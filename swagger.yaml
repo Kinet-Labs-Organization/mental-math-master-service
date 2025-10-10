@@ -1,0 +1,653 @@
+openapi: 3.0.3
+info:
+  title: PetPulse AI Backend Services
+  description: Complete API collection for PetPulse AI backend services including Auth and User modules
+  version: 1.0.0
+  contact:
+    name: PetPulse AI Team
+    email: team@petpulseai.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://api.petpulseai.com
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token
+
+  schemas:
+    Role:
+      type: string
+      enum:
+        - SUPER_ADMIN
+        - ADMIN
+        - NORMAL
+      description: User role in the system
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "john.doe@example.com"
+        name:
+          type: string
+          description: User full name
+          example: "John Doe"
+        image:
+          type: string
+          format: uri
+          description: User profile image URL
+          example: "https://example.com/avatar.jpg"
+          nullable: true
+        signUpMethod:
+          type: string
+          description: Sign up method used
+          example: "email"
+          default: "google"
+        role:
+          $ref: '#/components/schemas/Role'
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: User last update timestamp
+      required:
+        - id
+        - email
+        - name
+        - role
+        - createdAt
+        - updatedAt
+
+    SignupRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "newuser@example.com"
+        name:
+          type: string
+          description: User full name
+          example: "New User"
+        password:
+          type: string
+          minLength: 6
+          description: User password
+          example: "securePassword123"
+        image:
+          type: string
+          format: uri
+          description: User profile image URL
+          example: "https://example.com/avatar.jpg"
+          nullable: true
+        role:
+          $ref: '#/components/schemas/Role'
+          default: "NORMAL"
+      required:
+        - email
+        - name
+        - password
+
+    SigninRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "test@example.com"
+        password:
+          type: string
+          description: User password
+          example: "securePassword123"
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: JWT access token
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - access_token
+        - user
+
+    CreateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "john.doe@example.com"
+        name:
+          type: string
+          description: User full name
+          example: "John Doe"
+        password:
+          type: string
+          minLength: 6
+          description: User password
+          example: "securePassword123"
+        image:
+          type: string
+          format: uri
+          description: User profile image URL
+          example: "https://example.com/avatar.jpg"
+          nullable: true
+        role:
+          $ref: '#/components/schemas/Role'
+          default: "NORMAL"
+      required:
+        - email
+        - name
+        - password
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User full name
+          example: "John Smith"
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "john.smith@example.com"
+        image:
+          type: string
+          format: uri
+          description: User profile image URL
+          example: "https://example.com/new-avatar.jpg"
+          nullable: true
+        role:
+          $ref: '#/components/schemas/Role'
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User full name
+          example: "John Doe Updated"
+        image:
+          type: string
+          format: uri
+          description: User profile image URL
+          example: "https://example.com/updated-avatar.jpg"
+          nullable: true
+
+    UserStats:
+      type: object
+      properties:
+        petsCount:
+          type: integer
+          description: Number of pets owned by the user
+          example: 3
+        concernsCount:
+          type: integer
+          description: Number of concerns raised by the user
+          example: 5
+        remindersCount:
+          type: integer
+          description: Number of active reminders for the user
+          example: 8
+        medicalRecordsCount:
+          type: integer
+          description: Number of medical records for user's pets
+          example: 12
+      required:
+        - petsCount
+        - concernsCount
+        - remindersCount
+        - medicalRecordsCount
+
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 400
+        message:
+          type: string
+          description: Error message
+          example: "Validation failed"
+        error:
+          type: string
+          description: Error type
+          example: "Bad Request"
+      required:
+        - statusCode
+        - message
+
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "PetPulse AI Services is running!"
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          description: Service uptime in seconds
+
+paths:
+  /health:
+    get:
+      tags:
+        - General
+      summary: Health Check
+      description: Check if the API is running
+      security: []
+      responses:
+        '200':
+          description: API is running successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "PetPulse AI Services is running!"
+
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Sign Up
+      description: Register a new user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+            examples:
+              normal_user:
+                summary: Normal User Registration
+                value:
+                  email: "newuser@example.com"
+                  name: "New User"
+                  password: "securePassword123"
+                  image: "https://example.com/avatar.jpg"
+                  role: "NORMAL"
+              admin_user:
+                summary: Admin User Registration
+                value:
+                  email: "admin@example.com"
+                  name: "Admin User"
+                  password: "adminPassword123"
+                  role: "ADMIN"
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request - validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: Sign In
+      description: Authenticate user and get access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninRequest'
+      responses:
+        '200':
+          description: User successfully signed in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user:
+    post:
+      tags:
+        - User Management
+      summary: Create User
+      description: Create a new user - Requires ADMIN or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - User Management
+      summary: Get All Users
+      description: Retrieve all users - Requires NORMAL, ADMIN, or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/{id}:
+    get:
+      tags:
+        - User Management
+      summary: Get User by ID
+      description: Retrieve a specific user by their ID - Requires ADMIN or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - User Management
+      summary: Update User
+      description: Update a user's information - Requires ADMIN or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - User Management
+      summary: Delete User
+      description: Delete a user by ID - Requires ADMIN or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User deleted successfully"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/me/info:
+    get:
+      tags:
+        - User Management
+      summary: Get Current User (whoami)
+      description: Get the current authenticated user's information - Requires NORMAL, ADMIN, or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/me/update:
+    patch:
+      tags:
+        - User Management
+      summary: Update User Profile
+      description: Update current user profile (name and image only) - Requires NORMAL, ADMIN, or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/me/stats:
+    get:
+      tags:
+        - User Management
+      summary: Get User Statistics
+      description: Get current user's statistics (pets count, concerns count, reminders count, medical records count) - Requires NORMAL, ADMIN, or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserStats'
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/me/delete:
+    delete:
+      tags:
+        - User Management
+      summary: Delete Current User
+      description: Delete the current authenticated user - Requires ADMIN or SUPER_ADMIN role
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User deleted successfully"
+        '401':
+          description: Unauthorized - invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+tags:
+  - name: General
+    description: General API endpoints
+  - name: Authentication
+    description: Authentication endpoints for PetPulse AI
+  - name: User Management
+    description: All endpoints for User management in PetPulse AI

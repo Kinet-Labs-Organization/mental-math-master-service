@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  dev-db:
+    image: postgres:15
+    restart: always
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: petpulseai_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  test-db:
+    image: postgres:15
+    restart: always
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: petpulseai_test
+    # No volumes for test database - we want it to be ephemeral
+
+volumes:
+  postgres_data:
