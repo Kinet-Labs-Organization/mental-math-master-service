@@ -106,10 +106,12 @@ model Customer {
 // Products/inventory items
 model Product {
   id          String  @id @default(uuid())
-  sku         String? @unique
+  sku         String?
   name        String
   description String?
   price       Decimal @db.Decimal(10, 2)
+  quantity    Int     @default(0)
+  isActive    Boolean @default(true)
 
   // Multi-tenant relationship
   vendorId String
@@ -124,8 +126,6 @@ model Product {
   lastUpdatedAt DateTime @updatedAt
   lastUpdatedBy String   @default("SYSTEM")
 
-  @@index([sku])
-  @@index([vendorId])
   @@map("products")
 }
 

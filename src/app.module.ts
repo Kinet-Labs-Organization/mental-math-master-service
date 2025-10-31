@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { VendorModule } from '@/src/modules/vendor/vendor.module';
+import { OrderModule } from '@/src/modules/order/order.module';
+import { ProductModule } from '@/src/modules/product/product.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { WinstonModule } from 'nest-winston';
@@ -16,6 +18,8 @@ import { AppController } from './app.controller';
       isGlobal: true,
   }),
     VendorModule,
+    OrderModule,
+    ProductModule,
     AuthModule,
   WinstonModule.forRoot(WinstonOptions),
     ThrottlerModule.forRoot({
