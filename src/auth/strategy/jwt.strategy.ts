@@ -14,25 +14,47 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
+  // validate({
+  //   id,
+  //   email,
+  //   name,
+  //   role,
+  //   company_id
+  // }: {
+  //   id: string;
+  //   email: string;
+  //   name: string;
+  //   role: string;
+  //   company_id: string;
+  // }) {
+  //   return {
+  //     id,
+  //     email,
+  //     name,
+  //     role,
+  //     company_id
+  //   };
+  // }
+
   validate({
-    id,
-    email,
-    name,
-    role,
-    company_id
+    vendorUUID,
+    vendorId,
+    userUUID,
+    userEmail,
+    userRole,
   }: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    company_id: string;
+    vendorUUID: string;
+    vendorId: string;
+    userUUID: string;
+    userEmail: string;
+    userRole: string;
   }) {
     return {
-      id,
-      email,
-      name,
-      role,
-      company_id
+      vendorUUID,
+      vendorId,
+      userUUID,
+      userEmail,
+      userRole,
     };
   }
 }

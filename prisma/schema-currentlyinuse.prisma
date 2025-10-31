@@ -1,3 +1,7 @@
+// This is a production-ready schema for an e-commerce application
+// It implements flexible relationships between Orders, Products, and Users
+// with proper audit trails and multi-tenant support
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,9 +21,8 @@ enum SignUpMethod {
 }
 
 enum Role {
-  SYSTEM
   ADMIN
-  OWNER
+  VENDOR
   MANAGER
   STAFF
 }
@@ -32,58 +35,40 @@ enum OrderStatus {
   REFUNDED
 }
 
-// Vendor or Business or Company details
+// Vendor/Business owner and their staff members
 model Vendor {
-  id       String  @id @default(uuid())
-  isActive Boolean @default(true)
-  name     String
-  vendorId String  @unique
-
-  // Relationships
-  products   Product[]
-  orders     Order[]
-  customers  Customer[]
-  vendorUser VendorUser[]
-
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@map("vendor")
-}
-
-// Vendor or Business or Company owner and their staff members
-model VendorUser {
   id           String       @id @default(uuid())
   email        String
   password     String
   name         String
+  companyName  String
+  companyId    String       @unique @default(uuid())
   phone        String?
   signUpMethod SignUpMethod
   role         Role
   isActive     Boolean      @default(true)
 
   // Relationships
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  products Product[]
+  orders   Order[]
+  users    User[]
 
   // Audit fields
   createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
+  createdBy     String   @default("system")
   lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
+  lastUpdatedBy String   @default("system")
 
-  @@map("vendor_user")
+  @@index([email])
+  @@map("vendor_users")
 }
 
 // End customers/buyers
-model Customer {
-  id      String @id @default(uuid())
-  email   String @unique
+model User {
+  id      String  @id @default(uuid())
+  email   String  @unique
   name    String
-  phone   String @unique
+  phone   String?
   address Json? // Structured address data
 
   // Relationships
@@ -95,18 +80,18 @@ model Customer {
 
   // Audit fields
   createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
+  createdBy     String   @default("system")
   lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
+  lastUpdatedBy String   @default("system")
 
   @@index([email])
-  @@map("customers")
+  @@map("users")
 }
 
 // Products/inventory items
 model Product {
   id          String  @id @default(uuid())
-  sku         String? @unique
+  sku         String  @unique
   name        String
   description String?
   price       Decimal @db.Decimal(10, 2)
@@ -120,9 +105,9 @@ model Product {
 
   // Audit fields
   createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
+  createdBy     String   @default("system")
   lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
+  lastUpdatedBy String   @default("system")
 
   @@index([sku])
   @@index([vendorId])
@@ -149,9 +134,9 @@ model OrderItem {
 
   // Audit fields
   createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
+  createdBy     String   @default("system")
   lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
+  lastUpdatedBy String   @default("system")
 
   @@index([orderId])
   @@index([productId])
@@ -166,7 +151,7 @@ model Order {
 
   // Flexible customer relationship
   userId      String? // Optional reference to registered user
-  user        Customer? @relation(fields: [userId], references: [id])
+  user        User?   @relation(fields: [userId], references: [id])
   userDetails Json // Snapshot of user details at time of order
 
   // Order details
@@ -180,9 +165,9 @@ model Order {
 
   // Audit fields
   createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
+  createdBy     String   @default("system")
   lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
+  lastUpdatedBy String   @default("system")
 
   @@index([orderNumber])
   @@index([userId])

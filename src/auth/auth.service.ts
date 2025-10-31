@@ -4,13 +4,13 @@ import {
   Injectable,
   LoggerService,
 } from '@nestjs/common';
-import { AuthDto, SignupDto } from './dto';
+import { AccessTokenUserDto, StaffAuthDto, StaffSignupDto, VendorOwnerAuthDto, VendorWithOwnerSignupDto } from './dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { VendorService } from '@/src/modules/vendor/vendor.service';
-import { Role } from '@prisma/client';
+import { Prisma, Role, Vendor } from '@prisma/client';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
@@ -23,28 +23,37 @@ export class AuthService {
     private readonly logger: LoggerService,
   ) { }
 
-  async signup(signupDto: SignupDto) {
-    // save the new vendor in the db
+  async vendorWithOwnerSignup(signupDto: VendorWithOwnerSignupDto) {
     try {
-      const hash = await argon.hash(signupDto.password as string);
-      const vendor = await this.vendorService.create({
-        email: signupDto.email,
+      const hash = await argon.hash(signupDto.userPassword as string);
+
+      const vendorCreateInput: Prisma.VendorCreateInput = {
+        name: signupDto.vendorName,
+        vendorId: signupDto.vendorId,
+      };
+
+      const vendorUserCreateInput: Omit<Prisma.VendorUserCreateInput, 'vendor'> = {
+        email: signupDto.userEmail,
         password: hash,
-        name: signupDto.name,
-        phone: signupDto.phone,
+        name: signupDto.userFullName,
+        phone: signupDto.userPhone || '',
         signUpMethod: 'EMAIL',
-        companyName: signupDto.companyName,
-        role: Role.VENDOR,
-      });
-      if (!vendor) {
-        throw new ForbiddenException('vendor creation failed');
+        role: Role.OWNER,
+      };
+
+      const result = await this.vendorService.createVendorAndVendorOwner(
+        vendorCreateInput,
+        vendorUserCreateInput,
+      );
+      if (!result) {
+        throw new ForbiddenException('Vendor creation failed');
       }
       const payload = {
-        id: vendor?.id,
-        email: vendor?.email,
-        name: vendor?.name,
-        role: vendor?.role as string,
-        companyId: vendor?.companyId ?? '',
+        vendorUUID: result.createdVendor.id,
+        vendorId: result.createdVendor.vendorId,
+        userUUID: result.createdVendorUser.id,
+        userEmail: result.createdVendorUser.email,
+        userRole: result.createdVendorUser.role
       };
       return this.signToken(payload);
     } catch (error) {
@@ -57,57 +66,60 @@ export class AuthService {
     }
   }
 
-  async signin(dto: AuthDto) {
+  async vendorOwnerSignin(dto: VendorOwnerAuthDto) {
     // find the vendor by email
-    const vendor = await this.vendorService.findByEmail(dto.email);
+    const vendorOwner = await this.vendorService.findOwnerByEmail(dto.email);
     // if vendor does not exist throw exception
-    if (!vendor) throw new ForbiddenException('Credentials incorrect');
+    if (!vendorOwner) throw new ForbiddenException('Credentials incorrect');
     // compare password
     let pwMatches = false;
     if (
-      vendor.signUpMethod &&
-      (vendor.signUpMethod as string) === 'EMAIL' &&
-      vendor.password
+      vendorOwner.signUpMethod &&
+      (vendorOwner.signUpMethod as string) === 'EMAIL' &&
+      vendorOwner.password
     ) {
-      pwMatches = await argon.verify(vendor.password, dto.password);
+      pwMatches = await argon.verify(vendorOwner.password, dto.password);
     } else {
       throw new ForbiddenException('Credentials incorrect');
     }
     // if password incorrect throw exception
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
     const payload = {
-      id: vendor?.id,
-      email: vendor?.email,
-      name: vendor?.name,
-      role: vendor?.role,
-      companyId: vendor?.companyId ?? '',
+      vendorUUID: vendorOwner.vendorId,
+      vendorId: vendorOwner.vendor.vendorId,
+      userUUID: vendorOwner.id,
+      userEmail: vendorOwner.email,
+      userRole: vendorOwner.role
     };
     return this.signToken(payload);
   }
 
-  async googleSignup(_not_required_dto: any) {
-    const signupDto = await this.googleAuthAPI(_not_required_dto);
-    // save the new vendor in the db
+  async staffSignup(signupDto: StaffSignupDto, user: AccessTokenUserDto) {
     try {
-      const vendor = await this.vendorService.create({
-        email: signupDto.email,
-        password: '', // Google signup does not use password, so pass empty string or handle accordingly
-        name: signupDto.name,
-        signUpMethod: 'GOOGLE',
-        companyName: signupDto.companyName || '',
-        role: Role.VENDOR,
-      });
-      if (!vendor) {
-        throw new ForbiddenException('vendor creation failed');
-      }
-      const payload = {
-        id: vendor?.id,
-        email: vendor?.email,
-        name: vendor?.name,
-        role: vendor?.role as string,
-        companyId: vendor?.companyId ?? '',
+      const hash = await argon.hash(signupDto.userPassword as string);
+
+      // const vendorCreateInput: Prisma.VendorCreateInput = {
+      //   name: signupDto.vendorName,
+      //   vendorId: signupDto.vendorId,
+      // };
+
+      const vendorUserCreateInput: Omit<Prisma.VendorUserCreateInput, 'vendor'> = {
+        email: signupDto.userEmail,
+        password: hash,
+        name: signupDto.userFullName,
+        phone: signupDto.userPhone || '',
+        signUpMethod: 'EMAIL',
+        role: Role.STAFF,
       };
-      return this.signToken(payload);
+
+      const result = await this.vendorService.createStaff(
+        user,
+        vendorUserCreateInput,
+      );
+      if (!result) {
+        throw new ForbiddenException('Staff creation failed');
+      }
+      return;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -118,54 +130,58 @@ export class AuthService {
     }
   }
 
-  async googleSignin(_not_required_dto: any) {
-    const signinDTO = await this.googleAuthAPI(_not_required_dto);
-    if (!signinDTO) {
-      throw new ForbiddenException('Google signin failed');
+  async staffSignin(dto: StaffAuthDto) {
+    // find the staff by email
+    const staff = await this.vendorService.findStaffByOnlyEmail(dto.email, dto.vendorId);
+    // if staff does not exist throw exception
+    if (!staff) throw new ForbiddenException('Credentials incorrect');
+    // compare password
+    let pwMatches = false;
+    if (
+      staff.signUpMethod &&
+      (staff.signUpMethod as string) === 'EMAIL' &&
+      staff.password
+    ) {
+      pwMatches = await argon.verify(staff.password, dto.password);
+    } else {
+      throw new ForbiddenException('Credentials incorrect');
     }
-    // find the vendor by email
-    const vendor = await this.vendorService.findByEmail(signinDTO.email);
-    // if vendor does not exist throw exception
-    if (!vendor) throw new ForbiddenException('Something went wrong. Please contact suppot team');
+    // if password incorrect throw exception
+    if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
     const payload = {
-      id: vendor?.id,
-      email: vendor?.email,
-      name: vendor?.name,
-      role: vendor?.role,
-      companyId: vendor?.companyId ?? '',
+      vendorUUID: staff.vendorId,
+      vendorId: staff.vendorId,
+      userUUID: staff.id,
+      userEmail: staff.email,
+      userRole: staff.role
     };
     return this.signToken(payload);
   }
 
-  async googleAuthAPI(_not_required_dto: any) {
-    return _not_required_dto; // Return true on valid google signin
-  }
-
   async signToken({
-    id,
-    email,
-    name,
-    role,
-    companyId
+    vendorUUID,
+    vendorId,
+    userUUID,
+    userEmail,
+    userRole,
   }: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    companyId: string;
+    vendorUUID: string;
+    vendorId: string;
+    userUUID: string;
+    userEmail: string;
+    userRole: string;
   }): Promise<{
     access_token: string;
-    vendor: { id: string; email: string; name: string; role: string, companyId: string };
   }> {
     const secret = this.config.get('JWT_SECRET');
 
     const token = await this.jwt.signAsync(
       {
-        id,
-        email,
-        name,
-        role,
-        companyId
+        vendorUUID,
+        vendorId,
+        userUUID,
+        userEmail,
+        userRole,
       },
       {
         expiresIn: '59m',
@@ -175,13 +191,6 @@ export class AuthService {
 
     return {
       access_token: token,
-      vendor: {
-        id,
-        email,
-        name,
-        role,
-        companyId
-      },
     };
   }
 }

@@ -1,31 +1,33 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthDto, SignupDto } from './dto';
+import { AccessTokenUserDto, StaffAuthDto, StaffSignupDto, VendorOwnerAuthDto, VendorWithOwnerSignupDto } from './dto';
+import { GetUser } from './decorator';
+import { JwtGuard } from './guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
 
-  @Post('signup')
-  signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto);
+  @Post('vendor/signup')
+  vendorWithOwnerSignup(@Body(ValidationPipe) dto: VendorWithOwnerSignupDto) {
+    return this.authService.vendorWithOwnerSignup(dto);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('signin')
-  signin(@Body() dto: AuthDto) {
-    return this.authService.signin(dto);
+  @Post('vendor/signin')
+  vendorOwnerSignin(@Body(ValidationPipe) dto: VendorOwnerAuthDto) {
+    return this.authService.vendorOwnerSignin(dto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('staff/signup')
+  staffSignup(@Body(ValidationPipe) dto: StaffSignupDto, @GetUser() user: AccessTokenUserDto) {
+    return this.authService.staffSignup(dto, user);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('google/signup')
-  googleSignup(@Body() _not_required_dto: any) {
-    return this.authService.googleSignup(_not_required_dto);
-  }
-
-  @HttpCode(HttpStatus.OK)
-  @Post('google/signin')
-  googleSignin(@Body() _not_required_dto: any) {
-    return this.authService.googleSignin(_not_required_dto);
+  @Post('staff/signin')
+  staffSignin(@Body(ValidationPipe) dto: StaffAuthDto) {
+    return this.authService.staffSignin(dto);
   }
 }

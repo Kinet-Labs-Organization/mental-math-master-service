@@ -3,12 +3,9 @@ import {
   IsNotEmpty,
   IsString,
   IsOptional,
-  IsEnum,
-  MinLength,
 } from 'class-validator';
-import { Role } from '@prisma/client';
 
-export class AuthDto {
+export class VendorOwnerAuthDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -18,32 +15,68 @@ export class AuthDto {
   password: string;
 }
 
-export class SignupDto {
+export class StaffAuthDto {
+  @IsString()
+  @IsNotEmpty()
+  vendorId: string;
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsString()
-  @IsOptional()
-  password?: string;
+  @IsNotEmpty()
+  password: string;
+}
+
+export class VendorWithOwnerSignupDto {
+  @IsString()
+  @IsNotEmpty()
+  vendorName: string;
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  vendorId: string;
 
   @IsString()
   @IsNotEmpty()
-  companyName: string;
+  userEmail: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userFullName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userPassword: string;
 
   @IsString()
   @IsOptional()
-  phone?: string;
+  userPhone: string;
+}
+
+export class StaffSignupDto {
+  @IsEmail()
+  @IsNotEmpty()
+  userEmail: string;
 
   @IsString()
-  @IsOptional()
-  signUpMethod?: string;
+  @IsNotEmpty()
+  userPassword: string;
 
-  @IsEnum(Role)
-  @IsOptional()
-  role?: Role;
+  @IsString()
+  @IsNotEmpty()
+  userFullName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userPhone: string;
+}
+
+export class AccessTokenUserDto {
+  vendorUUID: string;
+  vendorId: string;
+  userUUID: string;
+  userEmail: string;
+  userRole: string;
 }
