@@ -34,22 +34,14 @@ export class UserController {
     return this.userService.tournamentGames();
   }
 
-  // @Post('login')
-  // async login(
-  //   @Body() { email, password }: { email: string; password: string },
-  // ) {
-  //   return this.userService.login({ email, password });
-  // }
-
-  // @UseGuards(JwtGuard)
-  // @Get('me')
-  // async me(@Request() req: any) {
-  //   return req.user;
-  // }
-
   @UseGuards(JwtGuard)
   @Get('flashGame/:id')
   async flashGame(@Param('id') id: string) {
     return this.userService.flashGame(id);
+  }
+
+  @Get("health")
+  async health() {
+    return { status: "healthy" };
   }
 }

@@ -32,20 +32,7 @@ export class UserService {
   }
 
   ////
-
-  // async login({ email, password }: { email: string; password: string }) {
-  //   const user = USERS.find(
-  //     (user) => user.email === email && user.password === password,
-  //   );
-  //   if (!user) {
-  //     throw new Error('Invalid credentials');
-  //   }
-  //   await new Promise((resolve) =>
-  //     setTimeout(() => resolve(1), MOCK_API_DELAY),
-  //   );
-  //   return this.authService.login(user);
-  // }
-
+  
   async progressReports() {
     const response = await new Promise((resolve) =>
       setTimeout(() => resolve(REPORT), MOCK_API_DELAY),
