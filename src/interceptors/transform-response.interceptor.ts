@@ -4,13 +4,13 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-} from '@nestjs/common';
-import { Observable, map, tap } from 'rxjs';
+} from "@nestjs/common";
+import { Observable, map, tap } from "rxjs";
 
 @Injectable()
 export class TransformResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    Logger.log('TransformResponseInterceptor: Intercepting response...');
+    Logger.log("TransformResponseInterceptor: Intercepting response...");
 
     const request = context.switchToHttp().getRequest();
     Logger.log(
@@ -24,11 +24,11 @@ export class TransformResponseInterceptor implements NestInterceptor {
     // this.transformUpstream(context.switchToHttp().getRequest().url, data);
     return next.handle().pipe(
       map((data) => ({
-        status: 'success',
+        status: "success",
         data,
       })),
       tap(() =>
-        Logger.log('TransformResponseInterceptor: Response transformed.'),
+        Logger.log("TransformResponseInterceptor: Response transformed."),
       ),
     );
   }

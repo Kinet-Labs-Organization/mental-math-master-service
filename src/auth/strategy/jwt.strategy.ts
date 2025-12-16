@@ -1,60 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { AccessTokenDto } from "../dto";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(
-    config: ConfigService,
-  ) {
+export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
+  constructor(config: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
-      secretOrKey: config.get<string>('JWT_SECRET') as string,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("Bearer"),
+      secretOrKey: config.get<string>("JWT_SECRET") as string,
     });
   }
 
-  // validate({
-  //   id,
-  //   email,
-  //   name,
-  //   role,
-  //   company_id
-  // }: {
-  //   id: string;
-  //   email: string;
-  //   name: string;
-  //   role: string;
-  //   company_id: string;
-  // }) {
-  //   return {
-  //     id,
-  //     email,
-  //     name,
-  //     role,
-  //     company_id
-  //   };
-  // }
-
-  validate({
-    vendorUUID,
-    vendorId,
-    userUUID,
-    userEmail,
-    userRole,
-  }: {
-    vendorUUID: string;
-    vendorId: string;
-    userUUID: string;
-    userEmail: string;
-    userRole: string;
-  }) {
+  validate(accessTokenPayload: AccessTokenDto) {
     return {
-      vendorUUID,
-      vendorId,
-      userUUID,
-      userEmail,
-      userRole,
+      email: accessTokenPayload.email,
+      subscribedOn: accessTokenPayload.subscribedOn || null,
+      subscriptionExpiration: accessTokenPayload.subscriptionExpiration || null,
+      term: accessTokenPayload.term || null,
+      status: accessTokenPayload.status,
     };
   }
 }

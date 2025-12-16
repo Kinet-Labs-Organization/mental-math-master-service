@@ -1,8 +1,8 @@
 // Global Jest setup for all test types
-import { config } from 'dotenv';
+import { config } from "dotenv";
 
 // Load test environment variables
-config({ path: '.env.test' });
+config({ path: ".env.test" });
 
 // Increase Jest timeout for database operations
 jest.setTimeout(30000);

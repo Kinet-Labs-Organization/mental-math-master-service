@@ -1,10 +1,10 @@
-import { AuthGuard } from '@nestjs/passport';
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { SKIP_GUARD_KEY } from '../decorator/skip-guard.decorator';
+import { AuthGuard } from "@nestjs/passport";
+import { ExecutionContext, Injectable } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { SKIP_GUARD_KEY } from "../decorator/skip-guard.decorator";
 
 @Injectable()
-export class JwtGuard extends AuthGuard('jwt') {
+export class JwtGuard extends AuthGuard("jwt") {
   constructor(private reflector: Reflector) {
     super();
   }

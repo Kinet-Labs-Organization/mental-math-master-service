@@ -1,8 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
-import { PrismaService } from '@/src/database/prisma/prisma.service';
-import { PrismaModule } from '@/src/database/prisma/prisma.module';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtModule } from "@nestjs/jwt";
+import { PrismaService } from "@/src/database/prisma/prisma.service";
+import { PrismaModule } from "@/src/database/prisma/prisma.module";
 
 export class DatabaseTestSetup {
   private static prismaService: PrismaService;
@@ -19,14 +19,14 @@ export class DatabaseTestSetup {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test',
+          envFilePath: ".env.test",
         }),
         PrismaModule,
         JwtModule.registerAsync({
           useFactory: (config: ConfigService) => ({
-            secret: config.get('JWT_SECRET'),
+            secret: config.get("JWT_SECRET"),
             signOptions: {
-              expiresIn: config.get('JWT_EXPIRE'),
+              expiresIn: config.get("JWT_EXPIRE"),
             },
           }),
           inject: [ConfigService],
@@ -51,7 +51,7 @@ export class DatabaseTestSetup {
   static async cleanDatabase(): Promise<void> {
     if (!this.prismaService) {
       throw new Error(
-        'Database not initialized. Call setupTestDatabase first.',
+        "Database not initialized. Call setupTestDatabase first.",
       );
     }
 
@@ -60,20 +60,20 @@ export class DatabaseTestSetup {
     try {
       // First, delete OrderItem (depends on Order and Product)
       await this.prismaService.orderItem.deleteMany();
-      
+
       // Delete Order (depends on User and Vendor)
       await this.prismaService.order.deleteMany();
-      
+
       // Delete Product (depends on Vendor)
       await this.prismaService.product.deleteMany();
-      
+
       // Delete User (depends on Vendor)
       await this.prismaService.user.deleteMany();
-      
+
       // Finally, delete Vendor (root entity)
       await this.prismaService.vendor.deleteMany();
     } catch (error) {
-      console.error('Error cleaning test database:', error);
+      console.error("Error cleaning test database:", error);
       throw error;
     }
   }
@@ -105,7 +105,7 @@ export class DatabaseTestSetup {
   static getPrismaService(): PrismaService {
     if (!this.prismaService) {
       throw new Error(
-        'Database not initialized. Call setupTestDatabase first.',
+        "Database not initialized. Call setupTestDatabase first.",
       );
     }
     return this.prismaService;
@@ -116,7 +116,7 @@ export class DatabaseTestSetup {
    */
   static getModule(): TestingModule {
     if (!this.module) {
-      throw new Error('Module not initialized. Call setupTestDatabase first.');
+      throw new Error("Module not initialized. Call setupTestDatabase first.");
     }
     return this.module;
   }

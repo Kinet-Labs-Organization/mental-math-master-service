@@ -1,16 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '@/src/app.module';
-import { PrismaService } from '@/src/database/prisma/prisma.service';
-import { DatabaseTestSetup } from '../helpers/database-test-setup';
-import { TestHelper } from '../helpers/test-helper';
-import { ValidationPipe } from '@nestjs/common';
-import { TransformResponseInterceptor } from '@/src/interceptors/transform-response.interceptor';
-import { HttpExceptionFilter } from '@/src/filters/http-exception.filter';
-import { AllExceptionsFilter } from '@/src/filters/unhandled-exception.filter';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import * as request from "supertest";
+import { AppModule } from "@/src/app.module";
+import { PrismaService } from "@/src/database/prisma/prisma.service";
+import { DatabaseTestSetup } from "../helpers/database-test-setup";
+import { TestHelper } from "../helpers/test-helper";
+import { ValidationPipe } from "@nestjs/common";
+import { TransformResponseInterceptor } from "@/src/interceptors/transform-response.interceptor";
+import { HttpExceptionFilter } from "@/src/filters/http-exception.filter";
+import { AllExceptionsFilter } from "@/src/filters/unhandled-exception.filter";
 
-describe('AppController (e2e)', () => {
+describe("AppController (e2e)", () => {
   let app: INestApplication;
   let prismaService: PrismaService;
 
@@ -19,11 +19,10 @@ describe('AppController (e2e)', () => {
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
-    })
-    .compile();
+    }).compile();
 
     app = moduleRef.createNestApplication();
-    
+
     // Apply global pipes, filters, and interceptors
     app.useGlobalPipes(
       new ValidationPipe({
@@ -32,16 +31,13 @@ describe('AppController (e2e)', () => {
       }),
     );
     app.useGlobalInterceptors(new TransformResponseInterceptor());
-    app.useGlobalFilters(
-      new HttpExceptionFilter(),
-      new AllExceptionsFilter(),
-    );
-    
+    app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
+
     await app.init();
 
     // Get the PrismaService from the module
     prismaService = moduleRef.get<PrismaService>(PrismaService);
-    
+
     // Clear the database before all tests
     await TestHelper.cleanupTestData(prismaService);
   });
@@ -51,44 +47,47 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  describe('Health Check', () => {
-    it('GET /health - should return health status', () => {
+  describe("Health Check", () => {
+    it("GET /health - should return health status", () => {
       return request(app.getHttpServer())
-        .get('/health')
+        .get("/health")
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('status', 'success');
-          expect(res.body).toHaveProperty('data', 'Application Backend Service is up and running!');
+          expect(res.body).toHaveProperty("status", "success");
+          expect(res.body).toHaveProperty(
+            "data",
+            "Application Backend Service is up and running!",
+          );
         });
     });
   });
 
-  describe('Authentication', () => {
+  describe("Authentication", () => {
     const testVendor = {
-      email: 'test-e2e@example.com',
-      password: 'Password123!',
-      companyName: 'Test E2E Company',
-      name: 'Test User',
+      email: "test-e2e@example.com",
+      password: "Password123!",
+      companyName: "Test E2E Company",
+      name: "Test User",
     };
 
     let authToken: string;
 
-    describe('Signup', () => {
-      it('POST /auth/signup - should create a new vendor', () => {
+    describe("Signup", () => {
+      it("POST /auth/signup - should create a new vendor", () => {
         return request(app.getHttpServer())
-          .post('/auth/signup')
+          .post("/auth/signup")
           .send(testVendor)
           .expect(201)
           .expect((res) => {
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.data).toHaveProperty('access_token');
-            expect(typeof res.body.data.access_token).toBe('string');
+            expect(res.body).toHaveProperty("data");
+            expect(res.body.data).toHaveProperty("access_token");
+            expect(typeof res.body.data.access_token).toBe("string");
           });
       });
 
-      it('POST /auth/signup - should reject duplicate email', () => {
+      it("POST /auth/signup - should reject duplicate email", () => {
         return request(app.getHttpServer())
-          .post('/auth/signup')
+          .post("/auth/signup")
           .send(testVendor)
           .expect((res) => {
             // Either 403 Forbidden or 400 Bad Request, depending on implementation
@@ -97,29 +96,29 @@ describe('AppController (e2e)', () => {
       });
     });
 
-    describe('Signin', () => {
-      it('POST /auth/signin - should authenticate with valid credentials', () => {
+    describe("Signin", () => {
+      it("POST /auth/signin - should authenticate with valid credentials", () => {
         return request(app.getHttpServer())
-          .post('/auth/signin')
+          .post("/auth/signin")
           .send({
             email: testVendor.email,
             password: testVendor.password,
           })
           .expect(200)
           .expect((res) => {
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.data).toHaveProperty('access_token');
+            expect(res.body).toHaveProperty("data");
+            expect(res.body.data).toHaveProperty("access_token");
             authToken = res.body.data.access_token;
-            expect(typeof authToken).toBe('string');
+            expect(typeof authToken).toBe("string");
           });
       });
 
-      it('POST /auth/signin - should reject invalid credentials', () => {
+      it("POST /auth/signin - should reject invalid credentials", () => {
         return request(app.getHttpServer())
-          .post('/auth/signin')
+          .post("/auth/signin")
           .send({
             email: testVendor.email,
-            password: 'wrongPassword',
+            password: "wrongPassword",
           })
           .expect(403)
           .expect((res) => {
@@ -128,12 +127,12 @@ describe('AppController (e2e)', () => {
           });
       });
 
-      it('POST /auth/signin - should reject non-existent user', () => {
+      it("POST /auth/signin - should reject non-existent user", () => {
         return request(app.getHttpServer())
-          .post('/auth/signin')
+          .post("/auth/signin")
           .send({
-            email: 'nonexistent@example.com',
-            password: 'Password123!',
+            email: "nonexistent@example.com",
+            password: "Password123!",
           })
           .expect(403)
           .expect((res) => {
@@ -144,37 +143,37 @@ describe('AppController (e2e)', () => {
     });
 
     // Basic test for Google authentication (mock)
-    describe('Google Authentication', () => {
-      it('POST /auth/google/signup - should handle Google signup', () => {
+    describe("Google Authentication", () => {
+      it("POST /auth/google/signup - should handle Google signup", () => {
         return request(app.getHttpServer())
-          .post('/auth/google/signup')
+          .post("/auth/google/signup")
           .send({
-            email: 'google-test@example.com',
-            name: 'Google Test User',
-            companyName: 'Google Test Company',
-            signUpMethod: 'GOOGLE',
-            googleId: 'google-id-123'
+            email: "google-test@example.com",
+            name: "Google Test User",
+            companyName: "Google Test Company",
+            signUpMethod: "GOOGLE",
+            googleId: "google-id-123",
           })
           .expect(200)
           .expect((res) => {
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.data).toHaveProperty('access_token');
+            expect(res.body).toHaveProperty("data");
+            expect(res.body.data).toHaveProperty("access_token");
           });
       });
 
-      it('POST /auth/google/signin - should handle Google signin', () => {
+      it("POST /auth/google/signin - should handle Google signin", () => {
         return request(app.getHttpServer())
-          .post('/auth/google/signin')
+          .post("/auth/google/signin")
           .send({
-            email: 'google-test@example.com',
-            googleId: 'google-id-123'
+            email: "google-test@example.com",
+            googleId: "google-id-123",
           })
           .expect((res) => {
             // Test might pass or fail depending on implementation
             // Just check that we get a response
             if (res.status === 200) {
-              expect(res.body).toHaveProperty('data');
-              expect(res.body.data).toHaveProperty('access_token');
+              expect(res.body).toHaveProperty("data");
+              expect(res.body.data).toHaveProperty("access_token");
             } else {
               expect(res.status).toBe(403);
             }

@@ -3,192 +3,90 @@ import {
   Inject,
   Injectable,
   LoggerService,
-} from '@nestjs/common';
-import { AccessTokenUserDto, StaffAuthDto, StaffSignupDto, VendorOwnerAuthDto, VendorWithOwnerSignupDto } from './dto';
-import * as argon from 'argon2';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { VendorService } from '@/src/modules/vendor/vendor.service';
-import { Prisma, Role, Vendor } from '@prisma/client';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+} from "@nestjs/common";
+import { AccessTokenDto, UserAuthDTO, UserSignupDTO } from "./dto";
+import * as argon from "argon2";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
+import { UserService } from "../modules/user/user.service";
+import { Prisma } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwt: JwtService,
     private config: ConfigService,
-    private readonly vendorService: VendorService,
+    private readonly userService: UserService,
     @Inject(WINSTON_MODULE_NEST_PROVIDER as string)
     private readonly logger: LoggerService,
-  ) { }
+  ) {}
 
-  async vendorWithOwnerSignup(signupDto: VendorWithOwnerSignupDto) {
+  async signin(dto: UserAuthDTO) {
+    const user = await this.userService.findUserByEmail(dto.email);
+    if (!user) throw new ForbiddenException("Credentials incorrect");
+    const pwMatches = await argon.verify(user.password, dto.password);
+    if (!pwMatches) throw new ForbiddenException("Credentials incorrect");
+    const payload: AccessTokenDto = {
+      email: user.email,
+      subscribedOn: user.subscribedOn || null,
+      subscriptionExpiration: user.subscriptionExpiration || null,
+      term: user.term || null,
+      status: user.status,
+    };
+    return this.signToken(payload);
+  }
+
+  async signup(signupDto: UserSignupDTO) {
     try {
-      const hash = await argon.hash(signupDto.userPassword as string);
-
-      const vendorCreateInput: Prisma.VendorCreateInput = {
-        name: signupDto.vendorName,
-        vendorId: signupDto.vendorId,
-      };
-
-      const vendorUserCreateInput: Omit<Prisma.VendorUserCreateInput, 'vendor'> = {
-        email: signupDto.userEmail,
+      const hash = await argon.hash(signupDto.password);
+      const createUserInput: Prisma.UserCreateInput = {
+        email: signupDto.email,
         password: hash,
-        name: signupDto.userFullName,
-        phone: signupDto.userPhone || '',
-        signUpMethod: 'EMAIL',
-        role: Role.OWNER,
+        name: signupDto.name,
+        status: "UNSUBSCRIBED",
       };
-
-      const result = await this.vendorService.createVendorAndVendorOwner(
-        vendorCreateInput,
-        vendorUserCreateInput,
-      );
-      if (!result) {
-        throw new ForbiddenException('Vendor creation failed');
+      const user = await this.userService.createUser(createUserInput);
+      if (!user) {
+        throw new ForbiddenException("User creation failed");
       }
-      const payload = {
-        vendorUUID: result.createdVendor.id,
-        vendorId: result.createdVendor.vendorId,
-        userUUID: result.createdVendorUser.id,
-        userEmail: result.createdVendorUser.email,
-        userRole: result.createdVendorUser.role
+      const payload: AccessTokenDto = {
+        email: user.email,
+        subscribedOn: user.subscribedOn || null,
+        subscriptionExpiration: user.subscriptionExpiration || null,
+        term: user.term || null,
+        status: user.status,
       };
       return this.signToken(payload);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ForbiddenException('Credentials taken');
+        if (error.code === "P2002") {
+          throw new ForbiddenException("Credentials taken");
         }
       }
       throw error;
     }
   }
 
-  async vendorOwnerSignin(dto: VendorOwnerAuthDto) {
-    // find the vendor by email
-    const vendorOwner = await this.vendorService.findOwnerByEmail(dto.email);
-    // if vendor does not exist throw exception
-    if (!vendorOwner) throw new ForbiddenException('Credentials incorrect');
-    // compare password
-    let pwMatches = false;
-    if (
-      vendorOwner.signUpMethod &&
-      (vendorOwner.signUpMethod as string) === 'EMAIL' &&
-      vendorOwner.password
-    ) {
-      pwMatches = await argon.verify(vendorOwner.password, dto.password);
-    } else {
-      throw new ForbiddenException('Credentials incorrect');
-    }
-    // if password incorrect throw exception
-    if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
-    const payload = {
-      vendorUUID: vendorOwner.vendorId,
-      vendorId: vendorOwner.vendor.vendorId,
-      userUUID: vendorOwner.id,
-      userEmail: vendorOwner.email,
-      userRole: vendorOwner.role
-    };
-    return this.signToken(payload);
-  }
-
-  async staffSignup(signupDto: StaffSignupDto, user: AccessTokenUserDto) {
-    try {
-      const hash = await argon.hash(signupDto.userPassword as string);
-
-      // const vendorCreateInput: Prisma.VendorCreateInput = {
-      //   name: signupDto.vendorName,
-      //   vendorId: signupDto.vendorId,
-      // };
-
-      const vendorUserCreateInput: Omit<Prisma.VendorUserCreateInput, 'vendor'> = {
-        email: signupDto.userEmail,
-        password: hash,
-        name: signupDto.userFullName,
-        phone: signupDto.userPhone || '',
-        signUpMethod: 'EMAIL',
-        role: Role.STAFF,
-      };
-
-      const result = await this.vendorService.createStaff(
-        user,
-        vendorUserCreateInput,
-      );
-      if (!result) {
-        throw new ForbiddenException('Staff creation failed');
-      }
-      return;
-    } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ForbiddenException('Credentials taken');
-        }
-      }
-      throw error;
-    }
-  }
-
-  async staffSignin(dto: StaffAuthDto) {
-    // find the staff by email
-    const staff = await this.vendorService.findStaffByOnlyEmail(dto.email, dto.vendorId);
-    // if staff does not exist throw exception
-    if (!staff) throw new ForbiddenException('Credentials incorrect');
-    // compare password
-    let pwMatches = false;
-    if (
-      staff.signUpMethod &&
-      (staff.signUpMethod as string) === 'EMAIL' &&
-      staff.password
-    ) {
-      pwMatches = await argon.verify(staff.password, dto.password);
-    } else {
-      throw new ForbiddenException('Credentials incorrect');
-    }
-    // if password incorrect throw exception
-    if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
-    const payload = {
-      vendorUUID: staff.vendorId,
-      vendorId: staff.vendorId,
-      userUUID: staff.id,
-      userEmail: staff.email,
-      userRole: staff.role
-    };
-    return this.signToken(payload);
-  }
-
-  async signToken({
-    vendorUUID,
-    vendorId,
-    userUUID,
-    userEmail,
-    userRole,
-  }: {
-    vendorUUID: string;
-    vendorId: string;
-    userUUID: string;
-    userEmail: string;
-    userRole: string;
-  }): Promise<{
+  async signToken(accessTokenPayload: AccessTokenDto): Promise<{
     access_token: string;
   }> {
-    const secret = this.config.get('JWT_SECRET');
-
+    const secret = this.config.get("JWT_SECRET");
     const token = await this.jwt.signAsync(
       {
-        vendorUUID,
-        vendorId,
-        userUUID,
-        userEmail,
-        userRole,
+        email: accessTokenPayload.email,
+        subscribedOn: accessTokenPayload.subscribedOn || null,
+        subscriptionExpiration:
+          accessTokenPayload.subscriptionExpiration || null,
+        term: accessTokenPayload.term || null,
+        status: accessTokenPayload.status,
       },
       {
-        expiresIn: '59m',
+        expiresIn: "59m",
         secret: secret,
       },
     );
-
     return {
       access_token: token,
     };

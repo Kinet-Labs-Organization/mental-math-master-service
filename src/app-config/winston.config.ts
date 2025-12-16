@@ -1,7 +1,6 @@
-
-import * as winston from 'winston';
-import { format } from 'winston';
-import { trace, context } from '@opentelemetry/api';
+import * as winston from "winston";
+import { format } from "winston";
+import { trace, context } from "@opentelemetry/api";
 
 // Add traceId from OTel
 const addTraceId = format((info) => {
@@ -24,20 +23,20 @@ const customLevels = {
 };
 
 const customColors = {
-  error: 'red',
-  warn: 'yellow',
-  info: 'green',
-  http: 'magenta',
-  verbose: 'cyan',
-  debug: 'blue',
-  silly: 'gray',
+  error: "red",
+  warn: "yellow",
+  info: "green",
+  http: "magenta",
+  verbose: "cyan",
+  debug: "blue",
+  silly: "gray",
 };
 
 winston.addColors(customColors);
 
 export const WinstonOptions = {
   levels: customLevels,
-  level: process.env.ENV === 'development' ? 'debug' : 'info',
+  level: process.env.ENV === "development" ? "debug" : "info",
   transports: [
     new winston.transports.Console({
       format: format.combine(
@@ -60,10 +59,10 @@ export const WinstonOptions = {
             traceId: string;
             stack: string;
           }) => {
-            const context = process.env.APP_NAME || 'NestApp';
+            const context = process.env.APP_NAME || "NestApp";
             const tracePart = traceId
               ? `\x1b[90m[TraceID: ${traceId}]\x1b[0m `
-              : '';
+              : "";
             const base = `\x1b[34m[${timestamp}]\x1b[0m \x1b[37m[${context}]\x1b[0m [${level}] ${tracePart}${message}`;
             return stack ? `${base}\n${stack}` : base;
           },

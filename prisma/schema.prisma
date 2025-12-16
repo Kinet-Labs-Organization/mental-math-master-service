@@ -19,174 +19,58 @@ enum SignUpMethod {
 enum Role {
   SYSTEM
   ADMIN
-  OWNER
-  MANAGER
-  STAFF
+  NORMAL
 }
 
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  CANCELLED
-  REFUNDED
+enum SubscriptionStatus {
+  SUBSCRIBED
+  UNSUBSCRIBED
+  TRIAL
 }
 
-// Vendor or Business or Company details
-model Vendor {
-  id       String  @id @default(uuid())
-  isActive Boolean @default(true)
-  name     String
-  vendorId String  @unique
-
-  // Relationships
-  products   Product[]
-  orders     Order[]
-  customers  Customer[]
-  vendorUser VendorUser[]
-
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@map("vendor")
+// User model
+model User {
+  id                     Int            @id @default(autoincrement())
+  email                  String         @unique
+  password               String
+  name                   String
+  subscribedOn           DateTime?
+  subscriptionExpiration DateTime?
+  term                   String?
+  status                 String
+  report                 Report?
+  gameActivities         GameActivity[]
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 }
 
-// Vendor or Business or Company owner and their staff members
-model VendorUser {
-  id           String       @id @default(uuid())
-  email        String
-  password     String
-  name         String
-  phone        String?
-  signUpMethod SignUpMethod
-  role         Role
-  isActive     Boolean      @default(true)
+// Report model: one-to-one with User
+model Report {
+  id          Int   @id @default(autoincrement())
+  gamesPlayed Int   @default(0)
+  accuracy    Float @default(0)
+  streak      Int   @default(0)
+  score       Int   @default(0)
 
-  // Relationships
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
 
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@map("vendor_user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// End customers/buyers
-model Customer {
-  id      String @id @default(uuid())
-  email   String @unique
-  name    String
-  phone   String @unique
-  address Json? // Structured address data
+// GameActivity model: one-to-many with User
+model GameActivity {
+  id             Int      @id @default(autoincrement())
+  gameId         String
+  gameType       String
+  correctAnswers Int
+  wrongAnswers   Int
+  playedAt       DateTime
 
-  // Relationships
-  orders Order[] // Optional reference from orders
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
 
-  // Multi-tenant relationship
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@index([email])
-  @@map("customers")
-}
-
-// Products/inventory items
-model Product {
-  id          String  @id @default(uuid())
-  sku         String?
-  name        String
-  description String?
-  price       Decimal @db.Decimal(10, 2)
-  quantity    Int     @default(0)
-  isActive    Boolean @default(true)
-
-  // Multi-tenant relationship
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-
-  // Flexible relationship with orders through OrderItem
-  orderItems OrderItem[]
-
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@map("products")
-}
-
-// Intermediary model for Order-Product relationship
-model OrderItem {
-  id String @id @default(uuid())
-
-  // Product reference (optional)
-  productId String?
-  product   Product? @relation(fields: [productId], references: [id])
-
-  // Order reference
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id])
-
-  // Denormalized product data
-  productSnapshot Json // Stores name, sku, price at time of order
-  quantity        Int
-  unitPrice       Decimal @db.Decimal(10, 2)
-  totalPrice      Decimal @db.Decimal(10, 2)
-
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@index([orderId])
-  @@index([productId])
-  @@map("order_items")
-}
-
-// Orders
-model Order {
-  id          String      @id @default(uuid())
-  orderNumber String      @unique @default(uuid())
-  status      OrderStatus @default(PENDING)
-
-  // Flexible customer relationship
-  userId      String? // Optional reference to registered user
-  user        Customer? @relation(fields: [userId], references: [id])
-  userDetails Json // Snapshot of user details at time of order
-
-  // Order details
-  orderItems  OrderItem[]
-  totalAmount Decimal     @db.Decimal(10, 2)
-  orderNote   String?
-
-  // Multi-tenant relationship
-  vendorId String
-  vendor   Vendor @relation(fields: [vendorId], references: [id])
-
-  // Audit fields
-  createdAt     DateTime @default(now())
-  createdBy     String   @default("SYSTEM")
-  lastUpdatedAt DateTime @updatedAt
-  lastUpdatedBy String   @default("SYSTEM")
-
-  @@index([orderNumber])
-  @@index([userId])
-  @@index([vendorId])
-  @@index([status])
-  @@map("orders")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

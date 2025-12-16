@@ -1,11 +1,6 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  IsOptional,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsOptional } from "class-validator";
 
-export class VendorOwnerAuthDto {
+export class UserAuthDTO {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -15,68 +10,24 @@ export class VendorOwnerAuthDto {
   password: string;
 }
 
-export class StaffAuthDto {
+export class UserSignupDTO {
   @IsString()
-  @IsNotEmpty()
-  vendorId: string;
-
-  @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 }
 
-export class VendorWithOwnerSignupDto {
-  @IsString()
-  @IsNotEmpty()
-  vendorName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  vendorId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userEmail: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userFullName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userPassword: string;
-
-  @IsString()
-  @IsOptional()
-  userPhone: string;
-}
-
-export class StaffSignupDto {
-  @IsEmail()
-  @IsNotEmpty()
-  userEmail: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userPassword: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userFullName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  userPhone: string;
-}
-
-export class AccessTokenUserDto {
-  vendorUUID: string;
-  vendorId: string;
-  userUUID: string;
-  userEmail: string;
-  userRole: string;
+export class AccessTokenDto {
+  email: string;
+  subscribedOn?: Date | null;
+  subscriptionExpiration?: Date | null;
+  term?: string | null;
+  status: string;
 }

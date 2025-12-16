@@ -1,22 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { Vendor } from '@prisma/client';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { Vendor } from "@prisma/client";
 
 // Define Role enum to match schema.prisma
 enum Role {
-  ADMIN = 'ADMIN',
-  VENDOR = 'VENDOR',
-  MANAGER = 'MANAGER',
-  STAFF = 'STAFF'
+  ADMIN = "ADMIN",
+  VENDOR = "VENDOR",
+  MANAGER = "MANAGER",
+  STAFF = "STAFF",
 }
 
 // Define SignUpMethod enum to match schema.prisma
 enum SignUpMethod {
-  EMAIL = 'EMAIL',
-  GOOGLE = 'GOOGLE',
-  FACEBOOK = 'FACEBOOK',
-  APPLE = 'APPLE'
+  EMAIL = "EMAIL",
+  GOOGLE = "GOOGLE",
+  FACEBOOK = "FACEBOOK",
+  APPLE = "APPLE",
 }
 
 export class TestHelper {
@@ -25,20 +25,20 @@ export class TestHelper {
    */
   static createTestVendor(overrides: Partial<Vendor> = {}): Vendor {
     return {
-      id: 'test-vendor-id',
-      email: 'test@example.com',
-      password: 'hashedPassword',
-      name: 'Test Vendor',
-      companyName: 'Test Company',
-      companyId: 'test-company-id',
-      phone: '+1234567890',
+      id: "test-vendor-id",
+      email: "test@example.com",
+      password: "hashedPassword",
+      name: "Test Vendor",
+      companyName: "Test Company",
+      companyId: "test-company-id",
+      phone: "+1234567890",
       signUpMethod: SignUpMethod.EMAIL,
       role: Role.VENDOR,
       isActive: true,
       createdAt: new Date(),
-      createdBy: 'system',
+      createdBy: "system",
       lastUpdatedAt: new Date(),
-      lastUpdatedBy: 'system',
+      lastUpdatedBy: "system",
       ...overrides,
     };
   }
@@ -49,18 +49,18 @@ export class TestHelper {
   static createTestVendors(): Vendor[] {
     return [
       this.createTestVendor({
-        id: 'vendor-user-id',
-        email: 'vendor@example.com',
+        id: "vendor-user-id",
+        email: "vendor@example.com",
         role: Role.VENDOR,
       }),
       this.createTestVendor({
-        id: 'admin-user-id',
-        email: 'admin@example.com',
+        id: "admin-user-id",
+        email: "admin@example.com",
         role: Role.ADMIN,
       }),
       this.createTestVendor({
-        id: 'manager-user-id',
-        email: 'manager@example.com',
+        id: "manager-user-id",
+        email: "manager@example.com",
         role: Role.MANAGER,
       }),
     ];
@@ -96,9 +96,9 @@ export class TestHelper {
           useValue: {
             get: jest.fn((key: string) => {
               const config: Record<string, any> = {
-                JWT_SECRET: 'test-jwt-secret',
-                JWT_EXPIRE: '15m',
-                DATABASE_URL: 'postgresql://test',
+                JWT_SECRET: "test-jwt-secret",
+                JWT_EXPIRE: "15m",
+                DATABASE_URL: "postgresql://test",
               };
               return config[key];
             }),
@@ -107,10 +107,10 @@ export class TestHelper {
         {
           provide: JwtService,
           useValue: {
-            sign: jest.fn(() => 'test.jwt.token'),
+            sign: jest.fn(() => "test.jwt.token"),
             verify: jest.fn(() => ({
-              id: 'test-id',
-              email: 'test@example.com',
+              id: "test-id",
+              email: "test@example.com",
             })),
           },
         },
@@ -184,14 +184,14 @@ export class TestHelper {
   static createAuthHeaders(token: string) {
     return {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
   }
 
   /**
    * Generate test email
    */
-  static generateTestEmail(prefix = 'test'): string {
+  static generateTestEmail(prefix = "test"): string {
     return `${prefix}-${Date.now()}@example.com`;
   }
 
