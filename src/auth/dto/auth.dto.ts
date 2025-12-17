@@ -16,12 +16,10 @@ export class UserSignupDTO {
   email: string;
 
   @IsString()
-  @IsNotEmpty()
-  password: string;
+  password!: string;
 
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name!: string;
 }
 
 export class AccessTokenDto {

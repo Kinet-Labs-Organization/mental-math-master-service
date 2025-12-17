@@ -14,7 +14,6 @@ import { UserAuthDTO, UserSignupDTO } from "./dto";
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
   @Post("signin")
   siginin(@Body(ValidationPipe) dto: UserAuthDTO) {
     return this.authService.signin(dto);

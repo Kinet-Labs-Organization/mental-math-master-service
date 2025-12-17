@@ -26,7 +26,7 @@ export class AuthService {
   async signin(dto: UserAuthDTO) {
     const user = await this.userService.findUserByEmail(dto.email);
     if (!user) throw new ForbiddenException("Credentials incorrect");
-    const pwMatches = await argon.verify(user.password, dto.password);
+    const pwMatches = await argon.verify(user.password || "", dto.password);
     if (!pwMatches) throw new ForbiddenException("Credentials incorrect");
     const payload: AccessTokenDto = {
       email: user.email,
@@ -40,11 +40,13 @@ export class AuthService {
 
   async signup(signupDto: UserSignupDTO) {
     try {
-      const hash = await argon.hash(signupDto.password);
+      const hash = signupDto.password
+        ? await argon.hash(signupDto.password)
+        : null;
       const createUserInput: Prisma.UserCreateInput = {
         email: signupDto.email,
         password: hash,
-        name: signupDto.name,
+        name: signupDto.name || null,
         status: "UNSUBSCRIBED",
       };
       const user = await this.userService.createUser(createUserInput);

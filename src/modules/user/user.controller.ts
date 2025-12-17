@@ -1,14 +1,22 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+  ValidationPipe,
+} from "@nestjs/common";
 import { UserService } from "./user.service";
 import { GetUser } from "@/src/auth/decorator";
 import { JwtGuard } from "@/src/auth/guard";
-import { AccessTokenDto } from "@/src/auth/dto";
+import { AccessTokenDto, UserSignupDTO } from "@/src/auth/dto";
 
-@UseGuards(JwtGuard)
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
+  @UseGuards(JwtGuard)
   @Get("me")
   async me(@GetUser() user: AccessTokenDto) {
     return user;
@@ -16,27 +24,32 @@ export class UserController {
 
   ////
 
+  @Post("userSync")
+  userSync(@Body(ValidationPipe) dto: any) {
+    return this.userService.userSync(dto);
+  }
+
   @UseGuards(JwtGuard)
-  @Get('progressReports')
+  @Get("progressReports")
   async progressReports() {
     return this.userService.progressReports();
   }
 
   @UseGuards(JwtGuard)
-  @Get('practiceGames')
+  @Get("practiceGames")
   async practiceGames() {
     return this.userService.practiceGames();
   }
 
   @UseGuards(JwtGuard)
-  @Get('tournamentGames')
+  @Get("tournamentGames")
   async tournamentGames() {
     return this.userService.tournamentGames();
   }
 
   @UseGuards(JwtGuard)
-  @Get('flashGame/:id')
-  async flashGame(@Param('id') id: string) {
+  @Get("flashGame/:id")
+  async flashGame(@Param("id") id: string) {
     return this.userService.flashGame(id);
   }
 

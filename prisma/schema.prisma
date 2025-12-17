@@ -3,15 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // Authentication and authorization related enums
 enum SignUpMethod {
   EMAIL
   GOOGLE
+  GMAIL
   FACEBOOK
   APPLE
 }
@@ -32,14 +32,15 @@ enum SubscriptionStatus {
 model User {
   id                     Int            @id @default(autoincrement())
   email                  String         @unique
-  password               String
-  name                   String
+  password               String?
+  name                   String?
   subscribedOn           DateTime?
   subscriptionExpiration DateTime?
   term                   String?
   status                 String
   report                 Report?
   gameActivities         GameActivity[]
+  SignUpMethod           SignUpMethod   @default(GMAIL)
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
 }

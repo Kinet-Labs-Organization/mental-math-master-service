@@ -1,11 +1,21 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { USERS, REPORT, PRACTICE_GAMES, TOURNAMENT_GAMES, FLASH_GAMES, MOCK_API_DELAY} from "@/src/utils/mock";
+import {
+  USERS,
+  REPORT,
+  PRACTICE_GAMES,
+  TOURNAMENT_GAMES,
+  FLASH_GAMES,
+  MOCK_API_DELAY,
+} from "@/src/utils/mock";
+import { UserSignupDTO } from "@/src/auth/dto";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class UserService {
@@ -32,7 +42,53 @@ export class UserService {
   }
 
   ////
-  
+
+  generateCreativeUsername(): string {
+    const colors = [
+      "Red",
+      "Blue",
+      "Green",
+      "Golden",
+      "Silver",
+      "Dark",
+      "Bright",
+    ];
+    const animals = [
+      "Panda",
+      "Koala",
+      "Penguin",
+      "Dolphin",
+      "Owl",
+      "Cat",
+      "Dog",
+    ];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const animal = animals[Math.floor(Math.random() * animals.length)];
+    return `${color} ${animal}`;
+  }
+
+  async userSync(signupDto: any) {
+    try {
+      const createUserInput: Prisma.UserCreateInput = {
+        email: signupDto.email,
+        name: signupDto.name || this.generateCreativeUsername(),
+        status: "UNSUBSCRIBED",
+      };
+      const user = await this.createUser(createUserInput);
+      if (!user) {
+        throw new ForbiddenException("User creation failed");
+      }
+      return { message: "User synchronized successfully" };
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2002") {
+          throw new ForbiddenException("Credentials taken");
+        }
+      }
+      throw error;
+    }
+  }
+
   async progressReports() {
     const response = await new Promise((resolve) =>
       setTimeout(() => resolve(REPORT), MOCK_API_DELAY),
