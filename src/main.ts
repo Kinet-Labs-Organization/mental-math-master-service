@@ -8,6 +8,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
 import { AllExceptionsFilter } from "./filters/unhandled-exception.filter";
 import { Logger } from "@nestjs/common";
 import { TransformResponseInterceptor } from "./interceptors/transform-response.interceptor";
+import { ConfigService } from "@nestjs/config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,10 +18,11 @@ async function bootstrap() {
   app.use(helmet(HelmetOptions));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformResponseInterceptor());
+  const configService = app.get(ConfigService);
 
   await app.listen(process.env.PORT || 3001, () => {
     Logger.log(
-      `Application is running on: http://localhost:${process.env.PORT || 3001}`,
+      `${configService.get<string>("APP_ENV")} - Application is running on: http://localhost:${process.env.PORT || 3001}`,
     );
   });
 }
