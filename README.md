@@ -75,3 +75,36 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 ## Heroku Deployment
 
 Stack change command : heroku stack:set container --app sellor
+
+
+
+
+CONSTANTS -
+
+    type        :   ADD_SUB | MUL | DIV
+    level       :   L1 | L2 | L3 | L4
+    serialNo    :   1-10
+    mode        :   flash | multiple
+    gameId      :   any
+    newsId      :   any
+
+API -
+
+    health          :   /health
+    
+    fetchGames      :   /games/     fetchGames/{type}/{level}
+    generateGame    :   /games/     generateGame/{type}/{level}/{serialNo}/{mode}
+    fetchGameMeta   :   /games/     fetchGameMeta/{type}/{level}
+    validateAnswer  :   /games/     validateAnswer/{gameId}
+
+    me              :   /user/      me
+    userSync        :   /user/      userSync
+    fetchReport     :   /user/      fetchReport
+    fetchLeaders    :   /user/      fetchLeaders
+    fetchAchievements:  /user/      fetchAchievements
+    clearData       :   /user/      clearData
+
+    fetchNewsList   :   /news/      fetchNewsList
+    fetchNews       :   /news/      fetchNews/{newsId}
+
+    setSubscription?:   /user/      setSubscription

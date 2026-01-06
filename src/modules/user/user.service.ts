@@ -16,6 +16,7 @@ import {
 } from "@/src/utils/mock";
 import { UserSignupDTO } from "@/src/auth/dto";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import * as games from "@/src/utils/gameConfig";
 
 @Injectable()
 export class UserService {
@@ -103,30 +104,35 @@ export class UserService {
     return response;
   }
 
-  async tournamentGames() {
+  async gameLevels(gameLevel: string) {
+    const gameLevelData = games[gameLevel];
     const response = await new Promise((resolve) =>
-      setTimeout(() => resolve(TOURNAMENT_GAMES), MOCK_API_DELAY),
+      setTimeout(() => resolve(gameLevelData), MOCK_API_DELAY),
     );
     return response;
   }
 
-  async flashGame(id: string) {
-    const game: any = FLASH_GAMES.find((game) => game.id === id);
+  async fetchGame(id: string) {
+    const gameTypeLevel = id.substring(0, id.lastIndexOf("_"));
+    const gameId = parseInt(id.substring(id.lastIndexOf("_")+1));
+    const selctedGameConfig = games[gameTypeLevel][gameId-1];
+    const gameData = this.flashGame(selctedGameConfig);
+    const response = await new Promise((resolve) =>
+      setTimeout(() => resolve(gameData), MOCK_API_DELAY),
+    );
+    return response;
+  }
 
+  flashGame(game: any) {
     const min = Math.pow(10, game.digitCount - 1);
     const max = Math.pow(10, game.digitCount) - 1;
     const newNumbers: any[] = [];
-
     for (let i = 0; i < game.numberCount; i++) {
       const value = Math.floor(Math.random() * (max - min + 1)) + min;
       const operation =
         game.operations[Math.floor(Math.random() * game.operations.length)];
       newNumbers.push({ value, operation });
     }
-
-    const response = await new Promise((resolve) =>
-      setTimeout(() => resolve(newNumbers), MOCK_API_DELAY),
-    );
-    return response;
+    return newNumbers;
   }
 }

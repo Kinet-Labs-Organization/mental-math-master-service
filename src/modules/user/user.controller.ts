@@ -42,9 +42,21 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
-  @Get("tournamentGames")
-  async tournamentGames() {
-    return this.userService.tournamentGames();
+  @Get("gameLevels/:game_level")
+  async gameLevels(@Param("game_level") gameLevel: string) {
+    return this.userService.gameLevels(gameLevel);
+  }
+
+  // @UseGuards(JwtGuard)
+  // @Get("fetchGame/:game/:level/:id")
+  // async fetchGame(@Param("game") game: string, @Param("level") level: string, @Param("id") id: string) {
+  //   return this.userService.fetchGame(game, level, id);
+  // }
+
+  @UseGuards(JwtGuard)
+  @Get("fetchGame/:id")
+  async fetchGame(@Param("id") id: string) {
+    return this.userService.fetchGame(id);
   }
 
   @UseGuards(JwtGuard)
