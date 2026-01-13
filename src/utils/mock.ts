@@ -305,4 +305,4 @@ export const FLASH_GAMES = [
   },
 ];
 
-export const MOCK_API_DELAY = 1000;
+export const MOCK_API_DELAY = 0;

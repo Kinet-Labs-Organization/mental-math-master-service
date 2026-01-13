@@ -8,6 +8,7 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerOption } from "./app-config/throttler.config";
 import { AppController } from "./app.controller";
+import { GameModule } from "./modules/game/game.module";
 
 @Module({
   controllers: [AppController],
@@ -16,6 +17,7 @@ import { AppController } from "./app.controller";
       isGlobal: true,
     }),
     UserModule,
+    GameModule,
     AuthModule,
     WinstonModule.forRoot(WinstonOptions),
     ThrottlerModule.forRoot({
