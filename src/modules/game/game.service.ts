@@ -1,9 +1,6 @@
 import {
   Injectable,
 } from "@nestjs/common";
-import {
-  MOCK_API_DELAY,
-} from "@/src/utils/mock";
 import * as games from "@/src/utils/gameConfig";
 
 @Injectable()
@@ -11,10 +8,7 @@ export class GameService {
 
   async gameLevels(gameLevel: string) {
     const gameLevelData = games[gameLevel];
-    const response = await new Promise((resolve) =>
-      setTimeout(() => resolve(gameLevelData), MOCK_API_DELAY),
-    );
-    return response;
+    return gameLevelData;
   }
 
   async fetchGame(gameData:any) {
@@ -28,10 +22,7 @@ export class GameService {
     } else if(type === 'regular') {
       gameDataResponse = this.regularGame(selctedGameConfig);
     }
-    const response = await new Promise((resolve) =>
-      setTimeout(() => resolve(gameDataResponse), MOCK_API_DELAY),
-    );
-    return response;
+    return gameDataResponse;
   }
 
   async fetchCustomGame(gameData: any) {
@@ -48,10 +39,7 @@ export class GameService {
     } else {
       gameDataResponse = this.regularGame(game);
     }
-    const response = await new Promise((resolve) =>
-      setTimeout(() => resolve(gameDataResponse), MOCK_API_DELAY),
-    );
-    return response;
+    return gameDataResponse;
   }
 
   flashGame(game: any) {
@@ -75,5 +63,4 @@ export class GameService {
     }
     return gameData;
   }
-
 }

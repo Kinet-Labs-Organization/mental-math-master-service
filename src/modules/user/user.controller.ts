@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   UseGuards,
   ValidationPipe,
 } from "@nestjs/common";
@@ -30,5 +31,41 @@ export class UserController {
   @Get("progressReports")
   async progressReports() {
     return this.userService.progressReports();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get("leaderBoardData")
+  async leaderBoardData() {
+    return this.userService.leaderBoardData();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get("profileData")
+  async profileData() {
+    return this.userService.profileData();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get("settingsData")
+  async settingsData() {
+    return this.userService.settingsData();
+  }
+
+  @UseGuards(JwtGuard)
+  @Put("toggleSoundEffect")
+  async toggleSoundEffect() {
+    return this.userService.toggleSoundEffect();
+  }
+
+  @UseGuards(JwtGuard)
+  @Put("toggleNotification")
+  async toggleNotification() {
+    return this.userService.toggleNotification();
+  }
+
+  @UseGuards(JwtGuard)
+  @Put("clearData")
+  async clearData() {
+    return this.userService.clearData();
   }
 }

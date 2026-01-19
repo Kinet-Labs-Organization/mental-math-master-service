@@ -8,7 +8,6 @@ import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
 import {
   REPORT,
-  MOCK_API_DELAY,
 } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
@@ -83,9 +82,42 @@ export class UserService {
   }
 
   async progressReports() {
-    const response = await new Promise((resolve) =>
-      setTimeout(() => resolve(REPORT), MOCK_API_DELAY),
-    );
-    return response;
+    return REPORT;
+  }
+
+  async leaderBoardData() {
+    return {
+      leaderBoard: [],
+    };
+  }
+
+  async profileData() {
+    return {
+      profile: {},
+    };
+  }
+
+  async settingsData() {
+    return {
+      settings: {},
+    };
+  }
+
+  async toggleSoundEffect() {
+    return {
+      message: "Sound effect setting toggled",
+    };
+  }
+
+  async toggleNotification() {
+    return {
+      message: "Notification setting toggled",
+    };
+  }
+
+  async clearData() {
+    return {
+      message: "User data cleared",
+    };
   }
 }

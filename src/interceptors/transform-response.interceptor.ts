@@ -9,7 +9,7 @@ import { Observable, map, tap } from "rxjs";
 
 @Injectable()
 export class TransformResponseInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
     Logger.log("TransformResponseInterceptor: Intercepting response...");
 
     const request = context.switchToHttp().getRequest();
@@ -22,6 +22,13 @@ export class TransformResponseInterceptor implements NestInterceptor {
     );
 
     // this.transformUpstream(context.switchToHttp().getRequest().url, data);
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        Logger.log("TransformResponseInterceptor: Simulated delay complete.");
+        resolve(1);
+      }, 0),
+    );
+
     return next.handle().pipe(
       map((data) => ({
         status: "success",
