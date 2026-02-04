@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Put,
+  Query,
   UseGuards,
   ValidationPipe,
 } from "@nestjs/common";
@@ -31,6 +32,12 @@ export class UserController {
   @Get("progressReports")
   async progressReports() {
     return this.userService.progressReports();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get("activities")
+  async activities(@Query("position") position: string) {
+    return this.userService.activities(position);
   }
 
   @UseGuards(JwtGuard)

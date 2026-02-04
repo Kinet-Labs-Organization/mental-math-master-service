@@ -10,9 +10,9 @@ import {
 import { GameService } from "./game.service";
 import { JwtGuard } from "@/src/auth/guard";
 
-@Controller('game')
+@Controller("game")
 export class GameController {
-  constructor(private readonly gameService: GameService) { }
+  constructor(private readonly gameService: GameService) {}
 
   @UseGuards(JwtGuard)
   @Get("gameLevels/:game_level")
@@ -22,7 +22,7 @@ export class GameController {
 
   @UseGuards(JwtGuard)
   @Post("fetchGame")
-  async fetchGame(@Body() data: string){
+  async fetchGame(@Body() data: string) {
     return this.gameService.fetchGame(data);
   }
 
@@ -31,5 +31,4 @@ export class GameController {
   async fetchCustomGame(@Body() data: string) {
     return this.gameService.fetchCustomGame(data);
   }
-
 }

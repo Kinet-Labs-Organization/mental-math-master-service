@@ -6,14 +6,12 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import {
-  REPORT,
-} from "@/src/utils/mock";
+import { PROGRESS_REPORT, ACTIVITIES } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -82,7 +80,16 @@ export class UserService {
   }
 
   async progressReports() {
-    return REPORT;
+    return PROGRESS_REPORT;
+  }
+
+  async activities(position: string) {
+    const length = 5;
+    if(!position) {
+      throw new Error(`Position not provided`); 
+    }
+    const pos = parseInt(position, 10);
+    return ACTIVITIES.slice(pos, pos + length);
   }
 
   async leaderBoardData() {
