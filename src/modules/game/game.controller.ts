@@ -31,4 +31,10 @@ export class GameController {
   async fetchCustomGame(@Body() data: string) {
     return this.gameService.fetchCustomGame(data);
   }
+
+  @UseGuards(JwtGuard)
+  @Get("blogs")
+  async blogs() {
+    return this.gameService.blogs();
+  }
 }

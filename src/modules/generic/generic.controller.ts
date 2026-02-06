@@ -1,0 +1,23 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
+import { JwtGuard } from "@/src/auth/guard";
+import { GenericService } from "./generic.service";
+
+@Controller("generic")
+export class GenericController {
+  constructor(private readonly genericService: GenericService) {}
+
+  @UseGuards(JwtGuard)
+  @Get("faqs")
+  async faqs() {
+    return this.genericService.faqs();
+  }
+
+}

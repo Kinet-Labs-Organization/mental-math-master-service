@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROGRESS_REPORT, ACTIVITIES } from "@/src/utils/mock";
+import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
@@ -99,15 +99,11 @@ export class UserService {
   }
 
   async profileData() {
-    return {
-      profile: {},
-    };
+    return PROFILE
   }
 
   async settingsData() {
-    return {
-      settings: {},
-    };
+    return SETTINGS;
   }
 
   async toggleSoundEffect() {

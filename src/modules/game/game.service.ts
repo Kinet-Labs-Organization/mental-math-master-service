@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import * as games from "@/src/utils/gameConfig";
+import { BLOGS } from "@/src/utils/mock";
 
 @Injectable()
 export class GameService {
@@ -62,5 +63,9 @@ export class GameService {
       gameData.push(this.flashGame(game));
     }
     return gameData;
+  }
+
+  async blogs() {
+    return BLOGS;
   }
 }
