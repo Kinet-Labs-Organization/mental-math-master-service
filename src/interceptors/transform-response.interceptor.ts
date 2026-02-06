@@ -26,7 +26,7 @@ export class TransformResponseInterceptor implements NestInterceptor {
       setTimeout(() => {
         Logger.log("TransformResponseInterceptor: Simulated delay complete.");
         resolve(1);
-      }, 2000),
+      }, 500),
     );
 
     return next.handle().pipe(

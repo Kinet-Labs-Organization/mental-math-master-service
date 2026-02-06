@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS } from "@/src/utils/mock";
+import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, BASIC_REPORT } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
@@ -79,7 +79,11 @@ export class UserService {
     }
   }
 
-  async progressReports() {
+  async basicReport() {
+    return BASIC_REPORT;
+  }
+
+  async progressReport() {
     return PROGRESS_REPORT;
   }
 

@@ -20,4 +20,10 @@ export class GenericController {
     return this.genericService.faqs();
   }
 
+  @UseGuards(JwtGuard)
+  @Get("leaderboard")
+  async leaderboard() {
+    return this.genericService.leaderboard();
+  }
+
 }

@@ -15,7 +15,7 @@ import { AccessTokenDto } from "@/src/auth/dto";
 
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @UseGuards(JwtGuard)
   @Get("me")
@@ -28,12 +28,21 @@ export class UserController {
     return this.userService.userSync(dto);
   }
 
+  // Used in progress route
   @UseGuards(JwtGuard)
-  @Get("progressReports")
-  async progressReports() {
-    return this.userService.progressReports();
+  @Get("basicReport")
+  async basicReport() {
+    return this.userService.basicReport();
   }
 
+  // Used in progress route
+  @UseGuards(JwtGuard)
+  @Get("progressReport")
+  async progressReport() {
+    return this.userService.progressReport();
+  }
+
+  // Used in progress route
   @UseGuards(JwtGuard)
   @Get("activities")
   async activities(@Query("position") position: string) {

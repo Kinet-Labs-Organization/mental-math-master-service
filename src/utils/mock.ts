@@ -1,41 +1,22 @@
-export const MOCK_API_DELAY = 0;
-
-export const USERS = [
-  {
-    email: "subscribed@test.com",
-    password: "1",
-    subscribedOn: 1765798676514,
-    subscriptionExpiration: 1797334676514,
-    term: "YEAR",
-    status: "SUBSCRIBED",
-  },
-  {
-    email: "unsubscribed@test.com",
-    password: "1",
-    subscribedOn: null,
-    subscriptionExpiration: null,
-    term: null,
-    status: "UNSUBSCRIBED",
-  },
-  {
-    email: "trial@test.com",
-    password: "1",
-    subscribedOn: 1765798676514,
-    subscriptionExpiration: 1766403476514,
-    term: "WEEK",
-    status: "TRIAL",
-  },
-];
-
-export const REPORT = {
-  sessions: 40,
-  accuracy: 95,
-  streak: 7,
-  achievements: 12,
-};
-
 const millisecondsInADay = 24 * 60 * 60 * 1000;
 const today = Date.now();
+
+export const BASIC_REPORT = {
+  rank: 25,
+  totalSessions: 80,
+  accuracyRate: 90,
+  currentStreak: 7,
+  score: 400,
+  achievements: ["First Steps", "Consistency"]
+};
+
+export const PROGRESS_REPORT = {
+  performanceTrend: [
+    85, 88, 90, 92, 10, 94, 90, 93, 95, 97, 99, 100, 98, 96, 94, 92, 90, 88, 85,
+    83, 81, 79, 77, 75, 73, 71, 69, 67, 65, 75,
+  ],
+  aiSuggestions: ["Practice subtraction more", "Try timed challenges"],
+};
 
 export const ACTIVITIES = [
   {
@@ -296,19 +277,6 @@ export const ACTIVITIES = [
   },
 ];
 
-export const PROGRESS_REPORT = {
-  totalSessions: 80,
-  accuracyRate: 90,
-  currentStreak: 7,
-  achievements: ["First Steps", "Consistency"],
-  performanceTrend: [
-    85, 88, 90, 92, 10, 94, 90, 93, 95, 97, 99, 100, 98, 96, 94, 92, 90, 88, 85,
-    83, 81, 79, 77, 75, 73, 71, 69, 67, 65, 75,
-  ],
-  aiSuggestions: ["Practice subtraction more", "Try timed challenges"],
-  recentActivities: ACTIVITIES.slice(0, 5),
-};
-
 export const PROFILE = {
   name: "Suman Mandal",
   email: "sumanmandal64@gmail.com",
@@ -426,4 +394,67 @@ export const BLOGS = [
     "link": "https://www.mathnasium.com/blog/visualization-math-skills",
     "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b"
   }
+];
+
+export const LEADER = [
+  {
+    rank: 1,
+    score: 5000,
+    accuracy: '95%',
+    name: "Ridhima Mandal",
+  },
+  {
+    rank: 2,
+    score: 4000,
+    accuracy: '90%',
+    name: "Rajarshi Das",
+  },
+  {
+    rank: 3,
+    score: 3000,
+    accuracy: '85%',
+    name: "Banhisikha Sarker",
+  },
+  {
+    rank: 4,
+    score: 2000,
+    accuracy: '80%',
+    name: "S.C Mandal",
+  },
+  {
+    rank: 5,
+    score: 1000,
+    accuracy: '75%',
+    name: "Bela Sarker",
+  },
+  {
+    rank: 6,
+    score: 900,
+    accuracy: '70%',
+    name: "M.C Sarker",
+  },
+  {
+    rank: 7,
+    score: 800,
+    accuracy: '65%',
+    name: "Jon Ghosh",
+  },
+  {
+    rank: 8,
+    score: 700,
+    accuracy: '60%',
+    name: "Rahul Saha",
+  },
+  {
+    rank: 9,
+    score: 600,
+    accuracy: '55%',
+    name: "Satyajit Das",
+  },
+  {
+    rank: 10,
+    score: 500,
+    accuracy: '50%',
+    name: "Anirban Saha",
+  },
 ];
