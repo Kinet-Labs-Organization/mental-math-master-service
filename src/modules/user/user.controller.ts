@@ -9,8 +9,8 @@ import {
   ValidationPipe,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { GetUser } from "@/src/auth/decorator";
-import { JwtGuard } from "@/src/auth/guard";
+import { GetUser, Subscriptions } from "@/src/auth/decorator";
+import { JwtGuard, SubscriptionGuard } from "@/src/auth/guard";
 import { AccessTokenDto } from "@/src/auth/dto";
 
 @Controller("user")
@@ -29,7 +29,8 @@ export class UserController {
   }
 
   // Used in progress route
-  @UseGuards(JwtGuard)
+  @Subscriptions("PRO")
+  @UseGuards(JwtGuard, SubscriptionGuard)
   @Get("basicReport")
   async basicReport() {
     return this.userService.basicReport();
