@@ -64,8 +64,4 @@ export class GameService {
     }
     return gameData;
   }
-
-  async blogs() {
-    return BLOGS;
-  }
 }

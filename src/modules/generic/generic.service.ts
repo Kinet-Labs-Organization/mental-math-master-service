@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { FAQ, LEADER } from "@/src/utils/mock";
+import { BLOGS, FAQ, LEADER } from "@/src/utils/mock";
 
 @Injectable()
 export class GenericService {
@@ -9,5 +9,9 @@ export class GenericService {
 
   async leaderboard() {
     return LEADER;
+  }
+
+  async blogs(recentMax: number) {
+    return BLOGS.slice(0, recentMax);
   }
 }

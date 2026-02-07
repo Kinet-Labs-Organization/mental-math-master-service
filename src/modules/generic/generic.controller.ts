@@ -26,4 +26,10 @@ export class GenericController {
     return this.genericService.leaderboard();
   }
 
+  @UseGuards(JwtGuard)
+  @Get("blogs")
+  async blogs(@Query("recentMax") recentMax: number) {
+    return this.genericService.blogs(recentMax);
+  }
+
 }

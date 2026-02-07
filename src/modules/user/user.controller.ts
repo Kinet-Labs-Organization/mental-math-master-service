@@ -56,7 +56,7 @@ export class UserController {
   }
 
   @UseGuards(JwtGuard)
-  @Get("profileData")
+  @Get("profile")
   async profileData() {
     return this.userService.profileData();
   }
@@ -77,6 +77,18 @@ export class UserController {
   @Put("toggleNotification")
   async toggleNotification() {
     return this.userService.toggleNotification();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get("notifications")
+  async notifications(@Query("recentMax") recentMax: number) {
+    return this.userService.notifications(recentMax);
+  }
+
+  @UseGuards(JwtGuard)
+  @Get("achievements")
+  async achievements() {
+    return this.userService.achievements();
   }
 
   @UseGuards(JwtGuard)

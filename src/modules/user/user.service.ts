@@ -6,12 +6,12 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, BASIC_REPORT } from "@/src/utils/mock";
+import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, BASIC_REPORT, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -89,8 +89,8 @@ export class UserService {
 
   async activities(position: string) {
     const length = 5;
-    if(!position) {
-      throw new Error(`Position not provided`); 
+    if (!position) {
+      throw new Error(`Position not provided`);
     }
     const pos = parseInt(position, 10);
     return ACTIVITIES.slice(pos, pos + length);
@@ -120,6 +120,25 @@ export class UserService {
     return {
       message: "Notification setting toggled",
     };
+  }
+
+  async notifications(recentMax: number) {
+    return {
+      notifications: NOTIFICATIONS.notifications.slice(0, recentMax),
+      total: NOTIFICATIONS.total,
+      unread: NOTIFICATIONS.unread,
+    };
+  }
+
+  async achievements() {
+    const myAchievements = ACHIEVEMENTS.achievements.map((achievement) => {
+      if (BASIC_REPORT.achievements.includes(achievement.id)) {
+        return { ...achievement, unlocked: true };
+      } else {
+        return { ...achievement, unlocked: false };
+      }
+    });
+    return myAchievements
   }
 
   async clearData() {

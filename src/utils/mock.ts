@@ -1,3 +1,5 @@
+import { Achievement } from "@prisma/client";
+
 const millisecondsInADay = 24 * 60 * 60 * 1000;
 const today = Date.now();
 
@@ -7,7 +9,7 @@ export const BASIC_REPORT = {
   accuracyRate: 90,
   currentStreak: 7,
   score: 400,
-  achievements: ["First Steps", "Consistency"]
+  achievements: ["achievement_1", "achievement_2", "achievement_3", "achievement_4"],
 };
 
 export const PROGRESS_REPORT = {
@@ -281,7 +283,8 @@ export const PROFILE = {
   name: "Suman Mandal",
   email: "sumanmandal64@gmail.com",
   subscribedOn: new Date("2023-01-15"),
-  report: PROGRESS_REPORT,
+  // plan: "FREE TRIAL",
+  plan: "TRIAL EXPIRED",
 };
 
 export const SETTINGS = {
@@ -338,61 +341,81 @@ export const BLOGS = [
     "title": "What Is Mental Math and Why It Matters",
     "brief": "Learn what mental math is, how it improves brain speed, focus, and confidence, and why it is an essential life skill for all ages.",
     "link": "https://www.mentalup.co/blog/mental-math",
-    "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d"
+    "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d",
+    "icon": "📜",
+    "read": "8 min",
   },
   {
     "title": "How Abacus Training Improves Brain Development",
     "brief": "An in-depth look at how abacus-based learning enhances memory, visualization, and cognitive growth in children.",
     "link": "https://www.vedantu.com/blog/abacus-benefits",
-    "image": "https://images.unsplash.com/photo-1588072432836-e10032774350"
+    "image": "https://images.unsplash.com/photo-1588072432836-e10032774350",
+    "icon": "🧠",
+    "read": "10 min",
   },
   {
     "title": "Mental Math Techniques Used by Human Calculators",
     "brief": "Discover the techniques and strategies used by mental math experts to perform lightning-fast calculations.",
     "link": "https://www.scientificamerican.com/article/mental-math/",
-    "image": "https://images.unsplash.com/photo-1518544887879-6d4c9a1c8b99"
+    "image": "https://images.unsplash.com/photo-1518544887879-6d4c9a1c8b99",
+    "icon": "⚡",
+    "read": "7 min",
   },
   {
     "title": "Abacus vs Mental Math: What’s the Difference?",
     "brief": "A clear comparison between traditional abacus training and pure mental math, including pros and learning outcomes.",
     "link": "https://www.cuemath.com/blog/abacus-vs-mental-math/",
-    "image": "https://images.unsplash.com/photo-1596495578065-6e0763fa1178"
+    "image": "https://images.unsplash.com/photo-1596495578065-6e0763fa1178",
+    "icon": "🔢",
+    "read": "9 min",
   },
   {
     "title": "Inside International Abacus Competitions",
     "brief": "Explore how international abacus tournaments are conducted, judging criteria, and how students prepare for them.",
     "link": "https://www.worldabacus.org/competitions",
-    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655"
+    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655",
+    "icon": "🏆",
+    "read": "12 min"
   },
   {
     "title": "How Daily Mental Math Practice Builds Speed",
     "brief": "Learn how short, daily mental math sessions can significantly increase calculation speed and accuracy over time.",
     "link": "https://www.brainmetrix.com/blog/mental-math-practice",
-    "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
+    "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
+    "icon": "⏱️",
+    "read": "6 min"
   },
   {
     "title": "Benefits of Abacus Learning for School Children",
     "brief": "Understand why abacus training is widely recommended for school-age children to strengthen math fundamentals.",
     "link": "https://byjus.com/maths/abacus/",
-    "image": "https://images.unsplash.com/photo-1600195077078-df1c6a9b0f1f"
+    "image": "https://images.unsplash.com/photo-1600195077078-df1c6a9b0f1f",
+    "icon": "🎓",
+    "read": "5 min"
   },
   {
     "title": "Preparing for Abacus Tournaments: A Complete Guide",
     "brief": "A practical guide covering practice routines, speed drills, and mental preparation for abacus competitions.",
     "link": "https://www.mentalabacus.in/abacus-competition-preparation",
-    "image": "https://images.unsplash.com/photo-1509062522246-3755977927d7"
+    "image": "https://images.unsplash.com/photo-1509062522246-3755977927d7",
+    "icon": "🏆",
+    "read": "10 min"
   },
   {
     "title": "Can Adults Improve Mental Math Skills?",
     "brief": "This article explains how adults can train their brains to calculate faster and sharpen focus using mental math.",
     "link": "https://www.psychologytoday.com/us/blog/brain-training/mental-math",
-    "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d"
+    "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
+    "icon": "🧠",
+    "read": "7 min"
   },
   {
     "title": "How Visualization Helps in Abacus and Mental Math",
     "brief": "Learn why number visualization is the core skill behind abacus mastery and high-speed mental calculations.",
     "link": "https://www.mathnasium.com/blog/visualization-math-skills",
-    "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b"
+    "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
+    "icon": "📊",
+    "read": "8 min"
   }
 ];
 
@@ -458,3 +481,29 @@ export const LEADER = [
     name: "Anirban Saha",
   },
 ];
+
+export const NOTIFICATIONS = {
+  notifications: [
+    { title: 'New Tournament Available', desc: 'The Neptune Championship has started!', time: '2h ago', icon: '🏆', color: 'bg-yellow-500/20 text-yellow-400', read: false },
+    { title: 'Daily Goal Reached', desc: 'You completed your daily practice goal.', time: '5h ago', icon: '🎯', color: 'bg-green-500/20 text-green-400', read: false },
+    { title: 'New Blog Post', desc: 'Check out our latest blog on mental math techniques.', time: '1d ago', icon: '📰', color: 'bg-blue-500/20 text-blue-400', read: true },
+    { title: 'Achievement Unlocked', desc: 'You earned the "Consistency" badge!', time: '3d ago', icon: '🏅', color: 'bg-purple-500/20 text-purple-400', read: true },
+    { title: 'Friend Joined', desc: 'Your friend Ridhima Mandal just joined the app.', time: '5d ago', icon: '👥', color: 'bg-pink-500/20 text-pink-400', read: false },
+    { title: 'Weekly Challenge', desc: 'New weekly challenge is live. Can you top the leaderboard?', time: '1w ago', icon: '🔥', color: 'bg-red-500/20 text-red-400', read: false },
+    { title: 'Subscription Expiring', desc: 'Your subscription will expire in 3 days. Renew now to keep your progress.', time: '2w ago', icon: '⏰', color: 'bg-gray-500/20 text-gray-400', read: true },
+  ],
+  total: 7,
+  unread: 5,
+};
+
+export const ACHIEVEMENTS = {
+  achievements: [
+    { id: 'achievement_1', icon: '🏆', title: 'First Win', description: 'Complete your first tournament', },
+    { id: 'achievement_2', icon: '🔥', title: 'Hot Streak', description: '5 day practice streak', },
+    { id: 'achievement_3', icon: '🎯', title: 'Perfectionist', description: '100% accuracy in a session', },
+    { id: 'achievement_4', icon: '⚡', title: 'Speed Demon', description: 'Complete Neptune level', },
+    { id: 'achievement_5', icon: '🌟', title: 'Rising Star', description: 'Reach top 10 on leaderboard', },
+    { id: 'achievement_6', icon: '💎', title: 'Master', description: 'Complete all tournaments', },
+  ],
+  total: 6,
+};
