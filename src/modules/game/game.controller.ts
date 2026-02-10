@@ -8,7 +8,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { GameService } from "./game.service";
-import { JwtGuard } from "@/src/auth/guard";
+import { JwtGuard, SubscriptionGuard } from "@/src/auth/guard";
+import { Subscriptions } from "@/src/auth/decorator";
 
 @Controller("game")
 export class GameController {
@@ -20,13 +21,15 @@ export class GameController {
     return this.gameService.gameLevels(gameLevel);
   }
 
-  @UseGuards(JwtGuard)
+  @Subscriptions("PRO")
+  @UseGuards(JwtGuard, SubscriptionGuard)
   @Post("fetchGame")
   async fetchGame(@Body() data: string) {
     return this.gameService.fetchGame(data);
   }
 
-  @UseGuards(JwtGuard)
+  @Subscriptions("PRO")
+  @UseGuards(JwtGuard, SubscriptionGuard)
   @Post("fetchCustomGame")
   async fetchCustomGame(@Body() data: string) {
     return this.gameService.fetchCustomGame(data);

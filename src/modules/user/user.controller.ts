@@ -29,8 +29,7 @@ export class UserController {
   }
 
   // Used in progress route
-  @Subscriptions("PRO")
-  @UseGuards(JwtGuard, SubscriptionGuard)
+  @UseGuards(JwtGuard)
   @Get("basicReport")
   async basicReport() {
     return this.userService.basicReport();
