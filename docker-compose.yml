@@ -1,6 +1,5 @@
-version: '3.8'
 services:
-  dev-db:
+  dev-db-mmm:
     image: postgres:15
     restart: always
     ports:
@@ -8,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
-      POSTGRES_DB: sts_dev
+      POSTGRES_DB: dev_db_mmm
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

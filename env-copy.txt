@@ -1,0 +1,13 @@
+# CORS_ORIGIN=http://localhost:3000
+# SUPABASE_URL=your-supabase-url
+# SUPABASE_KEY=your-supabase-key
+# JWT_SECRET=your-secret-key
+# DATABASE_URL=postgresql://postgres:123@localhost:5434/sts_dev
+
+APP_ENV=development
+DATABASE_URL="postgresql://postgres:123@localhost:5434/sts_dev?schema=public"
+DIRECT_URL="postgresql://postgres:123@localhost:5434/sts_dev?schema=public"
+APP_NAME="Mental Math Master"
+JWT_SECRET="i4lhIC9gx4+WcmeB4/idrp2WmzHyVZTNsXjJlp47MnRXaF32sNA0qP++KGP9onAFRRBkvXesF6bC2LMTsed6Gg=="
+CORS_ORIGIN="http://localhost:3000"
+PORT=3001
