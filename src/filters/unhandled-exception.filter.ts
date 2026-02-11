@@ -14,24 +14,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
 
     let status = 500;
-    let message = "Internal server error";
+    let message = "Something went wrong. Try again later";
 
     if (exception instanceof HttpException) {
       HttpExceptionFilter.prototype.catch.call(this, exception, host);
-      status = exception.getStatus();
-      const res = exception.getResponse();
-      message = typeof res === "string" ? res : (res as any).message || message;
+      // status = exception.getStatus();
+      // const res = exception.getResponse();
+      // message = typeof res === "string" ? res : (res as any).message || message;
+      // appMessage = exception.getResponse()['appMessage'];
     } else {
       Logger.error(`Unhandled Exception: "Unhandled"}`, {
         exception,
       });
       response.status(status).json({
-        statusCode: status,
-        timestamp: new Date().toISOString(),
-        path: request.url,
+        status: "failure",
         message,
       });
     }

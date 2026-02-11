@@ -21,7 +21,7 @@ export class GameController {
     return this.gameService.gameLevels(gameLevel);
   }
 
-  @Subscriptions("PRO")
+  @Subscriptions("PRO", "FREE")
   @UseGuards(JwtGuard, SubscriptionGuard)
   @Post("fetchGame")
   async fetchGame(@Body() data: string) {

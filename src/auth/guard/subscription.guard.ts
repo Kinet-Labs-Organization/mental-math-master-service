@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { SUBSCRIPTION_GUARD_KEY } from "../decorator/subscription-guard.decorator";
 
@@ -11,13 +16,16 @@ export class SubscriptionGuard implements CanActivate {
       SUBSCRIPTION_GUARD_KEY,
       [context.getHandler(), context.getClass()],
     );
-
-    if (!requiredSubscription) {
+    if (!requiredSubscription || requiredSubscription.length === 0 || requiredSubscription.includes("FREE")) {
       return true; // No subscription guard required, allow access
     }
-
     const { user } = context.switchToHttp().getRequest();
-
-    return requiredSubscription.includes(user?.status);
+    const hasSubscription = requiredSubscription.includes(user?.status);
+    if (!hasSubscription) {
+      throw new ForbiddenException(
+        { appMessage: "A PRO subscription is required to access this feature.", appAction: "UNSUBSCRIBED_USER" },
+      );
+    }
+    return true;
   }
 }
