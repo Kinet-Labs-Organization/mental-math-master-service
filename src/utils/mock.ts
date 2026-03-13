@@ -288,7 +288,7 @@ export const PROFILE = {
 };
 
 export const SETTINGS = {
-  soundEffect: true,
+  soundEffect: false,
   notification: true,
   newsLetter: true,
 };

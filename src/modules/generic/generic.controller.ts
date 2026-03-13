@@ -14,7 +14,7 @@ import { GenericService } from "./generic.service";
 export class GenericController {
   constructor(private readonly genericService: GenericService) {}
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("faqs")
   async faqs() {
     return this.genericService.faqs();

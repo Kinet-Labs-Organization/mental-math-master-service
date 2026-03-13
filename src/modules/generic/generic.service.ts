@@ -14,4 +14,8 @@ export class GenericService {
   async blogs(recentMax: number) {
     return BLOGS.slice(0, recentMax);
   }
+
+  async systemCall_userSyncFromSupabaseToLocalDB() {
+    
+  }
 }

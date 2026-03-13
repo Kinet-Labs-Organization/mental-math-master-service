@@ -117,7 +117,7 @@ const ADD_SUB_L1 = [
     numberCount: 3,
     delay: 1000,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "1",
     numberOfQuestions: 10,
   },
   {
@@ -128,7 +128,7 @@ const ADD_SUB_L1 = [
     numberCount: 4,
     delay: 1000,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "2",
     numberOfQuestions: 12,
   },
   {
@@ -139,7 +139,7 @@ const ADD_SUB_L1 = [
     numberCount: 5,
     delay: 950,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "3",
     numberOfQuestions: 12,
   },
   {
@@ -150,7 +150,7 @@ const ADD_SUB_L1 = [
     numberCount: 6,
     delay: 900,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "4",
     numberOfQuestions: 12,
   },
   {
@@ -161,7 +161,7 @@ const ADD_SUB_L1 = [
     numberCount: 8,
     delay: 850,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "5",
     numberOfQuestions: 15,
   },
   {
@@ -172,7 +172,7 @@ const ADD_SUB_L1 = [
     numberCount: 10,
     delay: 800,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "6",
     numberOfQuestions: 15,
   },
   {
@@ -183,7 +183,7 @@ const ADD_SUB_L1 = [
     numberCount: 3,
     delay: 1000,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "7",
     numberOfQuestions: 12,
   },
   {
@@ -194,7 +194,7 @@ const ADD_SUB_L1 = [
     numberCount: 4,
     delay: 950,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "8",
     numberOfQuestions: 12,
   },
   {
@@ -205,7 +205,7 @@ const ADD_SUB_L1 = [
     numberCount: 5,
     delay: 900,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "9",
     numberOfQuestions: 12,
   },
   {
@@ -216,7 +216,7 @@ const ADD_SUB_L1 = [
     numberCount: 6,
     delay: 850,
     level: "ADD_SUB_L1",
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "10",
     numberOfQuestions: 15,
   },
 ];
@@ -231,7 +231,7 @@ const ADD_SUB_L2 = [
     delay: 900,
     level: "ADD_SUB_L2",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "11",
   },
   {
     id: "ADD_SUB_L2_2",
@@ -242,7 +242,7 @@ const ADD_SUB_L2 = [
     delay: 850,
     level: "ADD_SUB_L2",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "12",
   },
   {
     id: "ADD_SUB_L2_3",
@@ -253,7 +253,7 @@ const ADD_SUB_L2 = [
     delay: 800,
     level: "ADD_SUB_L2",
     numberOfQuestions: 17,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "13",
   },
   {
     id: "ADD_SUB_L2_4",
@@ -264,7 +264,7 @@ const ADD_SUB_L2 = [
     delay: 750,
     level: "ADD_SUB_L2",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "14",
   },
   {
     id: "ADD_SUB_L2_5",
@@ -275,7 +275,7 @@ const ADD_SUB_L2 = [
     delay: 700,
     level: "ADD_SUB_L2",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "15",
   },
   {
     id: "ADD_SUB_L2_6",
@@ -286,7 +286,7 @@ const ADD_SUB_L2 = [
     delay: 650,
     level: "ADD_SUB_L2",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "16",
   },
   {
     id: "ADD_SUB_L2_7",
@@ -297,7 +297,7 @@ const ADD_SUB_L2 = [
     delay: 900,
     level: "ADD_SUB_L2",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "17",
   },
   {
     id: "ADD_SUB_L2_8",
@@ -308,7 +308,7 @@ const ADD_SUB_L2 = [
     delay: 850,
     level: "ADD_SUB_L2",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "18",
   },
   {
     id: "ADD_SUB_L2_9",
@@ -319,7 +319,7 @@ const ADD_SUB_L2 = [
     delay: 800,
     level: "ADD_SUB_L2",
     numberOfQuestions: 17,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "19",
   },
   {
     id: "ADD_SUB_L2_10",
@@ -330,7 +330,7 @@ const ADD_SUB_L2 = [
     delay: 750,
     level: "ADD_SUB_L2",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "20",
   },
 ];
 
@@ -344,7 +344,7 @@ const ADD_SUB_L3 = [
     delay: 700,
     level: "ADD_SUB_L3",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "21",
   },
   {
     id: "ADD_SUB_L3_2",
@@ -355,7 +355,7 @@ const ADD_SUB_L3 = [
     delay: 650,
     level: "ADD_SUB_L3",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "22",
   },
   {
     id: "ADD_SUB_L3_3",
@@ -366,7 +366,7 @@ const ADD_SUB_L3 = [
     delay: 600,
     level: "ADD_SUB_L3",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "23",
   },
   {
     id: "ADD_SUB_L3_4",
@@ -377,7 +377,7 @@ const ADD_SUB_L3 = [
     delay: 700,
     level: "ADD_SUB_L3",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "24",
   },
   {
     id: "ADD_SUB_L3_5",
@@ -388,7 +388,7 @@ const ADD_SUB_L3 = [
     delay: 650,
     level: "ADD_SUB_L3",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "25",
   },
   {
     id: "ADD_SUB_L3_6",
@@ -399,7 +399,7 @@ const ADD_SUB_L3 = [
     delay: 600,
     level: "ADD_SUB_L3",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "26",
   },
   {
     id: "ADD_SUB_L3_7",
@@ -410,7 +410,7 @@ const ADD_SUB_L3 = [
     delay: 550,
     level: "ADD_SUB_L3",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "27",
   },
   {
     id: "ADD_SUB_L3_8",
@@ -421,7 +421,7 @@ const ADD_SUB_L3 = [
     delay: 500,
     level: "ADD_SUB_L3",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "28",
   },
   {
     id: "ADD_SUB_L3_9",
@@ -432,7 +432,7 @@ const ADD_SUB_L3 = [
     delay: 450,
     level: "ADD_SUB_L3",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "29",
   },
   {
     id: "ADD_SUB_L3_10",
@@ -443,7 +443,7 @@ const ADD_SUB_L3 = [
     delay: 400,
     level: "ADD_SUB_L3",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "30",
   },
 ];
 
@@ -457,7 +457,7 @@ const ADD_SUB_L4 = [
     delay: 600,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "31",
   },
   {
     id: "ADD_SUB_L4_2",
@@ -468,7 +468,7 @@ const ADD_SUB_L4 = [
     delay: 550,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "32",
   },
   {
     id: "ADD_SUB_L4_3",
@@ -479,7 +479,7 @@ const ADD_SUB_L4 = [
     delay: 500,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "33",
   },
   {
     id: "ADD_SUB_L4_4",
@@ -490,7 +490,7 @@ const ADD_SUB_L4 = [
     delay: 600,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "34",
   },
   {
     id: "ADD_SUB_L4_5",
@@ -501,7 +501,7 @@ const ADD_SUB_L4 = [
     delay: 550,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "35",
   },
   {
     id: "ADD_SUB_L4_6",
@@ -512,7 +512,7 @@ const ADD_SUB_L4 = [
     delay: 500,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "36",
   },
   {
     id: "ADD_SUB_L4_7",
@@ -523,7 +523,7 @@ const ADD_SUB_L4 = [
     delay: 550,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "37",
   },
   {
     id: "ADD_SUB_L4_8",
@@ -534,7 +534,7 @@ const ADD_SUB_L4 = [
     delay: 500,
     level: "ADD_SUB_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "38",
   },
   {
     id: "ADD_SUB_L4_9",
@@ -545,7 +545,7 @@ const ADD_SUB_L4 = [
     delay: 450,
     level: "ADD_SUB_L4",
     numberOfQuestions: 30,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "1",
   },
   {
     id: "ADD_SUB_L4_10",
@@ -556,7 +556,7 @@ const ADD_SUB_L4 = [
     delay: 400,
     level: "ADD_SUB_L4",
     numberOfQuestions: 30,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "2",
   },
 ];
 
@@ -572,7 +572,7 @@ const MUL_L1 = [
     delay: 1500,
     level: "MUL_L1",
     numberOfQuestions: 10,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "3",
   },
   {
     id: "MUL_L1_2",
@@ -583,7 +583,7 @@ const MUL_L1 = [
     delay: 1400,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "4",
   },
   {
     id: "MUL_L1_3",
@@ -594,7 +594,7 @@ const MUL_L1 = [
     delay: 1300,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "5",
   },
   {
     id: "MUL_L1_4",
@@ -605,7 +605,7 @@ const MUL_L1 = [
     delay: 1500,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "6",
   },
   {
     id: "MUL_L1_5",
@@ -616,7 +616,7 @@ const MUL_L1 = [
     delay: 1400,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "7",
   },
   {
     id: "MUL_L1_6",
@@ -627,7 +627,7 @@ const MUL_L1 = [
     delay: 1300,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "8",
   },
   {
     id: "MUL_L1_7",
@@ -638,7 +638,7 @@ const MUL_L1 = [
     delay: 1600,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "9",
   },
   {
     id: "MUL_L1_8",
@@ -649,7 +649,7 @@ const MUL_L1 = [
     delay: 1500,
     level: "MUL_L1",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "10",
   },
   {
     id: "MUL_L1_9",
@@ -660,7 +660,7 @@ const MUL_L1 = [
     delay: 1400,
     level: "MUL_L1",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "11",
   },
   {
     id: "MUL_L1_10",
@@ -671,7 +671,7 @@ const MUL_L1 = [
     delay: 1700,
     level: "MUL_L1",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "12",
   },
 ];
 
@@ -685,7 +685,7 @@ const MUL_L2 = [
     delay: 1200,
     level: "MUL_L2",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "13",
   },
   {
     id: "MUL_L2_2",
@@ -696,7 +696,7 @@ const MUL_L2 = [
     delay: 1200,
     level: "MUL_L2",
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "14",
   },
   {
     id: "MUL_L2_3",
@@ -707,7 +707,7 @@ const MUL_L2 = [
     delay: 1100,
     level: "MUL_L2",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "15",
   },
   {
     id: "MUL_L2_4",
@@ -718,7 +718,7 @@ const MUL_L2 = [
     delay: 1100,
     level: "MUL_L2",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "16",
   },
   {
     id: "MUL_L2_5",
@@ -729,7 +729,7 @@ const MUL_L2 = [
     delay: 1100,
     level: "MUL_L2",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "17",
   },
   {
     id: "MUL_L2_6",
@@ -740,7 +740,7 @@ const MUL_L2 = [
     delay: 1000,
     level: "MUL_L2",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "18",
   },
   {
     id: "MUL_L2_7",
@@ -751,7 +751,7 @@ const MUL_L2 = [
     delay: 1000,
     level: "MUL_L2",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "19",
   },
   {
     id: "MUL_L2_8",
@@ -762,7 +762,7 @@ const MUL_L2 = [
     delay: 1000,
     level: "MUL_L2",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "20",
   },
   {
     id: "MUL_L2_9",
@@ -773,7 +773,7 @@ const MUL_L2 = [
     delay: 900,
     level: "MUL_L2",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "21",
   },
   {
     id: "MUL_L2_10",
@@ -784,7 +784,7 @@ const MUL_L2 = [
     delay: 900,
     level: "MUL_L2",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "22",
   },
 ];
 
@@ -798,7 +798,7 @@ const MUL_L3 = [
     delay: 1200,
     level: "MUL_L3",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "23",
   },
   {
     id: "MUL_L3_2",
@@ -809,7 +809,7 @@ const MUL_L3 = [
     delay: 1200,
     level: "MUL_L3",
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "24",
   },
   {
     id: "MUL_L3_3",
@@ -820,7 +820,7 @@ const MUL_L3 = [
     delay: 1000,
     level: "MUL_L3",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "25",
   },
   {
     id: "MUL_L3_4",
@@ -831,7 +831,7 @@ const MUL_L3 = [
     delay: 1000,
     level: "MUL_L3",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "26",
   },
   {
     id: "MUL_L3_5",
@@ -842,7 +842,7 @@ const MUL_L3 = [
     delay: 900,
     level: "MUL_L3",
     numberOfQuestions: 16,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "27",
   },
   {
     id: "MUL_L3_6",
@@ -853,7 +853,7 @@ const MUL_L3 = [
     delay: 900,
     level: "MUL_L3",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "28",
   },
   {
     id: "MUL_L3_7",
@@ -864,7 +864,7 @@ const MUL_L3 = [
     delay: 800,
     level: "MUL_L3",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "29",
   },
   {
     id: "MUL_L3_8",
@@ -875,7 +875,7 @@ const MUL_L3 = [
     delay: 800,
     level: "MUL_L3",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "30",
   },
   {
     id: "MUL_L3_9",
@@ -886,7 +886,7 @@ const MUL_L3 = [
     delay: 750,
     level: "MUL_L3",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "31",
   },
   {
     id: "MUL_L3_10",
@@ -897,7 +897,7 @@ const MUL_L3 = [
     delay: 750,
     level: "MUL_L3",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "32",
   },
 ];
 
@@ -911,7 +911,7 @@ const MUL_L4 = [
     delay: 1200,
     level: "MUL_L4",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "33",
   },
   {
     id: "MUL_L4_2",
@@ -922,7 +922,7 @@ const MUL_L4 = [
     delay: 1200,
     level: "MUL_L4",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "34",
   },
   {
     id: "MUL_L4_3",
@@ -933,7 +933,7 @@ const MUL_L4 = [
     delay: 1100,
     level: "MUL_L4",
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "35",
   },
   {
     id: "MUL_L4_4",
@@ -944,7 +944,7 @@ const MUL_L4 = [
     delay: 1100,
     level: "MUL_L4",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "36",
   },
   {
     id: "MUL_L4_5",
@@ -955,7 +955,7 @@ const MUL_L4 = [
     delay: 1000,
     level: "MUL_L4",
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "37",
   },
   {
     id: "MUL_L4_6",
@@ -966,7 +966,7 @@ const MUL_L4 = [
     delay: 1100,
     level: "MUL_L4",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "38",
   },
   {
     id: "MUL_L4_7",
@@ -977,7 +977,7 @@ const MUL_L4 = [
     delay: 1000,
     level: "MUL_L4",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "1",
   },
   {
     id: "MUL_L4_8",
@@ -988,7 +988,7 @@ const MUL_L4 = [
     delay: 950,
     level: "MUL_L4",
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "2",
   },
   {
     id: "MUL_L4_9",
@@ -999,7 +999,7 @@ const MUL_L4 = [
     delay: 900,
     level: "MUL_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "3",
   },
   {
     id: "MUL_L4_10",
@@ -1010,7 +1010,7 @@ const MUL_L4 = [
     delay: 900,
     level: "MUL_L4",
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "4",
   },
 ];
 
@@ -1028,7 +1028,7 @@ const DIV_L1 = [
     level: "DIV_L1",
     remainderAllowed: false,
     numberOfQuestions: 10,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "5",
   },
   {
     id: "DIV_L1_2",
@@ -1041,7 +1041,7 @@ const DIV_L1 = [
     level: "DIV_L1",
     remainderAllowed: false,
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "6",
   },
   {
     id: "DIV_L1_3",
@@ -1054,7 +1054,7 @@ const DIV_L1 = [
     level: "DIV_L1",
     remainderAllowed: false,
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "7",
   },
 ];
 
@@ -1070,7 +1070,7 @@ const DIV_L2 = [
     level: "DIV_L2",
     remainderAllowed: true,
     numberOfQuestions: 12,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "8",
   },
   {
     id: "DIV_L2_2",
@@ -1083,7 +1083,7 @@ const DIV_L2 = [
     level: "DIV_L2",
     remainderAllowed: true,
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "9",
   },
   {
     id: "DIV_L2_3",
@@ -1096,7 +1096,7 @@ const DIV_L2 = [
     level: "DIV_L2",
     remainderAllowed: true,
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "10",
   },
   {
     id: "DIV_L2_4",
@@ -1109,7 +1109,7 @@ const DIV_L2 = [
     level: "DIV_L2",
     remainderAllowed: true,
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "11",
   },
 ];
 
@@ -1125,7 +1125,7 @@ const DIV_L3 = [
     level: "DIV_L3",
     remainderAllowed: true,
     numberOfQuestions: 15,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "12",
   },
   {
     id: "DIV_L3_2",
@@ -1138,7 +1138,7 @@ const DIV_L3 = [
     level: "DIV_L3",
     remainderAllowed: true,
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "13",
   },
   {
     id: "DIV_L3_3",
@@ -1151,7 +1151,7 @@ const DIV_L3 = [
     level: "DIV_L3",
     remainderAllowed: true,
     numberOfQuestions: 18,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "14",
   },
   {
     id: "DIV_L3_4",
@@ -1164,7 +1164,7 @@ const DIV_L3 = [
     level: "DIV_L3",
     remainderAllowed: true,
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "15",
   },
 ];
 
@@ -1180,7 +1180,7 @@ const DIV_L4 = [
     level: "DIV_L4",
     remainderAllowed: true,
     numberOfQuestions: 20,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "16",
   },
   {
     id: "DIV_L4_2",
@@ -1193,7 +1193,7 @@ const DIV_L4 = [
     level: "DIV_L4",
     remainderAllowed: true,
     numberOfQuestions: 22,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "17",
   },
   {
     id: "DIV_L4_3",
@@ -1206,7 +1206,7 @@ const DIV_L4 = [
     level: "DIV_L4",
     remainderAllowed: true,
     numberOfQuestions: 25,
-    icon: "https://mxfmj8wrrjv5and6.public.blob.vercel-storage.com/31dbed13-9148-4635-9b09-f6b27a02c84f.png",
+    icon: "18",
   },
 ];
 
