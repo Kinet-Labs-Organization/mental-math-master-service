@@ -17,7 +17,7 @@ import { AccessTokenDto } from "@/src/auth/dto";
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("me")
   async me(@GetUser() user: AccessTokenDto) {
     return user;
@@ -29,69 +29,69 @@ export class UserController {
   }
 
   // Used in progress route
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("basicReport")
   async basicReport() {
     return this.userService.basicReport();
   }
 
   // Used in progress route
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("progressReport")
   async progressReport() {
     return this.userService.progressReport();
   }
 
   // Used in progress route
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("activities")
   async activities(@Query("position") position: string) {
     return this.userService.activities(position);
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("leaderBoardData")
   async leaderBoardData() {
     return this.userService.leaderBoardData();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("profile")
   async profileData() {
     return this.userService.profileData();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("settingsData")
   async settingsData() {
     return this.userService.settingsData();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Put("toggleSoundEffect")
   async toggleSoundEffect() {
     return this.userService.toggleSoundEffect();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Put("toggleNotification")
   async toggleNotification() {
     return this.userService.toggleNotification();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("notifications")
   async notifications(@Query("recentMax") recentMax: number) {
     return this.userService.notifications(recentMax);
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("achievements")
   async achievements() {
     return this.userService.achievements();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Put("clearData")
   async clearData() {
     return this.userService.clearData();

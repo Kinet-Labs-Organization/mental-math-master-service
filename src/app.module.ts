@@ -10,6 +10,7 @@ import { ThrottlerOption } from "./app-config/throttler.config";
 import { AppController } from "./app.controller";
 import { GameModule } from "./modules/game/game.module";
 import { GenericModule } from "./modules/generic/generic.module";
+import { FirebaseAdminModule } from "./auth/firebase/firebase-admin.module";
 
 @Module({
   controllers: [AppController],
@@ -19,6 +20,7 @@ import { GenericModule } from "./modules/generic/generic.module";
     }),
     UserModule,
     GameModule,
+    FirebaseAdminModule,
     AuthModule,
     GenericModule,
     WinstonModule.forRoot(WinstonOptions),

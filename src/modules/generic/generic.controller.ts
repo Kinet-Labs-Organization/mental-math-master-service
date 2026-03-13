@@ -7,7 +7,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { JwtGuard } from "@/src/auth/guard";
+// import { JwtGuard } from "@/src/auth/guard";
 import { GenericService } from "./generic.service";
 
 @Controller("generic")
@@ -20,13 +20,13 @@ export class GenericController {
     return this.genericService.faqs();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("leaderboard")
   async leaderboard() {
     return this.genericService.leaderboard();
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Get("blogs")
   async blogs(@Query("recentMax") recentMax: number) {
     return this.genericService.blogs(recentMax);
