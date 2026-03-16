@@ -4,12 +4,11 @@ import {
   Get,
   Param,
   Post,
-  Query,
   UseGuards,
 } from "@nestjs/common";
 import { GameService } from "./game.service";
 import { FirebaseAuthGuard, SubscriptionGuard } from "@/src/auth/guard";
-import { Subscriptions } from "@/src/auth/decorator";
+import { GetUser, Subscriptions } from "@/src/auth/decorator";
 
 @Controller("game")
 export class GameController {
@@ -33,5 +32,15 @@ export class GameController {
   @Post("fetchCustomGame")
   async fetchCustomGame(@Body() data: string) {
     return this.gameService.fetchCustomGame(data);
+  }
+
+  @Subscriptions("PRO", "FREE")
+  @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
+  @Post("flashReport")
+  async flashReport(
+    @GetUser("email") email: string,
+    @Body() data: any,
+  ) {
+    return this.gameService.saveFlashGameReport(email, data);
   }
 }
