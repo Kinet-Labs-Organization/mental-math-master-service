@@ -34,8 +34,8 @@ export class FlashGameReportPayloadDto {
   @IsNotEmpty()
   gameName: string;
 
-  @IsIn(["flash"])
-  gameMode: "flash";
+  @IsIn(["flash", "regular"])
+  gameMode: "flash" | "regular";
 
   @IsNumber()
   correctAnswerGiven: number;
