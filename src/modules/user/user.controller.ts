@@ -10,14 +10,14 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { GetUser, Subscriptions } from "@/src/auth/decorator";
-import { JwtGuard, SubscriptionGuard } from "@/src/auth/guard";
+import { FirebaseAuthGuard, JwtGuard, SubscriptionGuard } from "@/src/auth/guard";
 import { AccessTokenDto } from "@/src/auth/dto";
 
 @Controller("user")
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("me")
   async me(@GetUser() user: AccessTokenDto) {
     return user;

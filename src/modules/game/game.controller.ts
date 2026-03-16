@@ -5,10 +5,13 @@ import {
   Param,
   Post,
   UseGuards,
+  ValidationPipe,
 } from "@nestjs/common";
 import { GameService } from "./game.service";
 import { FirebaseAuthGuard, SubscriptionGuard } from "@/src/auth/guard";
 import { GetUser, Subscriptions } from "@/src/auth/decorator";
+import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
+import { User } from "@prisma/client";
 
 @Controller("game")
 export class GameController {
@@ -38,9 +41,16 @@ export class GameController {
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
   @Post("flashReport")
   async flashReport(
-    @GetUser("email") email: string,
-    @Body() data: any,
+    @GetUser() user: any,
+    @Body(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    )
+    data: FlashGameReportPayloadDto,
   ) {
-    return this.gameService.saveFlashGameReport(email, data);
+    return this.gameService.saveFlashGameReport(user, data);
   }
 }

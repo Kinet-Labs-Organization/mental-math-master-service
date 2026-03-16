@@ -2,31 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma, PrismaClient, User } from "@prisma/client";
 import * as games from "@/src/utils/gameConfig";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
-
-interface FlashGameReportPayload {
-  gameId: string;
-  gameName: string;
-  gameMode: "flash";
-  selectedGame: {
-    id: string;
-    name: string;
-    digitCount: number;
-    numberCount: number;
-    delay: number | null;
-    operations: string[];
-    icon: string | null;
-  };
-  numbers: Array<{
-    value: number;
-    operation: string;
-  }>;
-  correctAnswer: number;
-  userAnswer: string;
-  parsedAnswer: number | null;
-  isCorrect: boolean;
-  outcome: "win" | "lose";
-  answeredAt: string;
-}
+import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
 
 interface FlashReportSummary {
   gamesPlayed: number;
@@ -100,34 +76,6 @@ export class GameService {
     return gameData;
   }
 
-  async saveFlashGameReport(email: string, payload: FlashGameReportPayload) {
-    if (!email) {
-      throw new BadRequestException("Authenticated user email is required");
-    }
-
-    if (!payload?.gameId || !payload?.selectedGame || !Array.isArray(payload?.numbers)) {
-      throw new BadRequestException("Invalid flash game report payload");
-    }
-
-    const playedAt = new Date(payload.answeredAt);
-    if (Number.isNaN(playedAt.getTime())) {
-      throw new BadRequestException("Invalid answeredAt timestamp");
-    }
-
-    return this.prisma.$transaction(async (tx) => {
-      const user = await this.getOrCreateUser(tx, email);
-      const activity = await this.createFlashGameActivity(tx, user.id, payload, playedAt);
-      const summary = await this.calculateFlashReportSummary(tx, user.id);
-      const report = await this.updateUserReport(tx, user.id, summary);
-
-      return {
-        message: "Flash game report saved successfully",
-        activityId: activity.id,
-        report,
-      };
-    });
-  }
-
   private generateCreativeUsername(): string {
     const colors = ["Red", "Blue", "Green", "Golden", "Silver", "Bright"];
     const animals = ["Panda", "Koala", "Penguin", "Dolphin", "Owl", "Falcon"];
@@ -135,8 +83,30 @@ export class GameService {
     const animal = animals[Math.floor(Math.random() * animals.length)];
     return `${color} ${animal}`;
   }
+  
+  async saveFlashGameReport(user: any, payload: FlashGameReportPayloadDto) {
+    if (!user?.email) {
+      throw new BadRequestException("Authenticated user email is required");
+    }
 
-  private async getOrCreateUser(tx: PrismaTransactionClient, email: string): Promise<User> {
+    return this.prisma.$transaction(async (tx) => {
+      const appUser = await this.getOrCreateUser(tx, user.email);
+      const activity = await this.createFlashGameActivity(tx, appUser, payload);
+      const summary = await this.calculateFlashReportSummary(tx, appUser);
+      const report = await this.updateUserReport(tx, appUser, summary);
+
+      return {
+        message: "Flash game report saved successfully",
+        activityId: activity.id,
+        // report,
+      };
+    });
+  }
+
+  private async getOrCreateUser(
+    tx: PrismaTransactionClient,
+    email: string,
+  ): Promise<User> {
     return tx.user.upsert({
       where: { email },
       update: {},
@@ -150,30 +120,32 @@ export class GameService {
 
   private async createFlashGameActivity(
     tx: PrismaTransactionClient,
-    userId: number,
-    payload: FlashGameReportPayload,
-    playedAt: Date,
+    user: User,
+    payload: FlashGameReportPayloadDto,
   ) {
     return tx.gameActivity.create({
       data: {
         gameId: payload.gameId,
         gameType: payload.gameMode,
-        correctAnswers: payload.isCorrect ? 1 : 0,
-        wrongAnswers: payload.isCorrect ? 0 : 1,
-        playedAt,
-        details: payload as unknown as Prisma.InputJsonValue,
-        userId,
+        correctAnswers: payload.correctAnswerGiven,
+        wrongAnswers: payload.wrongAnswerGiven,
+        playedAt: new Date(payload.answeredAt),
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
       },
     });
   }
 
   private async calculateFlashReportSummary(
     tx: PrismaTransactionClient,
-    userId: number,
+    user: User,
   ): Promise<FlashReportSummary> {
     const [aggregates, recentActivities] = await Promise.all([
       tx.gameActivity.aggregate({
-        where: { userId },
+        where: { userId: user.id },
         _count: { _all: true },
         _sum: {
           correctAnswers: true,
@@ -181,7 +153,7 @@ export class GameService {
         },
       }),
       tx.gameActivity.findMany({
-        where: { userId },
+        where: { userId: user.id },
         orderBy: [{ playedAt: "desc" }, { id: "desc" }],
         select: {
           correctAnswers: true,
@@ -217,15 +189,27 @@ export class GameService {
 
   private async updateUserReport(
     tx: PrismaTransactionClient,
-    userId: number,
+    user: User,
     summary: FlashReportSummary,
   ) {
     return tx.report.upsert({
-      where: { userId },
-      update: summary,
+      where: { userId: user.id },
+      update: {
+        gamesPlayed: summary.gamesPlayed,
+        accuracy: summary.accuracy,
+        streak: summary.streak,
+        score: summary.score,
+      },
       create: {
-        userId,
-        ...summary,
+        gamesPlayed: summary.gamesPlayed,
+        accuracy: summary.accuracy,
+        streak: summary.streak,
+        score: summary.score,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
       },
     });
   }

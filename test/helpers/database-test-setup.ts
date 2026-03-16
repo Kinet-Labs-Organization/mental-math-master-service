@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
 import { PrismaModule } from "@/src/database/prisma/prisma.module";
+import { resolve } from "path";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 export class DatabaseTestSetup {
   private static prismaService: PrismaService;
@@ -15,11 +17,13 @@ export class DatabaseTestSetup {
     prismaService: PrismaService;
     module: TestingModule;
   }> {
+    const envFilePath = resolve(process.cwd(), ".env.test");
+
     const module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: ".env.test",
+          envFilePath,
         }),
         PrismaModule,
         JwtModule.registerAsync({
@@ -35,9 +39,23 @@ export class DatabaseTestSetup {
     }).compile();
 
     const prismaService = module.get<PrismaService>(PrismaService);
+    const configService = module.get<ConfigService>(ConfigService);
 
-    // Wait for database connection
-    await prismaService.$connect();
+    try {
+      await prismaService.$connect();
+    } catch (error) {
+      const databaseUrl = configService.get<string>("DATABASE_URL");
+      throw new Error(
+        [
+          `Failed to connect to the test database from ${envFilePath}.`,
+          `DATABASE_URL: ${databaseUrl}`,
+          "Make sure the test DB is running and migrated first:",
+          "1. docker compose -f docker-compose.test.yml up -d test-db-mmm",
+          "2. dotenv -e .env.test -- prisma migrate deploy",
+          `Original error: ${(error as Error).message}`,
+        ].join("\n"),
+      );
+    }
 
     this.prismaService = prismaService;
     this.module = module;
@@ -55,24 +73,27 @@ export class DatabaseTestSetup {
       );
     }
 
-    // Delete in correct order to avoid foreign key constraints
-    // Order matters - delete child records first, then parents
     try {
-      // First, delete OrderItem (depends on Order and Product)
-      await this.prismaService.orderItem.deleteMany();
-
-      // Delete Order (depends on User and Vendor)
-      await this.prismaService.order.deleteMany();
-
-      // Delete Product (depends on Vendor)
-      await this.prismaService.product.deleteMany();
-
-      // Delete User (depends on Vendor)
+      // Delete child records first, then parents.
+      // await this.prismaService.notifications.deleteMany();
+      await this.prismaService.gameActivity.deleteMany();
+      await this.prismaService.report.deleteMany();
       await this.prismaService.user.deleteMany();
-
-      // Finally, delete Vendor (root entity)
-      await this.prismaService.vendor.deleteMany();
     } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === "P2021"
+      ) {
+        throw new Error(
+          [
+            "The test database schema is not ready.",
+            "Required tables like GameActivity do not exist yet.",
+            "Run these commands first:",
+            "1. npm run start:db:test",
+            "2. npm run test:integration:game",
+          ].join("\n"),
+        );
+      }
       console.error("Error cleaning test database:", error);
       throw error;
     }

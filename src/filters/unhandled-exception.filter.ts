@@ -5,8 +5,9 @@ import {
   HttpException,
   Logger,
 } from "@nestjs/common";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { HttpExceptionFilter } from "./http-exception.filter";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -20,10 +21,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       HttpExceptionFilter.prototype.catch.call(this, exception, host);
-      // status = exception.getStatus();
-      // const res = exception.getResponse();
-      // message = typeof res === "string" ? res : (res as any).message || message;
-      // appMessage = exception.getResponse()['appMessage'];
+    } else if (exception instanceof PrismaClientKnownRequestError) {
+      Logger.error("Unhandled Prisma exception", {
+        code: exception.code,
+        meta: exception.meta,
+        message: exception.message,
+      });
+      response.status(status).json({
+        status: "failure",
+        message,
+        prismaCode: exception.code,
+      });
     } else {
       Logger.error(`Unhandled Exception: "Unhandled"}`, {
         exception,

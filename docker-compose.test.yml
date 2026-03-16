@@ -8,11 +8,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
-      POSTGRES_DB: petpulseai_dev
+      POSTGRES_DB: test_db_mmm
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  test-db:
+  test-db-mmm:
     image: postgres:15
     restart: always
     ports:
@@ -20,7 +20,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
-      POSTGRES_DB: petpulseai_test
+      POSTGRES_DB: test_db_mmm
     # No volumes for test database - we want it to be ephemeral
 
 volumes:
