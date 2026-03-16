@@ -1,16 +1,9 @@
-import { Type } from "class-transformer";
 import {
-  ArrayMinSize,
-  IsBoolean,
-  IsArray,
   IsIn,
-  IsInt,
   IsISO8601,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
-  ValidateNested,
 } from "class-validator";
 
 interface IProgressReport {
@@ -30,43 +23,6 @@ interface IActivities {
   totalQuestions?: number;
   correctAnswers?: number;
   correctness?: boolean;
-}
-
-export class FlashGameSelectedGameDto {
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @IsInt()
-  digitCount: number;
-
-  @IsInt()
-  numberCount: number;
-
-  @IsOptional()
-  @IsInt()
-  delay: number | null;
-
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  operations: string[];
-
-  @IsOptional()
-  @IsString()
-  icon: string | null;
-}
-
-export class FlashGameNumberItemDto {
-  @IsNumber()
-  value: number;
-
-  @IsString()
-  operation: string;
 }
 
 export class FlashGameReportPayloadDto {

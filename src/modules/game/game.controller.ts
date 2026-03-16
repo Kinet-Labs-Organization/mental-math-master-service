@@ -11,7 +11,6 @@ import { GameService } from "./game.service";
 import { FirebaseAuthGuard, SubscriptionGuard } from "@/src/auth/guard";
 import { GetUser, Subscriptions } from "@/src/auth/decorator";
 import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
-import { User } from "@prisma/client";
 
 @Controller("game")
 export class GameController {
@@ -39,8 +38,8 @@ export class GameController {
 
   @Subscriptions("PRO", "FREE")
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
-  @Post("flashReport")
-  async flashReport(
+  @Post("saveFlashGame")
+  async saveFlashGame(
     @GetUser() user: any,
     @Body(
       new ValidationPipe({
