@@ -12,11 +12,11 @@ describe("GameService - Integration Tests", () => {
 
   const email = "flash-player@example.com";
   const payload = {
-    gameId: "ADD_SUB_L1_1",
+    gameId: "ADDSUB_L1_1",
     gameName: "Sirius",
     gameMode: "flash" as const,
     selectedGame: {
-      id: "ADD_SUB_L1_1",
+      id: "ADDSUB_L1_1",
       name: "Sirius",
       digitCount: 1,
       numberCount: 3,

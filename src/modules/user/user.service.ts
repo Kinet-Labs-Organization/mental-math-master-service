@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, BASIC_REPORT, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
+import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
@@ -79,8 +79,27 @@ export class UserService {
     }
   }
 
-  async basicReport() {
-    return BASIC_REPORT;
+  async basicReport(email: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: { report: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    return {
+      totalSessions: user.report?.gamesPlayed ?? 0,
+      accuracyRate: user.report?.accuracy ?? 0,
+      currentStreak: user.report?.streak ?? 0,
+      score: user.report?.score ?? 0,
+      achievements: []
+    };
   }
 
   async progressReport() {
@@ -132,11 +151,7 @@ export class UserService {
 
   async achievements() {
     const myAchievements = ACHIEVEMENTS.achievements.map((achievement) => {
-      if (BASIC_REPORT.achievements.includes(achievement.id)) {
-        return { ...achievement, unlocked: true };
-      } else {
-        return { ...achievement, unlocked: false };
-      }
+      return { ...achievement, unlocked: false };
     });
     return myAchievements
   }

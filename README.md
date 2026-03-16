@@ -81,7 +81,7 @@ Stack change command : heroku stack:set container --app sellor
 
 CONSTANTS -
 
-    type        :   ADD_SUB | MUL | DIV
+    type        :   ADDSUB | MUL | DIV
     level       :   L1 | L2 | L3 | L4
     serialNo    :   1-10
     mode        :   flash | multiple
