@@ -38,8 +38,8 @@ export class GameController {
 
   @Subscriptions("PRO", "FREE")
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
-  @Post("saveFlashGame")
-  async saveFlashGame(
+  @Post("saveGame")
+  async saveGame(
     @GetUser() user: any,
     @Body(
       new ValidationPipe({
@@ -47,9 +47,9 @@ export class GameController {
         forbidNonWhitelisted: true,
         transform: true,
       }),
-    )
-    data: FlashGameReportPayloadDto,
+  )
+  data: FlashGameReportPayloadDto,
   ) {
-    return this.gameService.saveFlashGameReport(user, data);
+    return this.gameService.saveGame(user, data);
   }
 }

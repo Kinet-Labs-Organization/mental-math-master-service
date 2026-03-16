@@ -84,19 +84,15 @@ export class GameService {
     return `${color} ${animal}`;
   }
   
-  async saveFlashGameReport(user: any, payload: FlashGameReportPayloadDto) {
-    if (!user?.email) {
-      throw new BadRequestException("Authenticated user email is required");
-    }
-
+  async saveGame(user: any, payload: FlashGameReportPayloadDto) {
     return this.prisma.$transaction(async (tx) => {
       const appUser = await this.getOrCreateUser(tx, user.email);
-      const activity = await this.createFlashGameActivity(tx, appUser, payload);
-      const summary = await this.calculateFlashReportSummary(tx, appUser);
+      const activity = await this.createGameActivity(tx, appUser, payload);
+      const summary = await this.calculateReportSummary(tx, appUser);
       const report = await this.updateUserReport(tx, appUser, summary);
 
       return {
-        message: "Flash game report saved successfully",
+        message: "Game saved successfully",
         activityId: activity.id,
         // report,
       };
@@ -118,7 +114,7 @@ export class GameService {
     });
   }
 
-  private async createFlashGameActivity(
+  private async createGameActivity(
     tx: PrismaTransactionClient,
     user: User,
     payload: FlashGameReportPayloadDto,
@@ -139,7 +135,7 @@ export class GameService {
     });
   }
 
-  private async calculateFlashReportSummary(
+  private async calculateReportSummary(
     tx: PrismaTransactionClient,
     user: User,
   ): Promise<FlashReportSummary> {
