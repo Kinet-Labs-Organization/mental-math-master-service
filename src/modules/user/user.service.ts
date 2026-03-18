@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROGRESS_REPORT, ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
+import { ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 @Injectable()
@@ -105,8 +105,75 @@ export class UserService {
     };
   }
 
-  async progressReport() {
-    return PROGRESS_REPORT;
+  async progressReport(email: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentActivities = await this.prisma.gameActivity.findMany({
+      where: {
+        userId: user.id,
+        createdAt: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        createdAt: true,
+        correctAnswers: true,
+        wrongAnswers: true,
+      },
+    });
+
+    const groupedByDay = new Map<
+      string,
+      { correctAnswers: number; wrongAnswers: number }
+    >();
+
+    for (const activity of recentActivities) {
+      const dayKey = activity.createdAt.toISOString().slice(0, 10);
+      const daySummary = groupedByDay.get(dayKey) ?? {
+        correctAnswers: 0,
+        wrongAnswers: 0,
+      };
+
+      daySummary.correctAnswers += activity.correctAnswers;
+      daySummary.wrongAnswers += activity.wrongAnswers;
+      groupedByDay.set(dayKey, daySummary);
+    }
+
+    const performanceTrend = Array.from(groupedByDay.values()).map(
+      ({ correctAnswers, wrongAnswers }) => {
+        const totalAnswers = correctAnswers + wrongAnswers;
+        if (totalAnswers === 0) {
+          return 0;
+        }
+
+        return Math.round((correctAnswers / totalAnswers) * 100);
+      },
+    );
+
+    return {
+      performanceTrend,
+      aiSuggestions: [
+        "Practice subtraction more",
+        "Try timed challenges",
+      ],
+    };
   }
 
   async activities(position: string) {

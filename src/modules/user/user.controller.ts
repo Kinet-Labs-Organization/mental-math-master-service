@@ -38,9 +38,10 @@ export class UserController {
 
   // Used in progress route
   // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("progressReport")
-  async progressReport() {
-    return this.userService.progressReport();
+  async progressReport(@GetUser("email") email: string) {
+    return this.userService.progressReport(email);
   }
 
   // Used in progress route
