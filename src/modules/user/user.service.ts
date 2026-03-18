@@ -194,26 +194,33 @@ export class UserService {
     const pos = Number.isNaN(parseInt(position, 10)) ? 0 : parseInt(position, 10);
     const take = Number.isNaN(parseInt(length, 10)) ? 5 : parseInt(length, 10);
 
-    const activities = await this.prisma.gameActivity.findMany({
-      where: {
-        userId: user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      skip: pos,
-      take,
-      select: {
-        gameId: true,
-        playedAt: true,
-        gameType: true,
-        correctAnswers: true,
-        wrongAnswers: true,
-        score: true,
-      },
-    });
+    const [activities, totalCount] = await Promise.all([
+      this.prisma.gameActivity.findMany({
+        where: {
+          userId: user.id,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: pos,
+        take,
+        select: {
+          gameId: true,
+          playedAt: true,
+          gameType: true,
+          correctAnswers: true,
+          wrongAnswers: true,
+          score: true,
+        },
+      }),
+      this.prisma.gameActivity.count({
+        where: {
+          userId: user.id,
+        },
+      }),
+    ]);
 
-    return activities.map((activity) => {
+    const recentActivities = activities.map((activity) => {
       const gameMeta = this.getGameMetaFromGameId(activity.gameId);
 
       return {
@@ -226,6 +233,10 @@ export class UserService {
         score: activity.score ?? 0,
       };
     });
+    return {
+      recentActivities,
+      totalCount,
+    };
   }
 
   async leaderBoardData() {
