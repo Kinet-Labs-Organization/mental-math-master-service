@@ -70,6 +70,9 @@ export class UserService {
       }
       return { message: "User synchronized successfully" };
     } catch (error) {
+      if(error instanceof UnprocessableEntityException && error.message === 'Email already exists') {
+        return { message: "User synchronized successfully" };
+      }
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
           throw new ForbiddenException("Credentials taken");
