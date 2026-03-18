@@ -1213,6 +1213,149 @@ const DIV_L4 = [
   },
 ];
 
+const ACHIEVEMENTS_CRITERIA = [
+  {
+    "id": "LOGIN_STREAK_3",
+    "name": "Spark Chain",
+    "description": "Play 3 days in a row",
+    "category": "daily_streak",
+    "target": 3
+  },
+  {
+    "id": "LOGIN_STREAK_7",
+    "name": "Weekly Rhythm",
+    "description": "Play 7 days in a row",
+    "category": "daily_streak",
+    "target": 7
+  },
+  {
+    "id": "LOGIN_STREAK_22",
+    "name": "Discipline Mind",
+    "description": "Play 22 days in a row",
+    "category": "daily_streak",
+    "target": 22
+  },
+  {
+    "id": "GAMES_TOTAL_25",
+    "name": "First 25",
+    "description": "Complete 25 games total",
+    "category": "games_total",
+    "target": 25
+  },
+  {
+    "id": "GAMES_TOTAL_50",
+    "name": "Momentum Builder",
+    "description": "Complete 50 games total",
+    "category": "games_total",
+    "target": 50
+  },
+  {
+    "id": "GAMES_TOTAL_100",
+    "name": "Century Solver",
+    "description": "Complete 100 games total",
+    "category": "games_total",
+    "target": 100
+  },
+  {
+    "id": "GAMES_TOTAL_200",
+    "name": "Dedicated Calculator",
+    "description": "Complete 200 games total",
+    "category": "games_total",
+    "target": 200
+  },
+  {
+    "id": "GAMES_TOTAL_500",
+    "name": "Math Marathoner",
+    "description": "Complete 500 games total",
+    "category": "games_total",
+    "target": 500
+  },
+  {
+    "id": "GAMES_TOTAL_1000",
+    "name": "Legend of Numbers",
+    "description": "Complete 1000 games total",
+    "category": "games_total",
+    "target": 1000
+  },
+  {
+    "id": "SCORE_TOTAL_500",
+    "name": "Point Collector",
+    "description": "Reach 500 total score",
+    "category": "score_total",
+    "target": 500
+  },
+  {
+    "id": "SCORE_TOTAL_1000",
+    "name": "Score Climber",
+    "description": "Reach 1000 total score",
+    "category": "score_total",
+    "target": 1000
+  },
+  {
+    "id": "SCORE_TOTAL_2000",
+    "name": "Elite Scorer",
+    "description": "Reach 2000 total score",
+    "category": "score_total",
+    "target": 2000
+  },
+  {
+    "id": "SCORE_TOTAL_5000",
+    "name": "Score Titan",
+    "description": "Reach 5000 total score",
+    "category": "score_total",
+    "target": 5000
+  },
+  {
+    "id": "SCORE_TOTAL_10000",
+    "name": "Grand Master Score",
+    "description": "Reach 10000 total score",
+    "category": "score_total",
+    "target": 10000
+  },
+  {
+    "id": "WIN_STREAK_5",
+    "name": "Hot Hands",
+    "description": "Unlock a 5-win streak",
+    "category": "win_streak",
+    "target": 5
+  },
+  {
+    "id": "WIN_STREAK_10",
+    "name": "Unbreakable Focus",
+    "description": "Unlock a 10-win streak",
+    "category": "win_streak",
+    "target": 10
+  },
+  {
+    "id": "WIN_STREAK_20",
+    "name": "Streak Legend",
+    "description": "Unlock a 20-win streak",
+    "category": "win_streak",
+    "target": 20
+  },
+  {
+    "id": "FLASH_ADDSUB_ALL_COMPLETED",
+    "name": "Flash AddSub Master",
+    "description": "Complete all Flash ADDSUB levels",
+    "category": "flash_category_complete",
+    "target": "ADDSUB_ALL"
+  },
+  {
+    "id": "FLASH_MUL_ALL_COMPLETED",
+    "name": "Flash Multiplication Master",
+    "description": "Complete all Flash MUL levels",
+    "category": "flash_category_complete",
+    "target": "MUL_ALL"
+  },
+  {
+    "id": "FLASH_DIV_ALL_COMPLETED",
+    "name": "Flash Division Master",
+    "description": "Complete all Flash DIV levels",
+    "category": "flash_category_complete",
+    "target": "DIV_ALL"
+  }
+];
+
 export {
   GAME_METAS,
   GAME_LEVELS,
@@ -1228,4 +1371,5 @@ export {
   DIV_L2,
   DIV_L3,
   DIV_L4,
+  ACHIEVEMENTS_CRITERIA
 };

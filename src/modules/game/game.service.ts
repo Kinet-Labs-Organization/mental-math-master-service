@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { Prisma, PrismaClient, User } from "@prisma/client";
+import { Achievement, Prisma, PrismaClient, User } from "@prisma/client";
 import * as games from "@/src/utils/gameConfig";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
 import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
@@ -10,6 +10,21 @@ interface FlashReportSummary {
   streak: number;
   score: number;
 }
+
+interface AchievementCriteriaItem {
+  id: string;
+  category: string;
+  target: number | string;
+}
+
+const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
+  GAMES_TOTAL_25: Achievement.GAMES_TOTAL_25,
+  GAMES_TOTAL_50: Achievement.GAMES_TOTAL_50,
+  GAMES_TOTAL_100: Achievement.GAMES_TOTAL_100,
+  GAMES_TOTAL_200: Achievement.GAMES_TOTAL_200,
+  GAMES_TOTAL_500: Achievement.GAMES_TOTAL_500,
+  GAMES_TOTAL_1000: Achievement.GAMES_TOTAL_1000,
+};
 
 @Injectable()
 export class GameService {
@@ -85,18 +100,38 @@ export class GameService {
   }
   
   async saveGame(user: any, payload: FlashGameReportPayloadDto) {
-    return this.prisma.$transaction(async (tx) => {
-      const appUser = await this.getOrCreateUser(tx, user.email);
-      const activity = await this.createGameActivity(tx, appUser, payload);
-      const summary = await this.calculateReportSummary(tx, appUser, payload);
-      const report = await this.updateUserReport(tx, appUser, summary);
+    const result = await this.prisma.$transaction(
+      async (tx) => {
+        const appUser = await this.getOrCreateUser(tx, user.email);
+        const activity = await this.createGameActivity(tx, appUser, payload);
+        const summary = await this.calculateReportSummary(tx, appUser, payload);
+        const report = await this.updateUserReport(tx, appUser, summary);
 
-      return {
-        message: "Game saved successfully",
-        activityId: activity.id,
-        // report,
-      };
-    });
+        return {
+          message: "Game saved successfully",
+          userId: appUser.id,
+          gamesPlayed: summary.gamesPlayed,
+          activityId: activity.id,
+          report,
+        };
+      },
+      {
+        maxWait: 10000,
+        timeout: 15000,
+      },
+    );
+
+    const achievements = await this.markGamesPlayedAchievements(
+      result.userId,
+      result.gamesPlayed,
+    );
+
+    return {
+      message: result.message,
+      activityId: result.activityId,
+      report: result.report,
+      achievements,
+    };
   }
 
   private async getOrCreateUser(
@@ -219,6 +254,53 @@ export class GameService {
         },
       },
     });
+  }
+
+  private async markGamesPlayedAchievements(
+    userId: number,
+    gamesPlayed: number,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { achievements: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException("User not found for achievement update");
+    }
+
+    const currentAchievements = user.achievements ?? [];
+    const criteria = (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
+      .filter(
+        (achievement) =>
+          achievement.category === "games_total" &&
+          typeof achievement.target === "number" &&
+          gamesPlayed >= achievement.target,
+      )
+      .map((achievement) => GAMES_PLAYED_ACHIEVEMENT_MAP[achievement.id])
+      .filter((achievement): achievement is Achievement => Boolean(achievement));
+
+    const nextAchievements = Array.from(
+      new Set([...currentAchievements, ...criteria]),
+    );
+
+    if (nextAchievements.length === currentAchievements.length) {
+      return nextAchievements;
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        achievements: {
+          set: nextAchievements,
+        },
+      },
+      select: {
+        achievements: true,
+      },
+    });
+
+    return updatedUser.achievements;
   }
 }
 
