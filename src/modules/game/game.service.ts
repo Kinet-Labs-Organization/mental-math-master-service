@@ -8,7 +8,7 @@ interface FlashReportSummary {
   gamesPlayed: number;
   accuracy: number;
   streak: number;
-  score: number;
+  currentGameScore: number;
 }
 
 interface AchievementCriteriaItem {
@@ -103,8 +103,8 @@ export class GameService {
     const result = await this.prisma.$transaction(
       async (tx) => {
         const appUser = await this.getOrCreateUser(tx, user.email);
-        const activity = await this.createGameActivity(tx, appUser, payload);
         const summary = await this.calculateReportSummary(tx, appUser, payload);
+        const activity = await this.createGameActivity(tx, appUser, summary, payload);
         const report = await this.updateUserReport(tx, appUser, summary);
 
         return {
@@ -152,6 +152,7 @@ export class GameService {
   private async createGameActivity(
     tx: PrismaTransactionClient,
     user: User,
+    summary: FlashReportSummary,
     payload: FlashGameReportPayloadDto,
   ) {
     return tx.gameActivity.create({
@@ -160,6 +161,7 @@ export class GameService {
         gameType: payload.gameMode,
         correctAnswers: payload.correctAnswerGiven,
         wrongAnswers: payload.wrongAnswerGiven,
+        score: summary.currentGameScore,
         playedAt: new Date(payload.answeredAt),
         user: {
           connect: {
@@ -212,13 +214,13 @@ export class GameService {
     const [gameType, gameLevel, gameNo] = payload.gameId.split("_");
     const weightage = games.GAME_METAS.filter((meta) => meta.code === gameType)[0].weightage;
     const levelMultiplier = parseInt(gameLevel.substring(1));
-    const score = totalCorrectAnswers * weightage * levelMultiplier;
+    const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
 
     return {
       gamesPlayed: aggregates._count._all,
       accuracy,
       streak: currentStreak,
-      score: score,
+      currentGameScore: currentGameScore,
     };
   }
 
@@ -229,10 +231,11 @@ export class GameService {
   ) {
     const existingReport = await tx.report.findUnique({
       where: { userId: user.id },
-      select: { streak: true },
+      select: { streak: true, score: true },
     });
 
     const nextStreak = summary.streak > 0 ? (existingReport?.streak ?? 0) + summary.streak : 0;
+    const score = summary.currentGameScore + (existingReport?.score ?? 0);
 
     return tx.report.upsert({
       where: { userId: user.id },
@@ -240,13 +243,13 @@ export class GameService {
         gamesPlayed: summary.gamesPlayed,
         accuracy: summary.accuracy,
         streak: nextStreak,
-        score: summary.score,
+        score: score,
       },
       create: {
         gamesPlayed: summary.gamesPlayed,
         accuracy: summary.accuracy,
         streak: nextStreak,
-        score: summary.score,
+        score: score,
         user: {
           connect: {
             id: user.id,
