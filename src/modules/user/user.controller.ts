@@ -46,9 +46,14 @@ export class UserController {
 
   // Used in progress route
   // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("activities")
-  async activities(@Query("position") position: string) {
-    return this.userService.activities(position);
+  async activities(
+    @GetUser("email") email: string,
+    @Query("position") position: string,
+    @Query("length") length: string,
+  ) {
+    return this.userService.activities(email, position, length);
   }
 
   // @UseGuards(JwtGuard)

@@ -6,8 +6,9 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { ACTIVITIES, PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
+import { PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import * as games from "@/src/utils/gameConfig";
 
 @Injectable()
 export class UserService {
@@ -176,13 +177,55 @@ export class UserService {
     };
   }
 
-  async activities(position: string) {
-    const length = 5;
-    if (!position) {
-      throw new Error(`Position not provided`);
+  async activities(email: string, position: string, length: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
     }
-    const pos = parseInt(position, 10);
-    return ACTIVITIES.slice(pos, pos + length);
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const pos = Number.isNaN(parseInt(position, 10)) ? 0 : parseInt(position, 10);
+    const take = Number.isNaN(parseInt(length, 10)) ? 5 : parseInt(length, 10);
+
+    const activities = await this.prisma.gameActivity.findMany({
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: pos,
+      take,
+      select: {
+        gameId: true,
+        playedAt: true,
+        gameType: true,
+        correctAnswers: true,
+        wrongAnswers: true,
+        score: true,
+      },
+    });
+
+    return activities.map((activity) => {
+      const gameMeta = this.getGameMetaFromGameId(activity.gameId);
+
+      return {
+        gameName: gameMeta.name,
+        gamePlayedAt: activity.playedAt,
+        gameType: activity.gameType,
+        icon: gameMeta.icon,
+        correctAnswers: activity.correctAnswers,
+        wrongAnswers: activity.wrongAnswers,
+        score: activity.score ?? 0,
+      };
+    });
   }
 
   async leaderBoardData() {
@@ -229,6 +272,21 @@ export class UserService {
   async clearData() {
     return {
       message: "User data cleared",
+    };
+  }
+
+  private getGameMetaFromGameId(gameId: string) {
+    const [gameType, gameLevel, gameNo] = gameId.split("_");
+    const gameConfigKey = `${gameType}_${gameLevel}` as keyof typeof games;
+    const gameLevelList = games[gameConfigKey] as
+      | Array<{ name: string; icon: string }>
+      | undefined;
+    const gameIndex = parseInt(gameNo, 10) - 1;
+    const gameConfig = gameLevelList?.[gameIndex];
+
+    return {
+      name: gameConfig?.name ?? gameId,
+      icon: Number(gameConfig?.icon ?? 0),
     };
   }
 }
