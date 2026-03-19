@@ -27,20 +27,20 @@ const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   GAMES_TOTAL_1000: Achievement.GAMES_TOTAL_1000,
 };
 
-const PLAY_STREAK_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
+const PLAY_STREAK_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   PLAY_STREAK_3: Achievement.PLAY_STREAK_3,
   PLAY_STREAK_7: Achievement.PLAY_STREAK_7,
   PLAY_STREAK_22: Achievement.PLAY_STREAK_22,
   PLAY_STREAK_30: Achievement.PLAY_STREAK_30,
 };
 
-const WIN_STREAK_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
+const WIN_STREAK_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   WIN_STREAK_3: Achievement.WIN_STREAK_3,
   WIN_STREAK_5: Achievement.WIN_STREAK_5,
   WIN_STREAK_10: Achievement.WIN_STREAK_10,
 };
 
-const SCORE_TOTAL_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
+const SCORE_TOTAL_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   SCORE_TOTAL_500: Achievement.SCORE_TOTAL_500,
   SCORE_TOTAL_1000: Achievement.SCORE_TOTAL_1000,
   SCORE_TOTAL_2000: Achievement.SCORE_TOTAL_2000,
@@ -297,8 +297,14 @@ export class GameService {
       gamesPlayed,
       currentAchievements,
     );
-    const streakAchievements = this.checkWinStreakAchievements(currentStreak);
-    const totalScoreAchievements = this.checkTotalScoreAchievements(totalScore);
+    const streakAchievements = this.checkWinStreakAchievements(
+      currentStreak,
+      currentAchievements,
+    );
+    const totalScoreAchievements = this.checkTotalScoreAchievements(
+      totalScore,
+      currentAchievements,
+    );
     const evaluatedAchievements = Array.from(
       new Set([
         ...gamesPlayedAchievements,
@@ -359,25 +365,43 @@ export class GameService {
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 
-  private checkWinStreakAchievements(currentStreak: number): Achievement[] {
+  private checkWinStreakAchievements(
+    currentStreak: number,
+    currentAchievements: Achievement[],
+  ): Achievement[] {
+    const currentAchievementsSet = new Set(currentAchievements);
+
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
-        (achievement) =>
-          achievement.category === "win_streak" &&
-          typeof achievement.target === "number" &&
-          currentStreak >= achievement.target,
+        (achievement) => {
+          return (
+            achievement.category === "win_streak" &&
+            !currentAchievementsSet.has(WIN_STREAK_ACHIEVEMENT_MAP[achievement.id]) &&
+            typeof achievement.target === "number" &&
+            currentStreak >= achievement.target
+          );
+        },
       )
       .map((achievement) => WIN_STREAK_ACHIEVEMENT_MAP[achievement.id])
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 
-  private checkTotalScoreAchievements(totalScore: number): Achievement[] {
+  private checkTotalScoreAchievements(
+    totalScore: number,
+    currentAchievements: Achievement[],
+  ): Achievement[] {
+    const currentAchievementsSet = new Set(currentAchievements);
+
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
-        (achievement) =>
-          achievement.category === "score_total" &&
-          typeof achievement.target === "number" &&
-          totalScore >= achievement.target,
+        (achievement) => {
+          return (
+            achievement.category === "score_total" &&
+            !currentAchievementsSet.has(SCORE_TOTAL_ACHIEVEMENT_MAP[achievement.id]) &&
+            typeof achievement.target === "number" &&
+            totalScore >= achievement.target
+          );
+        },
       )
       .map((achievement) => SCORE_TOTAL_ACHIEVEMENT_MAP[achievement.id])
       .filter((achievement): achievement is Achievement => Boolean(achievement));
