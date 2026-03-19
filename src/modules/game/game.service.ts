@@ -5,9 +5,9 @@ import { PrismaService } from "@/src/database/prisma/prisma.service";
 import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
 
 interface FlashReportSummary {
-  gamesPlayed: number;
+  gamesPlayedSoFar: number;
   accuracy: number;
-  streak: number;
+  streakCheck: boolean;
   currentGameScore: number;
 }
 
@@ -28,7 +28,7 @@ const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
 
 @Injectable()
 export class GameService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async gameLevels(gameLevel: string) {
     const gameLevelData = games[gameLevel];
@@ -98,7 +98,7 @@ export class GameService {
     const animal = animals[Math.floor(Math.random() * animals.length)];
     return `${color} ${animal}`;
   }
-  
+
   async saveGame(user: any, payload: FlashGameReportPayloadDto) {
     const result = await this.prisma.$transaction(
       async (tx) => {
@@ -110,7 +110,7 @@ export class GameService {
         return {
           message: "Game saved successfully",
           userId: appUser.id,
-          gamesPlayed: summary.gamesPlayed,
+          gamesPlayed: summary.gamesPlayedSoFar+1,
           activityId: activity.id,
           report,
         };
@@ -128,9 +128,6 @@ export class GameService {
 
     return {
       message: result.message,
-      activityId: result.activityId,
-      report: result.report,
-      achievements,
     };
   }
 
@@ -145,29 +142,6 @@ export class GameService {
         email,
         name: this.generateCreativeUsername(),
         status: "UNSUBSCRIBED",
-      },
-    });
-  }
-
-  private async createGameActivity(
-    tx: PrismaTransactionClient,
-    user: User,
-    summary: FlashReportSummary,
-    payload: FlashGameReportPayloadDto,
-  ) {
-    return tx.gameActivity.create({
-      data: {
-        gameId: payload.gameId,
-        gameType: payload.gameMode,
-        correctAnswers: payload.correctAnswerGiven,
-        wrongAnswers: payload.wrongAnswerGiven,
-        score: summary.currentGameScore,
-        playedAt: new Date(payload.answeredAt),
-        user: {
-          connect: {
-            id: user.id,
-          },
-        },
       },
     });
   }
@@ -196,18 +170,20 @@ export class GameService {
       }),
     ]);
 
-    const totalCorrectAnswers = aggregates._sum.correctAnswers ?? 0;
-    const totalWrongAnswers = aggregates._sum.wrongAnswers ?? 0;
+    const correctAnswers = aggregates._sum.correctAnswers ?? 0;
+    const wrongAnswers = aggregates._sum.wrongAnswers ?? 0;
+    const totalCorrectAnswers = correctAnswers + payload.correctAnswerGiven;
+    const totalWrongAnswers = wrongAnswers + payload.wrongAnswerGiven;
     const totalAttempts = totalCorrectAnswers + totalWrongAnswers;
     const accuracy =
       totalAttempts === 0
         ? 0
         : Math.ceil(Number(((totalCorrectAnswers / totalAttempts) * 100)));
 
-    let currentStreak = 0;
-    if(payload.gameMode === "flash") {
+    let currentStreak = false;
+    if (payload.gameMode === "flash") {
       if (payload.correctAnswerGiven > payload.wrongAnswerGiven) {
-        currentStreak += 1;
+        currentStreak = true;
       }
     }
 
@@ -217,11 +193,34 @@ export class GameService {
     const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
 
     return {
-      gamesPlayed: aggregates._count._all,
+      gamesPlayedSoFar: aggregates._count._all,
       accuracy,
-      streak: currentStreak,
+      streakCheck: currentStreak,
       currentGameScore: currentGameScore,
     };
+  }
+
+  private async createGameActivity(
+    tx: PrismaTransactionClient,
+    user: User,
+    summary: FlashReportSummary,
+    payload: FlashGameReportPayloadDto,
+  ) {
+    return tx.gameActivity.create({
+      data: {
+        gameId: payload.gameId,
+        gameType: payload.gameMode,
+        correctAnswers: payload.correctAnswerGiven,
+        wrongAnswers: payload.wrongAnswerGiven,
+        score: summary.currentGameScore,
+        playedAt: new Date(payload.answeredAt),
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
   }
 
   private async updateUserReport(
@@ -234,21 +233,22 @@ export class GameService {
       select: { streak: true, score: true },
     });
 
-    const nextStreak = summary.streak > 0 ? (existingReport?.streak ?? 0) + summary.streak : 0;
+    const gamesPlayed = (summary.gamesPlayedSoFar ?? 0) + 1;
+    const streak = summary.streakCheck ? (existingReport?.streak ?? 0) + 1 : 0;
     const score = summary.currentGameScore + (existingReport?.score ?? 0);
 
     return tx.report.upsert({
       where: { userId: user.id },
       update: {
-        gamesPlayed: summary.gamesPlayed,
+        gamesPlayed: gamesPlayed,
         accuracy: summary.accuracy,
-        streak: nextStreak,
+        streak: streak,
         score: score,
       },
       create: {
-        gamesPlayed: summary.gamesPlayed,
+        gamesPlayed: gamesPlayed,
         accuracy: summary.accuracy,
-        streak: nextStreak,
+        streak: streak,
         score: score,
         user: {
           connect: {
