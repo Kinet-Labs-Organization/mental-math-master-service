@@ -74,6 +74,6 @@ export class GenericService {
   }
 
   async systemCall_userSyncFromSupabaseToLocalDB() {
-    
   }
+
 }

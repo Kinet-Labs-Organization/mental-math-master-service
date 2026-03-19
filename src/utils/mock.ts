@@ -338,84 +338,92 @@ export const FAQ = [
 
 export const BLOGS = [
   {
-    "title": "What Is Mental Math and Why It Matters",
-    "brief": "Learn what mental math is, how it improves brain speed, focus, and confidence, and why it is an essential life skill for all ages.",
-    "link": "https://www.mentalup.co/blog/mental-math",
-    "image": "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d",
-    "icon": "📜",
-    "read": "8 min",
+    brief: "Explore how abacus training enhances memory, focus, and overall brain development in children.",
+    icon: "🧠",
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
+    link: "https://thelearningspaceschool.com/benefits-of-learning-the-abacus-for-kids/",
+    read: "6 min",
+    title: "Benefits of Learning Abacus for Kids"
   },
   {
-    "title": "How Abacus Training Improves Brain Development",
-    "brief": "An in-depth look at how abacus-based learning enhances memory, visualization, and cognitive growth in children.",
-    "link": "https://www.vedantu.com/blog/abacus-benefits",
-    "image": "https://images.unsplash.com/photo-1588072432836-e10032774350",
-    "icon": "🧠",
-    "read": "10 min",
+    brief: "Understand the strong connection between abacus learning and improved mental math skills.",
+    icon: "🔢",
+    image: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b",
+    link: "https://sipabacus.com/in/blog/what-is-the-relationship-between-abacus-and-mental-maths/",
+    read: "5 min",
+    title: "Relationship Between Abacus and Mental Maths"
   },
   {
-    "title": "Mental Math Techniques Used by Human Calculators",
-    "brief": "Discover the techniques and strategies used by mental math experts to perform lightning-fast calculations.",
-    "link": "https://www.scientificamerican.com/article/mental-math/",
-    "image": "https://images.unsplash.com/photo-1518544887879-6d4c9a1c8b99",
-    "icon": "⚡",
-    "read": "7 min",
+    brief: "Learn why abacus training is important for concentration, logic, and brain development.",
+    icon: "📚",
+    image: "https://images.unsplash.com/photo-1513258496099-48168024aec0",
+    link: "https://www.21kschool.com/in/blog/importance-of-abacus/",
+    read: "7 min",
+    title: "Importance of Abacus for Children"
   },
   {
-    "title": "Abacus vs Mental Math: What’s the Difference?",
-    "brief": "A clear comparison between traditional abacus training and pure mental math, including pros and learning outcomes.",
-    "link": "https://www.cuemath.com/blog/abacus-vs-mental-math/",
-    "image": "https://images.unsplash.com/photo-1596495578065-6e0763fa1178",
-    "icon": "🔢",
-    "read": "9 min",
+    brief: "Discover how mental math using abacus improves memory, visualization, and calculation speed.",
+    icon: "⚡",
+    image: "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d",
+    link: "https://abacusmaster.com/blog/learning-abacus-benefits",
+    read: "4 min",
+    title: "Benefits of Learning Abacus"
   },
   {
-    "title": "Inside International Abacus Competitions",
-    "brief": "Explore how international abacus tournaments are conducted, judging criteria, and how students prepare for them.",
-    "link": "https://www.worldabacus.org/competitions",
-    "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655",
-    "icon": "🏆",
-    "read": "12 min"
+    brief: "Compare abacus vs mental math and understand which approach builds stronger cognitive skills.",
+    icon: "⚖️",
+    image: "https://images.unsplash.com/photo-1508780709619-79562169bc64",
+    link: "https://bhanzu.com/blog/abacus-vs-mental-math-which-is-better-for-kids/",
+    read: "6 min",
+    title: "Abacus vs Mental Math for Kids"
   },
   {
-    "title": "How Daily Mental Math Practice Builds Speed",
-    "brief": "Learn how short, daily mental math sessions can significantly increase calculation speed and accuracy over time.",
-    "link": "https://www.brainmetrix.com/blog/mental-math-practice",
-    "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
-    "icon": "⏱️",
-    "read": "6 min"
+    brief: "Learn how abacus training improves attention span, memory retention, and academic performance.",
+    icon: "🎓",
+    image: "https://images.unsplash.com/photo-1497486751825-1233686d5d80",
+    link: "https://sipabacus.com/in/blog/the-connection-between-abacus-learning-and-academic-success-in-children/",
+    read: "6 min",
+    title: "Abacus Learning and Academic Success"
   },
   {
-    "title": "Benefits of Abacus Learning for School Children",
-    "brief": "Understand why abacus training is widely recommended for school-age children to strengthen math fundamentals.",
-    "link": "https://byjus.com/maths/abacus/",
-    "image": "https://images.unsplash.com/photo-1600195077078-df1c6a9b0f1f",
-    "icon": "🎓",
-    "read": "5 min"
+    brief: "Understand how abacus training builds both left and right brain functions in children.",
+    icon: "🧩",
+    image: "https://images.unsplash.com/photo-1516117172878-fd2c41f4a759",
+    link: "https://ucmas.ca/research-done-on-impact-of-abacus-training-on-children/",
+    read: "5 min",
+    title: "Impact of Abacus Training on Children"
   },
   {
-    "title": "Preparing for Abacus Tournaments: A Complete Guide",
-    "brief": "A practical guide covering practice routines, speed drills, and mental preparation for abacus competitions.",
-    "link": "https://www.mentalabacus.in/abacus-competition-preparation",
-    "image": "https://images.unsplash.com/photo-1509062522246-3755977927d7",
-    "icon": "🏆",
-    "read": "10 min"
+    brief: "Explore how early abacus learning strengthens memory structures and math abilities.",
+    icon: "📈",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40",
+    link: "https://ucmas.ca/3-benefits-of-introducing-your-child-to-an-abacus-math-program-early-on/",
+    read: "4 min",
+    title: "Benefits of Early Abacus Learning"
   },
   {
-    "title": "Can Adults Improve Mental Math Skills?",
-    "brief": "This article explains how adults can train their brains to calculate faster and sharpen focus using mental math.",
-    "link": "https://www.psychologytoday.com/us/blog/brain-training/mental-math",
-    "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d",
-    "icon": "🧠",
-    "read": "7 min"
+    brief: "Learn how mental math training improves concentration, logic, and quick calculation skills.",
+    icon: "⚙️",
+    image: "https://images.unsplash.com/photo-1526378722484-bd91ca387e72",
+    link: "https://www.successabacus.com/blog/mental-math-training-for-kids-how-abacus-improves-memory-in-children/",
+    read: "6 min",
+    title: "Mental Math Training for Kids"
   },
   {
-    "title": "How Visualization Helps in Abacus and Mental Math",
-    "brief": "Learn why number visualization is the core skill behind abacus mastery and high-speed mental calculations.",
-    "link": "https://www.mathnasium.com/blog/visualization-math-skills",
-    "image": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
-    "icon": "📊",
-    "read": "8 min"
+    brief: "Discover how abacus enhances cognitive skills like visualization, memory, and problem-solving.",
+    icon: "🧠",
+    image: "https://images.unsplash.com/photo-1532012197267-da84d127e765",
+    link: "https://www.mastermindabacus.com/blog_detail/448/the-role-of-abacus-in-your-childs-development-a-comprehensive-guide/",
+    read: "7 min",
+    title: "Role of Abacus in Child Development"
+  },
+  {
+    brief: "Understand how mental abacus improves speed, memory, and concentration in calculations.",
+    icon: "🚀",
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b",
+    link: "https://en.wikipedia.org/wiki/Mental_abacus",
+    read: "5 min",
+    title: "Mental Abacus Explained"
   }
 ];
 

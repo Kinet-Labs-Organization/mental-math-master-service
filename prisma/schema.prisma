@@ -65,6 +65,18 @@ model Notifications {
   user           User     @relation(fields: [userId], references: [id])
 }
 
+model Blogs {
+  id        Int      @id @default(autoincrement())
+  brief     String   @default("New blog post about mental math !")
+  icon      String   @default("📜")
+  image     String   @default("https://images.unsplash.com/photo-1509228627152-72ae9ae6848d")
+  link      String   @default("https://www.mentalup.co/blog/mental-math")
+  read      String   @default("8 min")
+  title     String   @default("What Is Mental Math and Why It Matters")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum SignUpMethod {
   EMAIL
   GOOGLE
