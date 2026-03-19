@@ -6,10 +6,11 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
+import { PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
+import { isContext } from "vm";
 
 @Injectable()
 export class UserService {
@@ -296,11 +297,56 @@ export class UserService {
     };
   }
 
-  async achievements() {
-    const myAchievements = ACHIEVEMENTS.achievements.map((achievement) => {
-      return { ...achievement, unlocked: false };
+  async achievements(email: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        report: {
+          select: {
+            achievements: true,
+          },
+        },
+      },
     });
-    return myAchievements
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const currentAchievementIds = user.report?.achievements ?? [];
+    if (currentAchievementIds.length === 0) {
+      return [];
+    }
+
+    const achievementMetaMap = new Map(
+      (games.ACHIEVEMENTS_CRITERIA as Array<{
+        id: string;
+        name: string;
+        description: string;
+        icon: string;
+      }>).map((achievement) => [
+        achievement.id,
+        {
+          title: achievement.name,
+          description: achievement.description,
+          icon: achievement.icon,
+        },
+      ]),
+    );
+
+    return currentAchievementIds.map((achievementId) => {
+      const meta = achievementMetaMap.get(achievementId);
+      return {
+        id: achievementId,
+        title: meta?.title ?? achievementId,
+        description: meta?.description ?? "",
+        icon: meta?.icon ?? "",
+      };
+    });
   }
 
   async clearData() {

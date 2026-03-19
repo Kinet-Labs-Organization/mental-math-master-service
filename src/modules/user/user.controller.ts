@@ -92,10 +92,10 @@ export class UserController {
     return this.userService.notifications(recentMax);
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("achievements")
-  async achievements() {
-    return this.userService.achievements();
+  async achievements(@GetUser("email") email: string) {
+    return this.userService.achievements(email);
   }
 
   // @UseGuards(JwtGuard)

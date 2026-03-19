@@ -19,7 +19,6 @@ model User {
   updatedAt              DateTime        @updatedAt
   name                   String?
   SignUpMethod           SignUpMethod    @default(GMAIL)
-  achievements           Achievement[]
   country                String?
   gameActivities         GameActivity[]
   notifications          Notifications[]
