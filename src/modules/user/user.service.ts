@@ -106,7 +106,7 @@ export class UserService {
       accuracyRate: user.report?.accuracy ?? 0,
       currentStreak: user.report?.streak ?? 0,
       score: user.report?.score ?? 0,
-      achievements: []
+      achievements: user.report?.achievements ?? []
     };
   }
 

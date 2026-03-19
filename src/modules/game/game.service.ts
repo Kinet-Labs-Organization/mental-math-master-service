@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Achievement, Prisma, PrismaClient, User } from "@prisma/client";
 import * as games from "@/src/utils/gameConfig";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
@@ -6,10 +6,10 @@ import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
 import { setsAreEqual } from "@/src/utils/utility";
 
 interface FlashReportSummary {
-  gamesPlayedSoFar: number;
+  gamesPlayed: number;
   accuracy: number;
-  streakCheck: boolean;
-  currentGameScore: number;
+  streak: number;
+  score: number;
 }
 
 interface AchievementCriteriaItem {
@@ -125,25 +125,23 @@ export class GameService {
     const result = await this.prisma.$transaction(
       async (tx) => {
         const appUser = await this.getOrCreateUser(tx, user.email);
+        const activity = await this.createGameActivity(tx, appUser, payload);
         const summary = await this.calculateReportSummary(tx, appUser, payload);
-        const activity = await this.createGameActivity(tx, appUser, summary, payload);
-        const report = await this.updateUserReport(tx, appUser, summary);
         const achievements = await this.markAchievements(
           tx,
-          appUser,
-          report.gamesPlayed,
-          report.streak,
-          report.score,
+          appUser.id,
+          summary.gamesPlayed,
+          summary.streak,
+          summary.score,
           activity.playedAt,
         );
+        const report = await this.updateUserReport(tx, appUser, summary, achievements);
 
         return {
           message: "Game saved successfully",
           userId: appUser.id,
-          gamesPlayed: report.gamesPlayed,
+          reportId: report.id,
           activityId: activity.id,
-          report,
-          achievements,
         };
       },
       {
@@ -155,6 +153,38 @@ export class GameService {
     return {
       message: result.message,
     };
+  }
+
+  private async updateUserReport(
+    tx: PrismaTransactionClient,
+    user: User,
+    summary: FlashReportSummary,
+    achievements: Achievement[],
+  ) {
+    return tx.report.upsert({
+      where: { userId: user.id },
+      update: {
+        gamesPlayed: summary.gamesPlayed,
+        accuracy: summary.accuracy,
+        streak: summary.streak,
+        score: summary.score,
+        achievements: {
+          set: achievements,
+        },
+      },
+      create: {
+        gamesPlayed: summary.gamesPlayed,
+        accuracy: summary.accuracy,
+        streak: summary.streak,
+        score: summary.score,
+        achievements: achievements,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
   }
 
   private async getOrCreateUser(
@@ -172,73 +202,19 @@ export class GameService {
     });
   }
 
-  private async calculateReportSummary(
-    tx: PrismaTransactionClient,
-    user: User,
-    payload: FlashGameReportPayloadDto,
-  ): Promise<FlashReportSummary> {
-    const [aggregates, recentActivities] = await Promise.all([
-      tx.gameActivity.aggregate({
-        where: { userId: user.id },
-        _count: { _all: true },
-        _sum: {
-          correctAnswers: true,
-          wrongAnswers: true,
-        },
-      }),
-      tx.gameActivity.findMany({
-        where: { userId: user.id },
-        orderBy: [{ playedAt: "desc" }, { id: "desc" }],
-        select: {
-          correctAnswers: true,
-          wrongAnswers: true,
-        },
-      }),
-    ]);
-
-    const correctAnswers = aggregates._sum.correctAnswers ?? 0;
-    const wrongAnswers = aggregates._sum.wrongAnswers ?? 0;
-    const totalCorrectAnswers = correctAnswers + payload.correctAnswerGiven;
-    const totalWrongAnswers = wrongAnswers + payload.wrongAnswerGiven;
-    const totalAttempts = totalCorrectAnswers + totalWrongAnswers;
-    const accuracy =
-      totalAttempts === 0
-        ? 0
-        : Math.ceil(Number(((totalCorrectAnswers / totalAttempts) * 100)));
-
-    let currentStreak = false;
-    if (payload.gameMode === "flash") {
-      if (payload.correctAnswerGiven > payload.wrongAnswerGiven) {
-        currentStreak = true;
-      }
-    }
-
-    const [gameType, gameLevel, gameNo] = payload.gameId.split("_");
-    const weightage = games.GAME_METAS.filter((meta) => meta.code === gameType)[0].weightage;
-    const levelMultiplier = parseInt(gameLevel.substring(1));
-    const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
-
-    return {
-      gamesPlayedSoFar: aggregates._count._all, // This is total games played before the current one
-      accuracy, // This is the updated accuracy including the current game
-      streakCheck: currentStreak, // This indicates whether the current game contributes to a streak
-      currentGameScore: currentGameScore, // This is the score for the current game
-    };
-  }
-
   private async createGameActivity(
     tx: PrismaTransactionClient,
     user: User,
-    summary: FlashReportSummary,
     payload: FlashGameReportPayloadDto,
   ) {
+    const currentGameScore = this.calculateGameScore(payload);
     return tx.gameActivity.create({
       data: {
         gameId: payload.gameId,
         gameType: payload.gameMode,
         correctAnswers: payload.correctAnswerGiven,
         wrongAnswers: payload.wrongAnswerGiven,
-        score: summary.currentGameScore,
+        score: currentGameScore,
         playedAt: new Date(payload.answeredAt),
         user: {
           connect: {
@@ -249,51 +225,71 @@ export class GameService {
     });
   }
 
-  private async updateUserReport(
+  private async calculateReportSummary(
     tx: PrismaTransactionClient,
     user: User,
-    summary: FlashReportSummary,
-  ) {
-    const existingReport = await tx.report.findUnique({
-      where: { userId: user.id },
-      select: { streak: true, score: true },
-    });
-
-    const gamesPlayed = (summary.gamesPlayedSoFar ?? 0) + 1;
-    const streak = summary.streakCheck ? (existingReport?.streak ?? 0) + 1 : 0;
-    const score = summary.currentGameScore + (existingReport?.score ?? 0);
-
-    return tx.report.upsert({
-      where: { userId: user.id },
-      update: {
-        gamesPlayed: gamesPlayed,
-        accuracy: summary.accuracy,
-        streak: streak,
-        score: score,
-      },
-      create: {
-        gamesPlayed: gamesPlayed,
-        accuracy: summary.accuracy,
-        streak: streak,
-        score: score,
-        user: {
-          connect: {
-            id: user.id,
-          },
+    payload: FlashGameReportPayloadDto,
+  ): Promise<FlashReportSummary> {
+    const [aggregates, report] = await Promise.all([
+      tx.gameActivity.aggregate({
+        where: { userId: user.id },
+        _count: { _all: true },
+        _sum: {
+          correctAnswers: true,
+          wrongAnswers: true,
+          score: true,
         },
-      },
-    });
+      }),
+      tx.report.findUnique({
+        where: { userId: user.id },
+        select: { streak: true },
+      })]);
+
+    const correctAnswers = aggregates._sum.correctAnswers ?? 0;
+    const wrongAnswers = aggregates._sum.wrongAnswers ?? 0;
+    const totalCorrectAnswers = correctAnswers; // + payload.correctAnswerGiven;
+    const totalWrongAnswers = wrongAnswers; // + payload.wrongAnswerGiven;
+    const totalAttempts = totalCorrectAnswers + totalWrongAnswers;
+    const accuracy =
+      totalAttempts === 0
+        ? 0
+        : Math.ceil(Number(((totalCorrectAnswers / totalAttempts) * 100)));
+
+    let currentOnGoingStreak = report?.streak ?? 0;
+    if (payload.gameMode === "flash") {
+      if (payload.correctAnswerGiven > payload.wrongAnswerGiven) {
+        currentOnGoingStreak += 1;
+      } else {
+        currentOnGoingStreak = 0;
+      }
+    }
+
+    // const [gameType, gameLevel, gameNo] = payload.gameId.split("_");
+    // const weightage = games.GAME_METAS.filter((meta) => meta.code === gameType)[0].weightage;
+    // const levelMultiplier = parseInt(gameLevel.substring(1));
+    // const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
+
+    return {
+      gamesPlayed: aggregates._count._all, // This is total games played including the current game
+      accuracy, // This is the updated accuracy including the current game
+      streak: currentOnGoingStreak, // This is the count of current ongoing streak including the current game result
+      score: aggregates._sum.score ?? 0, // This is the total score for all games played including the current game
+    };
   }
 
   private async markAchievements(
     tx: PrismaTransactionClient,
-    user: User,
+    userId: number,
     gamesPlayed: number,
     currentStreak: number,
     totalScore: number,
     currentGamePlayedAt: Date,
   ) {
-    const currentAchievements = user.achievements ?? [];
+    const currentReport = await tx.report.findUnique({
+      where: { userId },
+      select: { achievements: true },
+    });
+    const currentAchievements = currentReport?.achievements ?? [];
 
     const gamesPlayedAchievements = this.checkTotalGamesPlayedAchievements(
       gamesPlayed,
@@ -301,7 +297,7 @@ export class GameService {
     );
     const playStreakAchievements = await this.checkPlayStreakAchievements(
       tx,
-      user.id,
+      userId,
       currentGamePlayedAt,
       currentAchievements,
     );
@@ -339,19 +335,19 @@ export class GameService {
       return allAchievements;
     }
 
-    const updatedUser = await tx.user.update({
-      where: { id: user.id },
-      data: {
-        achievements: {
-          set: allAchievements,
-        },
-      },
-      select: {
-        achievements: true,
-      },
-    });
+    // const updatedUser = await tx.user.update({
+    //   where: { id: user.id },
+    //   data: {
+    //     achievements: {
+    //       set: allAchievements,
+    //     },
+    //   },
+    //   select: {
+    //     achievements: true,
+    //   },
+    // });
 
-    return updatedUser.achievements;
+    return allAchievements;
   }
 
   private checkTotalGamesPlayedAchievements(
@@ -488,6 +484,13 @@ export class GameService {
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 
+  private calculateGameScore(payload: FlashGameReportPayloadDto): number {
+    const [gameType, gameLevel, gameNo] = payload.gameId.split("_");
+    const weightage = games.GAME_METAS.filter((meta) => meta.code === gameType)[0].weightage;
+    const levelMultiplier = parseInt(gameLevel.substring(1));
+    const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
+    return currentGameScore;
+  }
 }
 
 type PrismaTransactionClient = Omit<

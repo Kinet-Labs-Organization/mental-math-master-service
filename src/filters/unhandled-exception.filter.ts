@@ -33,9 +33,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         prismaCode: exception.code,
       });
     } else {
-      Logger.error(`Unhandled Exception: "Unhandled"}`, {
-        exception,
-      });
+      Logger.error(`Unhandled Exception: "Unhandled"`, JSON.stringify(exception));
       response.status(status).json({
         status: "failure",
         message,
