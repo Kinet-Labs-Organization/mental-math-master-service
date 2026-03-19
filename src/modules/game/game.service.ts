@@ -28,8 +28,9 @@ const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
 };
 
 const STREAK_ACHIEVEMENT_MAP: Record<string, Achievement> = {
-  STREAK_10: Achievement.STREAK_10,
-  WIN_STREAK_10: Achievement.STREAK_10,
+  STREAK_3: Achievement.STREAK_3,
+  STREAK_7: Achievement.STREAK_7,
+  STREAK_2: Achievement.STREAK_22,
 };
 
 @Injectable()
@@ -332,8 +333,7 @@ export class GameService {
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
         (achievement) =>
-          (achievement.category === "streak" ||
-            achievement.category === "win_streak") &&
+          achievement.category === "streak" &&
           typeof achievement.target === "number" &&
           currentStreak >= achievement.target,
       )
