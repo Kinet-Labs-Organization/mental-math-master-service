@@ -3,6 +3,7 @@ import { Achievement, Prisma, PrismaClient, User } from "@prisma/client";
 import * as games from "@/src/utils/gameConfig";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
 import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
+import { setsAreEqual } from "@/src/utils/utility";
 
 interface FlashReportSummary {
   gamesPlayedSoFar: number;
@@ -106,24 +107,25 @@ export class GameService {
         const summary = await this.calculateReportSummary(tx, appUser, payload);
         const activity = await this.createGameActivity(tx, appUser, summary, payload);
         const report = await this.updateUserReport(tx, appUser, summary);
+        const achievements = await this.markAchievements(
+          tx,
+          appUser.id,
+          report.gamesPlayed,
+        );
 
         return {
           message: "Game saved successfully",
           userId: appUser.id,
-          gamesPlayed: summary.gamesPlayedSoFar+1,
+          gamesPlayed: report.gamesPlayed,
           activityId: activity.id,
           report,
+          achievements,
         };
       },
       {
         maxWait: 10000,
         timeout: 15000,
       },
-    );
-
-    const achievements = await this.markGamesPlayedAchievements(
-      result.userId,
-      result.gamesPlayed,
     );
 
     return {
@@ -259,11 +261,18 @@ export class GameService {
     });
   }
 
-  private async markGamesPlayedAchievements(
+  private async markAchievements(
+    tx: PrismaTransactionClient,
     userId: number,
     gamesPlayed: number,
   ) {
-    const user = await this.prisma.user.findUnique({
+    const gamesPlayedAchievements = this.markGamesPlayedAchievements(gamesPlayed);
+
+    // if (gamesPlayedAchievements.length === 0) {
+    //   return [];
+    // }
+
+    const user = await tx.user.findUnique({
       where: { id: userId },
       select: { achievements: true },
     });
@@ -273,29 +282,23 @@ export class GameService {
     }
 
     const currentAchievements = user.achievements ?? [];
-    const criteria = (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
-      .filter(
-        (achievement) =>
-          achievement.category === "games_total" &&
-          typeof achievement.target === "number" &&
-          gamesPlayed >= achievement.target,
-      )
-      .map((achievement) => GAMES_PLAYED_ACHIEVEMENT_MAP[achievement.id])
-      .filter((achievement): achievement is Achievement => Boolean(achievement));
-
-    const nextAchievements = Array.from(
-      new Set([...currentAchievements, ...criteria]),
+    const allAchievements = Array.from(
+      new Set([...currentAchievements, ...gamesPlayedAchievements]),
     );
 
-    if (nextAchievements.length === currentAchievements.length) {
-      return nextAchievements;
+    if(allAchievements.length === 0) {
+      return [];
     }
 
-    const updatedUser = await this.prisma.user.update({
+    if (setsAreEqual(new Set(allAchievements), new Set(currentAchievements))) {
+      return allAchievements;
+    }
+
+    const updatedUser = await tx.user.update({
       where: { id: userId },
       data: {
         achievements: {
-          set: nextAchievements,
+          set: allAchievements,
         },
       },
       select: {
@@ -305,6 +308,19 @@ export class GameService {
 
     return updatedUser.achievements;
   }
+
+  private markGamesPlayedAchievements(gamesPlayed: number): Achievement[] {
+    return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
+      .filter(
+        (achievement) =>
+          achievement.category === "games_total" &&
+          typeof achievement.target === "number" &&
+          gamesPlayed >= achievement.target,
+      )
+      .map((achievement) => GAMES_PLAYED_ACHIEVEMENT_MAP[achievement.id])
+      .filter((achievement): achievement is Achievement => Boolean(achievement));
+  }
+
 }
 
 type PrismaTransactionClient = Omit<
