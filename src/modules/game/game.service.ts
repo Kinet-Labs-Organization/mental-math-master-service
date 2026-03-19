@@ -130,7 +130,7 @@ export class GameService {
         const report = await this.updateUserReport(tx, appUser, summary);
         const achievements = await this.markAchievements(
           tx,
-          appUser.id,
+          appUser,
           report.gamesPlayed,
           report.streak,
           report.score,
@@ -286,11 +286,13 @@ export class GameService {
 
   private async markAchievements(
     tx: PrismaTransactionClient,
-    userId: number,
+    user: User,
     gamesPlayed: number,
     currentStreak: number,
     totalScore: number,
   ) {
+    const currentAchievements = user.achievements ?? [];
+
     const gamesPlayedAchievements = this.checkTotalGamesPlayedAchievements(gamesPlayed);
     const streakAchievements = this.checkWinStreakAchievements(currentStreak);
     const totalScoreAchievements = this.checkTotalScoreAchievements(totalScore);
@@ -302,16 +304,11 @@ export class GameService {
       ]),
     );
 
-    const user = await tx.user.findUnique({
-      where: { id: userId },
-      select: { achievements: true },
-    });
-
-    if (!user) {
-      throw new BadRequestException("User not found for achievement update");
-    }
-
-    const currentAchievements = user.achievements ?? [];
+    // const currentUser = await tx.user.findUnique({
+    //   where: { id: user.id },
+    //   select: { achievements: true },
+    // });
+    // const currentAchievements = user.achievements ?? [];
     const allAchievements = Array.from(
       new Set([...currentAchievements, ...evaluatedAchievements]),
     );
@@ -325,7 +322,7 @@ export class GameService {
     }
 
     const updatedUser = await tx.user.update({
-      where: { id: userId },
+      where: { id: user.id },
       data: {
         achievements: {
           set: allAchievements,
