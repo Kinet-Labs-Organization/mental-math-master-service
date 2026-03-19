@@ -9,10 +9,14 @@ import { PrismaService } from "../../database/prisma/prisma.service";
 import { PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS, ACHIEVEMENTS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
+import { RuleEngineService } from "@/src/services/rule-engine";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ruleEngineService: RuleEngineService,
+  ) {}
 
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -113,7 +117,17 @@ export class UserService {
 
     const user = await this.prisma.user.findUnique({
       where: { email },
-      select: { id: true },
+      select: {
+        id: true,
+        report: {
+          select: {
+            gamesPlayed: true,
+            accuracy: true,
+            streak: true,
+            score: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -134,6 +148,8 @@ export class UserService {
         createdAt: "desc",
       },
       select: {
+        gameId: true,
+        gameType: true,
         createdAt: true,
         correctAnswers: true,
         wrongAnswers: true,
@@ -168,12 +184,19 @@ export class UserService {
       },
     );
 
+    const aiSuggestions = this.ruleEngineService.generateSuggestions({
+      activities: recentActivities,
+      report: {
+        totalSessions: user.report?.gamesPlayed ?? 0,
+        accuracyRate: user.report?.accuracy ?? 0,
+        currentStreak: user.report?.streak ?? 0,
+        score: user.report?.score ?? 0,
+      },
+    });
+
     return {
       performanceTrend,
-      aiSuggestions: [
-        "Practice subtraction more",
-        "Try timed challenges",
-      ],
+      aiSuggestions,
     };
   }
 

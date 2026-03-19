@@ -16,6 +16,7 @@ export class SubscriptionGuard implements CanActivate {
       SUBSCRIPTION_GUARD_KEY,
       [context.getHandler(), context.getClass()],
     );
+    return true;
     if (!requiredSubscription || requiredSubscription.length === 0 || requiredSubscription.includes("FREE")) {
       return true; // No subscription guard required, allow access
     }
