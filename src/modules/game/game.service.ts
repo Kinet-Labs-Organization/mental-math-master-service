@@ -293,7 +293,10 @@ export class GameService {
   ) {
     const currentAchievements = user.achievements ?? [];
 
-    const gamesPlayedAchievements = this.checkTotalGamesPlayedAchievements(gamesPlayed);
+    const gamesPlayedAchievements = this.checkTotalGamesPlayedAchievements(
+      gamesPlayed,
+      currentAchievements,
+    );
     const streakAchievements = this.checkWinStreakAchievements(currentStreak);
     const totalScoreAchievements = this.checkTotalScoreAchievements(totalScore);
     const evaluatedAchievements = Array.from(
@@ -336,11 +339,19 @@ export class GameService {
     return updatedUser.achievements;
   }
 
-  private checkTotalGamesPlayedAchievements(gamesPlayed: number): Achievement[] {
+  private checkTotalGamesPlayedAchievements(
+    gamesPlayed: number,
+    currentAchievements: Achievement[],
+  ): Achievement[] {
+    const currentAchievementsSet = new Set(currentAchievements);
+
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
         (achievement) =>
           achievement.category === "games_total" &&
+          !currentAchievementsSet.has(
+            GAMES_PLAYED_ACHIEVEMENT_MAP[achievement.id],
+          ) &&
           typeof achievement.target === "number" &&
           gamesPlayed >= achievement.target,
       )
