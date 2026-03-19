@@ -134,6 +134,7 @@ export class GameService {
           report.gamesPlayed,
           report.streak,
           report.score,
+          activity.playedAt,
         );
 
         return {
@@ -290,11 +291,18 @@ export class GameService {
     gamesPlayed: number,
     currentStreak: number,
     totalScore: number,
+    currentGamePlayedAt: Date,
   ) {
     const currentAchievements = user.achievements ?? [];
 
     const gamesPlayedAchievements = this.checkTotalGamesPlayedAchievements(
       gamesPlayed,
+      currentAchievements,
+    );
+    const playStreakAchievements = await this.checkPlayStreakAchievements(
+      tx,
+      user.id,
+      currentGamePlayedAt,
       currentAchievements,
     );
     const streakAchievements = this.checkWinStreakAchievements(
@@ -308,6 +316,7 @@ export class GameService {
     const evaluatedAchievements = Array.from(
       new Set([
         ...gamesPlayedAchievements,
+        ...playStreakAchievements,
         ...streakAchievements,
         ...totalScoreAchievements,
       ]),
@@ -383,6 +392,78 @@ export class GameService {
         },
       )
       .map((achievement) => WIN_STREAK_ACHIEVEMENT_MAP[achievement.id])
+      .filter((achievement): achievement is Achievement => Boolean(achievement));
+  }
+
+  private async checkPlayStreakAchievements(
+    tx: PrismaTransactionClient,
+    userId: number,
+    currentGamePlayedAt: Date,
+    currentAchievements: Achievement[],
+  ): Promise<Achievement[]> {
+    const currentAchievementsSet = new Set(currentAchievements);
+
+    const pendingPlayStreakCriteria = (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
+      .filter(
+        (achievement) =>
+          achievement.category === "play_streak" &&
+          typeof achievement.target === "number",
+      )
+      .map((achievement) => ({
+        target: achievement.target as number,
+        mappedAchievement: PLAY_STREAK_ACHIEVEMENT_MAP[achievement.id],
+      }))
+      .filter(
+        (achievement): achievement is { target: number; mappedAchievement: Achievement } =>
+          Boolean(achievement.mappedAchievement) &&
+          !currentAchievementsSet.has(achievement.mappedAchievement as Achievement),
+      );
+
+    if (pendingPlayStreakCriteria.length === 0) {
+      return [];
+    }
+
+    const currentDateUtc = new Date(
+      Date.UTC(
+        currentGamePlayedAt.getUTCFullYear(),
+        currentGamePlayedAt.getUTCMonth(),
+        currentGamePlayedAt.getUTCDate(),
+      ),
+    );
+    const windowStartUtc = new Date(currentDateUtc);
+    windowStartUtc.setUTCDate(windowStartUtc.getUTCDate() - 29);
+
+    const recentActivities = await tx.gameActivity.findMany({
+      where: {
+        userId,
+        playedAt: {
+          gte: windowStartUtc,
+          lte: currentGamePlayedAt,
+        },
+      },
+      select: {
+        playedAt: true,
+      },
+    });
+
+    const playedDates = new Set(
+      recentActivities.map((activity) => activity.playedAt.toISOString().slice(0, 10)),
+    );
+
+    let continuousDays = 0;
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(currentDateUtc);
+      checkDate.setUTCDate(currentDateUtc.getUTCDate() - i);
+      const checkKey = checkDate.toISOString().slice(0, 10);
+      if (!playedDates.has(checkKey)) {
+        break;
+      }
+      continuousDays += 1;
+    }
+
+    return pendingPlayStreakCriteria
+      .filter((achievement) => continuousDays >= achievement.target)
+      .map((achievement) => achievement.mappedAchievement)
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 
