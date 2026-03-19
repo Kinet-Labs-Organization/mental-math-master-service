@@ -1222,18 +1222,18 @@ const ACHIEVEMENTS_CRITERIA = [
     "target": 3
   },
   {
-    "id": "STREAK_7",
+    "id": "STREAK_5",
     "name": "Weekly Rhythm",
-    "description": "Play 7 days in a row",
+    "description": "Play 5 days in a row",
     "category": "streak",
-    "target": 7
+    "target": 5
   },
   {
-    "id": "STREAK_22",
+    "id": "STREAK_10",
     "name": "Discipline Mind",
-    "description": "Play 22 days in a row",
+    "description": "Play 10 days in a row",
     "category": "streak",
-    "target": 22
+    "target": 10
   },
   {
     "id": "GAMES_TOTAL_25",

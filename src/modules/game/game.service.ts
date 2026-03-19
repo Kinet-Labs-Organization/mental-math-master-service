@@ -29,8 +29,8 @@ const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
 
 const STREAK_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
   STREAK_3: Achievement.STREAK_3,
-  STREAK_7: Achievement.STREAK_7,
-  STREAK_22: Achievement.STREAK_22,
+  STREAK_5: Achievement.STREAK_5,
+  STREAK_10: Achievement.STREAK_10,
 };
 
 const SCORE_TOTAL_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
