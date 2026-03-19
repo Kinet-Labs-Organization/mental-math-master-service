@@ -1313,27 +1313,6 @@ const ACHIEVEMENTS_CRITERIA = [
     "target": 10000
   },
   {
-    "id": "WIN_STREAK_5",
-    "name": "Hot Hands",
-    "description": "Unlock a 5-win streak",
-    "category": "win_streak",
-    "target": 5
-  },
-  {
-    "id": "WIN_STREAK_10",
-    "name": "Unbreakable Focus",
-    "description": "Unlock a 10-win streak",
-    "category": "win_streak",
-    "target": 10
-  },
-  {
-    "id": "WIN_STREAK_20",
-    "name": "Streak Legend",
-    "description": "Unlock a 20-win streak",
-    "category": "win_streak",
-    "target": 20
-  },
-  {
     "id": "FLASH_ADDSUB_ALL_COMPLETED",
     "name": "Flash AddSub Master",
     "description": "Complete all Flash ADDSUB levels",
