@@ -1,13 +1,11 @@
 import {
-  Body,
   Controller,
   Get,
-  Param,
-  Post,
   Query,
   UseGuards,
 } from "@nestjs/common";
-// import { JwtGuard } from "@/src/auth/guard";
+import { GetUser } from "@/src/auth/decorator";
+import { FirebaseAuthGuard } from "@/src/auth/guard";
 import { GenericService } from "./generic.service";
 
 @Controller("generic")
@@ -20,10 +18,10 @@ export class GenericController {
     return this.genericService.faqs();
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("leaderboard")
-  async leaderboard() {
-    return this.genericService.leaderboard();
+  async leaderboard(@GetUser("email") email: string) {
+    return this.genericService.leaderboard(email);
   }
 
   // @UseGuards(JwtGuard)
