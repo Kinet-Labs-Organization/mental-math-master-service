@@ -1215,24 +1215,52 @@ const DIV_L4 = [
 
 const ACHIEVEMENTS_CRITERIA = [
   {
-    "id": "STREAK_3",
-    "name": "Spark Chain",
+    "id": "PLAY_STREAK_3",
+    "name": "Login Chain",
     "description": "Play 3 days in a row",
-    "category": "streak",
+    "category": "play_streak",
     "target": 3
   },
   {
-    "id": "STREAK_5",
+    "id": "PLAY_STREAK_7",
+    "name": "Login Chain",
+    "description": "Play 3 days in a row",
+    "category": "play_streak",
+    "target": 7
+  },
+  {
+    "id": "PLAY_STREAK_22",
+    "name": "Login Chain",
+    "description": "Play 3 days in a row",
+    "category": "play_streak",
+    "target": 22
+  },
+  {
+    "id": "PLAY_STREAK_30",
+    "name": "Login Chain",
+    "description": "Play 3 days in a row",
+    "category": "play_streak",
+    "target": 30
+  },
+  {
+    "id": "WIN_STREAK_3",
+    "name": "Spark Chain",
+    "description": "Play 3 days in a row",
+    "category": "win_streak",
+    "target": 3
+  },
+  {
+    "id": "WIN_STREAK_5",
     "name": "Weekly Rhythm",
     "description": "Play 5 days in a row",
-    "category": "streak",
+    "category": "win_streak",
     "target": 5
   },
   {
-    "id": "STREAK_10",
+    "id": "WIN_STREAK_10",
     "name": "Discipline Mind",
     "description": "Play 10 days in a row",
-    "category": "streak",
+    "category": "win_streak",
     "target": 10
   },
   {

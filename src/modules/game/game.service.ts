@@ -27,10 +27,17 @@ const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   GAMES_TOTAL_1000: Achievement.GAMES_TOTAL_1000,
 };
 
-const STREAK_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
-  STREAK_3: Achievement.STREAK_3,
-  STREAK_5: Achievement.STREAK_5,
-  STREAK_10: Achievement.STREAK_10,
+const PLAY_STREAK_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
+  PLAY_STREAK_3: Achievement.PLAY_STREAK_3,
+  PLAY_STREAK_7: Achievement.PLAY_STREAK_7,
+  PLAY_STREAK_22: Achievement.PLAY_STREAK_22,
+  PLAY_STREAK_30: Achievement.PLAY_STREAK_30,
+};
+
+const WIN_STREAK_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
+  WIN_STREAK_3: Achievement.WIN_STREAK_3,
+  WIN_STREAK_5: Achievement.WIN_STREAK_5,
+  WIN_STREAK_10: Achievement.WIN_STREAK_10,
 };
 
 const SCORE_TOTAL_ACHIEVEMENT_MAP: Record<string, Achievement | undefined> = {
@@ -284,8 +291,8 @@ export class GameService {
     currentStreak: number,
     totalScore: number,
   ) {
-    const gamesPlayedAchievements = this.checkGamesPlayedAchievements(gamesPlayed);
-    const streakAchievements = this.checkStreakAchievements(currentStreak);
+    const gamesPlayedAchievements = this.checkTotalGamesPlayedAchievements(gamesPlayed);
+    const streakAchievements = this.checkWinStreakAchievements(currentStreak);
     const totalScoreAchievements = this.checkTotalScoreAchievements(totalScore);
     const evaluatedAchievements = Array.from(
       new Set([
@@ -309,7 +316,7 @@ export class GameService {
       new Set([...currentAchievements, ...evaluatedAchievements]),
     );
 
-    if(allAchievements.length === 0) {
+    if (allAchievements.length === 0) {
       return [];
     }
 
@@ -332,7 +339,7 @@ export class GameService {
     return updatedUser.achievements;
   }
 
-  private checkGamesPlayedAchievements(gamesPlayed: number): Achievement[] {
+  private checkTotalGamesPlayedAchievements(gamesPlayed: number): Achievement[] {
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
         (achievement) =>
@@ -344,16 +351,15 @@ export class GameService {
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 
-  private checkStreakAchievements(currentStreak: number): Achievement[] {
+  private checkWinStreakAchievements(currentStreak: number): Achievement[] {
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
         (achievement) =>
-          (achievement.category === "streak" ||
-            achievement.category === "win_streak") &&
+          achievement.category === "win_streak" &&
           typeof achievement.target === "number" &&
           currentStreak >= achievement.target,
       )
-      .map((achievement) => STREAK_ACHIEVEMENT_MAP[achievement.id])
+      .map((achievement) => WIN_STREAK_ACHIEVEMENT_MAP[achievement.id])
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 
