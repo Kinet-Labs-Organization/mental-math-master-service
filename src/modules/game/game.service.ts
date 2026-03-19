@@ -27,6 +27,11 @@ const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   GAMES_TOTAL_1000: Achievement.GAMES_TOTAL_1000,
 };
 
+const STREAK_ACHIEVEMENT_MAP: Record<string, Achievement> = {
+  STREAK_10: Achievement.STREAK_10,
+  WIN_STREAK_10: Achievement.STREAK_10,
+};
+
 @Injectable()
 export class GameService {
   constructor(private readonly prisma: PrismaService) { }
@@ -111,6 +116,7 @@ export class GameService {
           tx,
           appUser.id,
           report.gamesPlayed,
+          report.streak,
         );
 
         return {
@@ -195,10 +201,10 @@ export class GameService {
     const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
 
     return {
-      gamesPlayedSoFar: aggregates._count._all,
-      accuracy,
-      streakCheck: currentStreak,
-      currentGameScore: currentGameScore,
+      gamesPlayedSoFar: aggregates._count._all, // This is total games played before the current one
+      accuracy, // This is the updated accuracy including the current game
+      streakCheck: currentStreak, // This indicates whether the current game contributes to a streak
+      currentGameScore: currentGameScore, // This is the score for the current game
     };
   }
 
@@ -265,12 +271,13 @@ export class GameService {
     tx: PrismaTransactionClient,
     userId: number,
     gamesPlayed: number,
+    currentStreak: number,
   ) {
-    const gamesPlayedAchievements = this.markGamesPlayedAchievements(gamesPlayed);
-
-    // if (gamesPlayedAchievements.length === 0) {
-    //   return [];
-    // }
+    const gamesPlayedAchievements = this.checkGamesPlayedAchievements(gamesPlayed);
+    const streakAchievements = this.checkStreakAchievements(currentStreak);
+    const evaluatedAchievements = Array.from(
+      new Set([...gamesPlayedAchievements, ...streakAchievements]),
+    );
 
     const user = await tx.user.findUnique({
       where: { id: userId },
@@ -283,7 +290,7 @@ export class GameService {
 
     const currentAchievements = user.achievements ?? [];
     const allAchievements = Array.from(
-      new Set([...currentAchievements, ...gamesPlayedAchievements]),
+      new Set([...currentAchievements, ...evaluatedAchievements]),
     );
 
     if(allAchievements.length === 0) {
@@ -309,7 +316,7 @@ export class GameService {
     return updatedUser.achievements;
   }
 
-  private markGamesPlayedAchievements(gamesPlayed: number): Achievement[] {
+  private checkGamesPlayedAchievements(gamesPlayed: number): Achievement[] {
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
       .filter(
         (achievement) =>
@@ -318,6 +325,19 @@ export class GameService {
           gamesPlayed >= achievement.target,
       )
       .map((achievement) => GAMES_PLAYED_ACHIEVEMENT_MAP[achievement.id])
+      .filter((achievement): achievement is Achievement => Boolean(achievement));
+  }
+
+  private checkStreakAchievements(currentStreak: number): Achievement[] {
+    return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
+      .filter(
+        (achievement) =>
+          (achievement.category === "streak" ||
+            achievement.category === "win_streak") &&
+          typeof achievement.target === "number" &&
+          currentStreak >= achievement.target,
+      )
+      .map((achievement) => STREAK_ACHIEVEMENT_MAP[achievement.id])
       .filter((achievement): achievement is Achievement => Boolean(achievement));
   }
 

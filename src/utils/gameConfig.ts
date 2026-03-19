@@ -1215,24 +1215,24 @@ const DIV_L4 = [
 
 const ACHIEVEMENTS_CRITERIA = [
   {
-    "id": "LOGIN_STREAK_3",
+    "id": "STREAK_3",
     "name": "Spark Chain",
     "description": "Play 3 days in a row",
-    "category": "daily_streak",
+    "category": "streak",
     "target": 3
   },
   {
-    "id": "LOGIN_STREAK_7",
+    "id": "STREAK_7",
     "name": "Weekly Rhythm",
     "description": "Play 7 days in a row",
-    "category": "daily_streak",
+    "category": "streak",
     "target": 7
   },
   {
-    "id": "LOGIN_STREAK_22",
+    "id": "STREAK_22",
     "name": "Discipline Mind",
     "description": "Play 22 days in a row",
-    "category": "daily_streak",
+    "category": "streak",
     "target": 22
   },
   {
