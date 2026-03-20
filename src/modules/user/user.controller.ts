@@ -28,24 +28,18 @@ export class UserController {
     return this.userService.userSync(dto);
   }
 
-  // Used in progress route
-  // @UseGuards(JwtGuard)
   @UseGuards(FirebaseAuthGuard)
   @Get("basicReport")
   async basicReport(@GetUser("email") email: string) {
     return this.userService.basicReport(email);
   }
 
-  // Used in progress route
-  // @UseGuards(JwtGuard)
   @UseGuards(FirebaseAuthGuard)
   @Get("progressReport")
   async progressReport(@GetUser("email") email: string) {
     return this.userService.progressReport(email);
   }
 
-  // Used in progress route
-  // @UseGuards(JwtGuard)
   @UseGuards(FirebaseAuthGuard)
   @Get("activities")
   async activities(
@@ -56,7 +50,7 @@ export class UserController {
     return this.userService.activities(email, position, length);
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("leaderBoardData")
   async leaderBoardData() {
     return this.userService.leaderBoardData();
@@ -68,25 +62,29 @@ export class UserController {
     return this.userService.profileData(email);
   }
 
-  // @UseGuards(JwtGuard)
+  //
+  @UseGuards(FirebaseAuthGuard)
   @Get("settingsData")
   async settingsData() {
     return this.userService.settingsData();
   }
 
-  // @UseGuards(JwtGuard)
+  //
+  @UseGuards(FirebaseAuthGuard)
   @Put("toggleSoundEffect")
   async toggleSoundEffect() {
     return this.userService.toggleSoundEffect();
   }
 
-  // @UseGuards(JwtGuard)
+  //
+  @UseGuards(FirebaseAuthGuard)
   @Put("toggleNotification")
   async toggleNotification() {
     return this.userService.toggleNotification();
   }
 
-  // @UseGuards(JwtGuard)
+  //
+  @UseGuards(FirebaseAuthGuard)
   @Get("notifications")
   async notifications(@Query("recentMax") recentMax: number) {
     return this.userService.notifications(recentMax);
@@ -98,7 +96,8 @@ export class UserController {
     return this.userService.achievements(email);
   }
 
-  // @UseGuards(JwtGuard)
+  //
+  @UseGuards(FirebaseAuthGuard)
   @Put("clearData")
   async clearData() {
     return this.userService.clearData();

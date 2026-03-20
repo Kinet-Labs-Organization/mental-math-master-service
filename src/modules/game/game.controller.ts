@@ -22,21 +22,21 @@ export class GameController {
     return this.gameService.gameLevels(gameLevel);
   }
 
-  @Subscriptions("PRO")
+  @Subscriptions("PRO", "TRIAL")
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
   @Post("fetchGame")
   async fetchGame(@Body() data: string) {
     return this.gameService.fetchGame(data);
   }
 
-  @Subscriptions("PRO")
+  @Subscriptions("PRO", "TRIAL")
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
   @Post("fetchCustomGame")
   async fetchCustomGame(@Body() data: string) {
     return this.gameService.fetchCustomGame(data);
   }
 
-  @Subscriptions("PRO")
+  @Subscriptions("PRO", "TRIAL")
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
   @Post("saveGame")
   async saveGame(

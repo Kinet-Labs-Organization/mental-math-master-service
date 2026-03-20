@@ -12,7 +12,7 @@ import { GenericService } from "./generic.service";
 export class GenericController {
   constructor(private readonly genericService: GenericService) {}
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("faqs")
   async faqs() {
     return this.genericService.faqs();
@@ -24,7 +24,7 @@ export class GenericController {
     return this.genericService.leaderboard(email);
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("blogs")
   async blogs(@Query("recentMax") recentMax: number) {
     return this.genericService.blogs(recentMax);

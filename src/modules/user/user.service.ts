@@ -17,7 +17,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ruleEngineService: RuleEngineService,
-  ) {}
+  ) { }
 
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -76,7 +76,7 @@ export class UserService {
       }
       return { message: "User synchronized successfully" };
     } catch (error) {
-      if(error instanceof UnprocessableEntityException && error.message === 'Email already exists') {
+      if (error instanceof UnprocessableEntityException && error.message === 'Email already exists') {
         return { message: "User synchronized successfully" };
       }
       if (error instanceof PrismaClientKnownRequestError) {
@@ -290,26 +290,29 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    const now = new Date();
-    const isTrialExpired =
-      user.status === "TRIAL" &&
-      !!user.subscriptionExpiration &&
-      user.subscriptionExpiration < now;
-
-    const plan =
-      user.status as string === "SUBSCRIBED"
-        ? "PRO"
-        : isTrialExpired
-          ? "TRIAL EXPIRED"
-          : user.status === "TRIAL"
-            ? "FREE TRIAL"
-            : "NO PLAN";
+    let planNameToShow: string = "";
+    const previousStatus: string = "TRIAL";
+    if (user.status as string === "PRO") {
+      planNameToShow = "Pro Plan";
+    } else if (user.status as string === "TRIAL") {
+      planNameToShow = "Free Trial";
+    } else if (user.status as string === "UNSUBSCRIBED") {
+      if (previousStatus === "PRO") {
+        planNameToShow = "Plan Expired";
+      } else if (previousStatus === "TRIAL") {
+        planNameToShow = "Trial Expired";
+      }
+    }
 
     return {
       name: user.name ?? "Anonymous",
       email: user.email,
       subscribedOn: user.subscribedOn ?? user.subscriptionExpiration ?? null,
-      plan,
+      plan: {
+        planId: user.status,
+        planNameToShow: planNameToShow,
+        planAction: (user.status as string === "UNSUBSCRIBED" || user.status as string === "TRIAL") ? "UPGRADE" : "",
+      },
       createdAt: user.createdAt,
     };
   }
