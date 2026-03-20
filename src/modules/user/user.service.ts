@@ -269,12 +269,48 @@ export class UserService {
     };
   }
 
-  async profileData() {
+  async profileData(email: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        name: true,
+        email: true,
+        status: true,
+        subscribedOn: true,
+        subscriptionExpiration: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const now = new Date();
+    const isTrialExpired =
+      user.status === "TRIAL" &&
+      !!user.subscriptionExpiration &&
+      user.subscriptionExpiration < now;
+
+    const plan =
+      user.status as string === "SUBSCRIBED"
+        ? "PRO"
+        : isTrialExpired
+          ? "TRIAL EXPIRED"
+          : user.status === "TRIAL"
+            ? "FREE TRIAL"
+            : "NO PLAN";
+
     return {
-        "name": "Mr. Suman Mandal",
-        "email": "mr.sumanmandal64@gmail.com",
-        "subscribedOn": "2023-01-15T00:00:00.000Z",
-        "plan": "TRIAL EXPIRED"
+      name: user.name ?? "Anonymous",
+      email: user.email,
+      subscribedOn: user.subscribedOn ?? user.subscriptionExpiration ?? null,
+      plan,
+      createdAt: user.createdAt,
     };
   }
 

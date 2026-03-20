@@ -62,10 +62,10 @@ export class UserController {
     return this.userService.leaderBoardData();
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("profile")
-  async profileData() {
-    return this.userService.profileData();
+  async profileData(@GetUser("email") email: string) {
+    return this.userService.profileData(email);
   }
 
   // @UseGuards(JwtGuard)
