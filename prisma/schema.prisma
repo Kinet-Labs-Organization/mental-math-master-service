@@ -13,13 +13,13 @@ model User {
   password               String?
   subscribedOn           DateTime?
   subscriptionExpiration DateTime?
-  term                   String?
-  status                 String
   createdAt              DateTime        @default(now())
   updatedAt              DateTime        @updatedAt
   name                   String?
   SignUpMethod           SignUpMethod    @default(GMAIL)
   country                String?
+  term                   String?
+  status                 String?         @default("TRIAL")
   gameActivities         GameActivity[]
   notifications          Notifications[]
   report                 Report?
@@ -31,10 +31,10 @@ model Report {
   accuracy     Float         @default(0)
   streak       Int           @default(0)
   score        Int           @default(0)
-  achievements Achievement[]
   userId       Int           @unique
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  achievements Achievement[]
   user         User          @relation(fields: [userId], references: [id])
 }
 
@@ -68,7 +68,7 @@ model Notifications {
 model Blogs {
   id        Int      @id @default(autoincrement())
   brief     String   @default("New blog post about mental math !")
-  icon      String   @default("📜")
+  icon      String   @default("")
   image     String   @default("https://images.unsplash.com/photo-1509228627152-72ae9ae6848d")
   link      String   @default("https://www.mentalup.co/blog/mental-math")
   read      String   @default("8 min")
@@ -95,6 +95,7 @@ enum SubscriptionStatus {
   SUBSCRIBED
   UNSUBSCRIBED
   TRIAL
+  PRO
 }
 
 enum Achievement {
@@ -116,4 +117,10 @@ enum Achievement {
   SCORE_TOTAL_2000
   SCORE_TOTAL_5000
   SCORE_TOTAL_10000
+}
+
+enum TERM {
+  d7
+  d30
+  d365
 }
