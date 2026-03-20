@@ -8,18 +8,18 @@ datasource db {
 }
 
 model User {
-  id                     Int             @id @default(autoincrement())
-  email                  String          @unique
+  id                     Int                 @id @default(autoincrement())
+  email                  String              @unique
   password               String?
   subscribedOn           DateTime?
   subscriptionExpiration DateTime?
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
   name                   String?
-  SignUpMethod           SignUpMethod    @default(GMAIL)
+  SignUpMethod           SignUpMethod        @default(GMAIL)
   country                String?
-  term                   String?
-  status                 String?         @default("TRIAL")
+  term                   Term?               @default(d7)
+  status                 SubscriptionStatus? @default(TRIAL)
   gameActivities         GameActivity[]
   notifications          Notifications[]
   report                 Report?
@@ -92,7 +92,6 @@ enum Role {
 }
 
 enum SubscriptionStatus {
-  SUBSCRIBED
   UNSUBSCRIBED
   TRIAL
   PRO
@@ -119,7 +118,7 @@ enum Achievement {
   SCORE_TOTAL_10000
 }
 
-enum TERM {
+enum Term {
   d7
   d30
   d365
