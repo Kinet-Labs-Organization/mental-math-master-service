@@ -8,7 +8,7 @@ CREATE TYPE "Role" AS ENUM ('SYSTEM', 'ADMIN', 'NORMAL');
 CREATE TYPE "SubscriptionStatus" AS ENUM ('SUBSCRIBED', 'UNSUBSCRIBED', 'TRIAL');
 
 -- CreateEnum
-CREATE TYPE "Achievement" AS ENUM ('FIRST_GAME', 'STREAK_10', 'ACCURACY_90', 'SPEED_DEMON', 'MATH_MASTER', 'PERFECT_SCORE', 'GAMES_TOTAL_25', 'GAMES_TOTAL_50', 'GAMES_TOTAL_100', 'GAMES_TOTAL_200', 'GAMES_TOTAL_500', 'GAMES_TOTAL_1000');
+CREATE TYPE "Achievement" AS ENUM ('PLAY_STREAK_3', 'PLAY_STREAK_7', 'PLAY_STREAK_22', 'PLAY_STREAK_30', 'WIN_STREAK_3', 'WIN_STREAK_5', 'WIN_STREAK_10', 'GAMES_TOTAL_25', 'GAMES_TOTAL_50', 'GAMES_TOTAL_100', 'GAMES_TOTAL_200', 'GAMES_TOTAL_500', 'GAMES_TOTAL_1000', 'SCORE_TOTAL_500', 'SCORE_TOTAL_1000', 'SCORE_TOTAL_2000', 'SCORE_TOTAL_5000', 'SCORE_TOTAL_10000');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -23,7 +23,6 @@ CREATE TABLE "User" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT,
     "SignUpMethod" "SignUpMethod" NOT NULL DEFAULT 'GMAIL',
-    "achievements" "Achievement"[],
     "country" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -36,6 +35,7 @@ CREATE TABLE "Report" (
     "accuracy" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "streak" INTEGER NOT NULL DEFAULT 0,
     "score" INTEGER NOT NULL DEFAULT 0,
+    "achievements" "Achievement"[],
     "userId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -72,6 +72,21 @@ CREATE TABLE "Notifications" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Notifications_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Blogs" (
+    "id" SERIAL NOT NULL,
+    "brief" TEXT NOT NULL DEFAULT 'New blog post about mental math !',
+    "icon" TEXT NOT NULL DEFAULT '📜',
+    "image" TEXT NOT NULL DEFAULT 'https://images.unsplash.com/photo-1509228627152-72ae9ae6848d',
+    "link" TEXT NOT NULL DEFAULT 'https://www.mentalup.co/blog/mental-math',
+    "read" TEXT NOT NULL DEFAULT '8 min',
+    "title" TEXT NOT NULL DEFAULT 'What Is Mental Math and Why It Matters',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Blogs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
