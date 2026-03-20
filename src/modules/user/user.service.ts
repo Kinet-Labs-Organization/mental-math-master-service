@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -391,6 +392,49 @@ export class UserService {
         icon: meta?.icon ?? "",
       };
     });
+  }
+
+  async upgrade(email: string, payload: { term: "d7" | "d30" | "d365" }) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const validTerms: Record<string, number> = {
+      d7: 7,
+      d30: 30,
+      d365: 365,
+    };
+
+    const daysToAdd = validTerms[payload?.term];
+    if (!daysToAdd) {
+      throw new BadRequestException("Invalid term. Allowed values: d7, d30, d365");
+    }
+
+    const subscribedOn = new Date();
+    const subscriptionExpiration = new Date(subscribedOn);
+    subscriptionExpiration.setDate(subscriptionExpiration.getDate() + daysToAdd);
+
+    const updatedUser = await this.prisma.user.update({
+      where: { email },
+      data: {
+        status: "PRO",
+        term: payload.term,
+        subscribedOn,
+        subscriptionExpiration,
+      },
+      select: {
+        email: true,
+        status: true,
+        term: true,
+        subscribedOn: true,
+        subscriptionExpiration: true,
+      },
+    });
+
+    return {
+      message: "User upgraded successfully",
+      data: updatedUser,
+    };
   }
 
   async clearData() {

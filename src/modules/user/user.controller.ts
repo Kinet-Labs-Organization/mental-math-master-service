@@ -96,6 +96,15 @@ export class UserController {
     return this.userService.achievements(email);
   }
 
+  @UseGuards(FirebaseAuthGuard)
+  @Post("upgrade")
+  async upgrade(
+    @GetUser("email") email: string,
+    @Body(ValidationPipe) payload: { term: "d7" | "d30" | "d365" },
+  ) {
+    return this.userService.upgrade(email, payload);
+  }
+
   //
   @UseGuards(FirebaseAuthGuard)
   @Put("clearData")
