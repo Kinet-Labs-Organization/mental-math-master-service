@@ -22,18 +22,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       HttpExceptionFilter.prototype.catch.call(this, exception, host);
     } else if (exception instanceof PrismaClientKnownRequestError) {
-      Logger.error("Unhandled Prisma exception", {
-        code: exception.code,
-        meta: exception.meta,
-        message: exception.message,
-      });
+      Logger.error("Unhandled Prisma exception", JSON.stringify(exception));
       response.status(status).json({
         status: "failure",
         message,
         prismaCode: exception.code,
       });
     } else {
-      Logger.error(`Unhandled Exception: "Unhandled"`, JSON.stringify(exception));
+      Logger.error(`Unhandled Exception`, JSON.stringify(exception));
       response.status(status).json({
         status: "failure",
         message,
