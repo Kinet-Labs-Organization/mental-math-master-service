@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { BLOGS, FAQ } from "@/src/utils/mock";
+import { FAQ } from "@/src/utils/mock";
 import { PrismaClient } from "@prisma/client";
 
 @Injectable()
@@ -70,7 +70,24 @@ export class GenericService {
   }
 
   async blogs(recentMax: number) {
-    return BLOGS.slice(0, recentMax);
+    const take = Number.isFinite(Number(recentMax)) && Number(recentMax) > 0
+      ? Number(recentMax)
+      : 100;
+
+    return this.prisma.blogs.findMany({
+      take,
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        brief: true,
+        icon: true,
+        image: true,
+        link: true,
+        read: true,
+        title: true,
+      },
+    });
   }
 
   async systemCall_userSyncFromSupabaseToLocalDB() {

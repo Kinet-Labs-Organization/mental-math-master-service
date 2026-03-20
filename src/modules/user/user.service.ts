@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { PROFILE, SETTINGS, FAQ, BLOGS, NOTIFICATIONS } from "@/src/utils/mock";
+import { SETTINGS, NOTIFICATIONS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
@@ -270,7 +270,12 @@ export class UserService {
   }
 
   async profileData() {
-    return PROFILE
+    return {
+        "name": "Mr. Suman Mandal",
+        "email": "mr.sumanmandal64@gmail.com",
+        "subscribedOn": "2023-01-15T00:00:00.000Z",
+        "plan": "TRIAL EXPIRED"
+    };
   }
 
   async settingsData() {
