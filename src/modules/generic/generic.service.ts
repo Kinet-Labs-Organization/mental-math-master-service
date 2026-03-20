@@ -76,9 +76,7 @@ export class GenericService {
 
     return this.prisma.blogs.findMany({
       take,
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
       select: {
         brief: true,
         icon: true,
