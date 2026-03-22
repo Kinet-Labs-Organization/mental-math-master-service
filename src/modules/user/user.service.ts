@@ -11,7 +11,7 @@ import { SETTINGS, NOTIFICATIONS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
-import { isContext } from "vm";
+import * as admin from "firebase-admin";
 
 @Injectable()
 export class UserService {
@@ -64,6 +64,27 @@ export class UserService {
     return `${color} ${animal}`;
   }
 
+  private async syncSubscriptionClaimsForFirebaseUser(
+    uid: string,
+    data: {
+      status: "PRO" | "TRIAL" | "UNSUBSCRIBED";
+      term?: "d7" | "d30" | "d365" | null;
+      subscriptionExpiration?: Date | null;
+    },
+  ) {
+    const firebaseUser = await admin.auth().getUser(uid);
+    const existingClaims = firebaseUser.customClaims ?? {};
+
+    await admin.auth().setCustomUserClaims(uid, {
+      ...existingClaims,
+      status: data.status,
+      term: data.term ?? null,
+      subscriptionExpiration: data.subscriptionExpiration
+        ? Math.floor(data.subscriptionExpiration.getTime() / 1000)
+        : null,
+    });
+  }
+
   async userSync(signupDto: any) {
     try {
       const createUserInput: Prisma.UserCreateInput = {
@@ -75,9 +96,35 @@ export class UserService {
       if (!user) {
         throw new ForbiddenException("User creation failed");
       }
+      const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
+      await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
+        status: (user.status as "PRO" | "TRIAL" | "UNSUBSCRIBED") ?? "UNSUBSCRIBED",
+        term: (user.term as "d7" | "d30" | "d365" | null) ?? null,
+        subscriptionExpiration: user.subscriptionExpiration ?? null,
+      });
       return { message: "User synchronized successfully" };
     } catch (error) {
       if (error instanceof UnprocessableEntityException && error.message === 'Email already exists') {
+        try {
+          const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
+          const dbUser = await this.prisma.user.findUnique({
+            where: { email: signupDto.email },
+            select: {
+              status: true,
+              term: true,
+              subscriptionExpiration: true,
+            },
+          });
+          if (dbUser?.status) {
+            await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
+              status: dbUser.status as "PRO" | "TRIAL" | "UNSUBSCRIBED",
+              term: (dbUser.term as "d7" | "d30" | "d365" | null) ?? null,
+              subscriptionExpiration: dbUser.subscriptionExpiration ?? null,
+            });
+          }
+        } catch (claimSyncError) {
+          console.warn("Failed to sync Firebase custom claims during userSync:", claimSyncError);
+        }
         return { message: "User synchronized successfully" };
       }
       if (error instanceof PrismaClientKnownRequestError) {
@@ -394,9 +441,16 @@ export class UserService {
     });
   }
 
-  async upgrade(email: string, payload: { term: "d7" | "d30" | "d365" }) {
+  async upgrade(
+    email: string,
+    uid: string,
+    payload: { term: "d7" | "d30" | "d365" },
+  ) {
     if (!email) {
       throw new NotFoundException("Authenticated user email not found");
+    }
+    if (!uid) {
+      throw new NotFoundException("Authenticated user uid not found");
     }
 
     const validTerms: Record<string, number> = {
@@ -429,6 +483,12 @@ export class UserService {
         subscribedOn: true,
         subscriptionExpiration: true,
       },
+    });
+
+    await this.syncSubscriptionClaimsForFirebaseUser(uid, {
+      status: "PRO",
+      term: payload.term,
+      subscriptionExpiration,
     });
 
     return {

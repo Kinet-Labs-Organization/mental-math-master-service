@@ -21,14 +21,28 @@ export class SubscriptionGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
-    const hasSubscription = requiredSubscription.includes(user?.status);
-    console.log('user?.status');
-    console.log(user?.status);
-    // if (!hasSubscription) {
-    //   throw new ForbiddenException(
-    //     { appMessage: "A PRO subscription is required to access this feature.", appAction: "UNSUBSCRIBED_USER" },
-    //   );
-    // }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const claimStatus = user?.status as string | undefined;
+    const claimExpiry = user?.subscriptionExpiration as number | undefined;
+
+    let effectiveStatus = claimStatus ?? "UNSUBSCRIBED";
+    if (
+      (effectiveStatus === "PRO" || effectiveStatus === "TRIAL") &&
+      typeof claimExpiry === "number" &&
+      claimExpiry <= nowInSeconds
+    ) {
+      effectiveStatus = "UNSUBSCRIBED";
+    }
+
+    const hasSubscription = requiredSubscription.includes(effectiveStatus);
+    if (!hasSubscription) {
+      throw new ForbiddenException({
+        appMessage: "A valid subscription is required to access this feature.",
+        appAction: "UNSUBSCRIBED_USER",
+      });
+    }
+
     return true;
   }
 }

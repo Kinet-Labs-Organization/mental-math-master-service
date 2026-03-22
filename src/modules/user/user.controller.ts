@@ -90,7 +90,8 @@ export class UserController {
     return this.userService.notifications(recentMax);
   }
 
-  @UseGuards(FirebaseAuthGuard)
+  @Subscriptions("PRO", "TRIAL")
+  @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
   @Get("achievements")
   async achievements(@GetUser("email") email: string) {
     return this.userService.achievements(email);
@@ -100,9 +101,10 @@ export class UserController {
   @Post("upgrade")
   async upgrade(
     @GetUser("email") email: string,
+    @GetUser("uid") uid: string,
     @Body(ValidationPipe) payload: { term: "d7" | "d30" | "d365" },
   ) {
-    return this.userService.upgrade(email, payload);
+    return this.userService.upgrade(email, uid, payload);
   }
 
   //
