@@ -107,6 +107,15 @@ export class UserController {
     return this.userService.upgrade(email, uid, payload);
   }
 
+  @UseGuards(FirebaseAuthGuard)
+  @Post("unsubscribe")
+  async unsubscribe(
+    @GetUser("email") email: string,
+    @GetUser("uid") uid: string,
+  ) {
+    return this.userService.unsubscribe(email, uid);
+  }
+
   //
   @UseGuards(FirebaseAuthGuard)
   @Put("clearData")

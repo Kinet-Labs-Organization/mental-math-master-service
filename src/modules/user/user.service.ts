@@ -497,6 +497,43 @@ export class UserService {
     };
   }
 
+  async unsubscribe(email: string, uid: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+    if (!uid) {
+      throw new NotFoundException("Authenticated user uid not found");
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { email },
+      data: {
+        status: "UNSUBSCRIBED",
+        term: null,
+        subscribedOn: null,
+        subscriptionExpiration: null,
+      },
+      select: {
+        email: true,
+        status: true,
+        term: true,
+        subscribedOn: true,
+        subscriptionExpiration: true,
+      },
+    });
+
+    await this.syncSubscriptionClaimsForFirebaseUser(uid, {
+      status: "UNSUBSCRIBED",
+      term: null,
+      subscriptionExpiration: null,
+    });
+
+    return {
+      message: "User unsubscribed successfully",
+      data: updatedUser,
+    };
+  }
+
   async clearData() {
     return {
       message: "User data cleared",
