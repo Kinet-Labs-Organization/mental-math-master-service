@@ -6,12 +6,16 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { SUBSCRIPTION_GUARD_KEY } from "../decorator/subscription-guard.decorator";
+import { UserService } from "@/src/modules/user/user.service";
 
 @Injectable()
 export class SubscriptionGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private readonly userService: UserService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredSubscription = this.reflector.getAllAndOverride<string[]>(
       SUBSCRIPTION_GUARD_KEY,
       [context.getHandler(), context.getClass()],
@@ -33,6 +37,18 @@ export class SubscriptionGuard implements CanActivate {
       claimExpiry <= nowInSeconds
     ) {
       effectiveStatus = "UNSUBSCRIBED";
+      const email = user?.email as string | undefined;
+      const uid = user?.uid as string | undefined;
+      if (email && uid) {
+        try {
+          await this.userService.unsubscribe(email, uid);
+        } catch (error) {
+          console.warn(
+            "Failed to auto-unsubscribe user from expired token claim:",
+            error,
+          );
+        }
+      }
     }
 
     const hasSubscription = requiredSubscription.includes(effectiveStatus);

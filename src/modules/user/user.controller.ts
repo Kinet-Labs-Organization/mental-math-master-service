@@ -90,7 +90,6 @@ export class UserController {
     return this.userService.notifications(recentMax);
   }
 
-  @Subscriptions("PRO", "TRIAL")
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
   @Get("achievements")
   async achievements(@GetUser("email") email: string) {
