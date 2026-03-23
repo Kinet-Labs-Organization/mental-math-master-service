@@ -62,25 +62,19 @@ export class UserController {
     return this.userService.profileData(email);
   }
 
-  //
   @UseGuards(FirebaseAuthGuard)
   @Get("settingsData")
-  async settingsData() {
-    return this.userService.settingsData();
+  async settingsData(@GetUser("email") email: string) {
+    return this.userService.settingsData(email);
   }
 
-  //
   @UseGuards(FirebaseAuthGuard)
-  @Put("toggleSoundEffect")
-  async toggleSoundEffect() {
-    return this.userService.toggleSoundEffect();
-  }
-
-  //
-  @UseGuards(FirebaseAuthGuard)
-  @Put("toggleNotification")
-  async toggleNotification() {
-    return this.userService.toggleNotification();
+  @Post("updateSettings")
+  async updateSettings(
+    @GetUser("email") email: string,
+    @Body(ValidationPipe) payload: any,
+  ) {
+    return this.userService.updateSettings(email, payload);
   }
 
   //
@@ -119,6 +113,7 @@ export class UserController {
   @UseGuards(FirebaseAuthGuard)
   @Put("clearData")
   async clearData() {
+    // Error: This endpoint is for testing purposes only and should not be used in production
     return this.userService.clearData();
   }
 }

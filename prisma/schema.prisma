@@ -24,6 +24,7 @@ model User {
   gameActivities         GameActivity[]
   notifications          Notifications[]
   report                 Report?
+  settings              Settings?
 }
 
 model Report {
@@ -76,6 +77,17 @@ model Blogs {
   title     String   @default("What Is Mental Math and Why It Matters")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Settings {
+  id           Int      @id @default(autoincrement())
+  soundEffect  Boolean  @default(true)
+  notifications Boolean @default(true)
+  newsLetter   Boolean  @default(true)
+  userId       Int      @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 enum SignUpMethod {

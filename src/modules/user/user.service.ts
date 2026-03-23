@@ -7,7 +7,7 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { SETTINGS, NOTIFICATIONS } from "@/src/utils/mock";
+import { NOTIFICATIONS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
@@ -367,8 +367,94 @@ export class UserService {
     };
   }
 
-  async settingsData() {
-    return SETTINGS;
+  async settingsData(email: string) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    return this.prisma.settings.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: {
+        user: {
+          connect: { id: user.id },
+        },
+      },
+      select: {
+        soundEffect: true,
+        notifications: true,
+        newsLetter: true,
+      },
+    });
+  }
+
+  async updateSettings(email: string, payload: any) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const updateData: {
+      soundEffect?: boolean;
+      notifications?: boolean;
+      newsLetter?: boolean;
+    } = {};
+
+    if (typeof payload?.soundEffect === "boolean") {
+      updateData.soundEffect = payload.soundEffect;
+    }
+    if (typeof payload?.sound === "boolean") {
+      updateData.soundEffect = payload.sound;
+    }
+    if (typeof payload?.notifications === "boolean") {
+      updateData.notifications = payload.notifications;
+    }
+    if (typeof payload?.notification === "boolean") {
+      updateData.notifications = payload.notification;
+    }
+    if (typeof payload?.newsLetter === "boolean") {
+      updateData.newsLetter = payload.newsLetter;
+    }
+    if (typeof payload?.newsletter === "boolean") {
+      updateData.newsLetter = payload.newsletter;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException("No valid settings fields provided");
+    }
+
+    return this.prisma.settings.upsert({
+      where: { userId: user.id },
+      update: updateData,
+      create: {
+        ...updateData,
+        user: {
+          connect: { id: user.id },
+        },
+      },
+      select: {
+        soundEffect: true,
+        notifications: true,
+        newsLetter: true,
+      },
+    });
   }
 
   async toggleSoundEffect() {
