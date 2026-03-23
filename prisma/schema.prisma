@@ -20,6 +20,7 @@ model User {
   country                String?
   term                   Term?               @default(d7)
   status                 SubscriptionStatus? @default(TRIAL)
+  lastSubscriptionStatus SubscriptionStatus?
   gameActivities         GameActivity[]
   notifications          Notifications[]
   report                 Report?

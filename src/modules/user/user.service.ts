@@ -330,6 +330,8 @@ export class UserService {
         status: true,
         subscribedOn: true,
         subscriptionExpiration: true,
+        lastSubscriptionStatus: true,
+        term: true,
         createdAt: true,
       },
     });
@@ -339,7 +341,7 @@ export class UserService {
     }
 
     let planNameToShow: string = "";
-    const previousStatus: string = "TRIAL";
+    const previousStatus: string = user.lastSubscriptionStatus as string || "TRIAL";
     if (user.status as string === "PRO") {
       planNameToShow = "Pro Plan";
     } else if (user.status as string === "TRIAL") {
@@ -468,9 +470,19 @@ export class UserService {
     const subscriptionExpiration = new Date(subscribedOn);
     subscriptionExpiration.setDate(subscriptionExpiration.getDate() + daysToAdd);
 
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+      select: { status: true },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: { email },
       data: {
+        lastSubscriptionStatus: existingUser.status ?? null,
         status: "PRO",
         term: payload.term,
         subscribedOn,
@@ -479,6 +491,7 @@ export class UserService {
       select: {
         email: true,
         status: true,
+        lastSubscriptionStatus: true,
         term: true,
         subscribedOn: true,
         subscriptionExpiration: true,
@@ -505,9 +518,19 @@ export class UserService {
       throw new NotFoundException("Authenticated user uid not found");
     }
 
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+      select: { status: true },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: { email },
       data: {
+        lastSubscriptionStatus: existingUser.status ?? null,
         status: "UNSUBSCRIBED",
         term: null,
         subscribedOn: null,
@@ -516,6 +539,7 @@ export class UserService {
       select: {
         email: true,
         status: true,
+        lastSubscriptionStatus: true,
         term: true,
         subscribedOn: true,
         subscriptionExpiration: true,
