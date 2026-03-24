@@ -80,8 +80,37 @@ export class UserController {
   //
   @UseGuards(FirebaseAuthGuard)
   @Get("notifications")
-  async notifications(@Query("recentMax") recentMax: number) {
-    return this.userService.notifications(recentMax);
+  async notifications(
+    @GetUser("email") email: string,
+    @Query("recentMax") recentMax: number,
+  ) {
+    return this.userService.notifications(email, recentMax);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Post("notifications/read")
+  async markNotificationRead(
+    @GetUser("email") email: string,
+    @Body(ValidationPipe) payload: { notificationId: number },
+  ) {
+    return this.userService.markNotificationRead(email, payload.notificationId);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Post("notifications/create")
+  async createNotification(
+    @GetUser("email") email: string,
+    @GetUser("uid") uid: string,
+    @GetUser("role") role: string,
+    @Body(ValidationPipe) payload: {
+      title: string;
+      details: string;
+      iconId?: number;
+      userIds?: number[];
+      broadcast?: boolean;
+    },
+  ) {
+    return this.userService.createNotificationAsAdmin(email, uid, role, payload);
   }
 
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)

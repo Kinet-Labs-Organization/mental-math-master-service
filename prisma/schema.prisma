@@ -22,6 +22,7 @@ model User {
   status                 SubscriptionStatus? @default(TRIAL)
   lastSubscriptionStatus SubscriptionStatus?
   gameActivities         GameActivity[]
+  userNotifications      UserToNotification[]
   report                 Report?
   settings               Settings?
 }
@@ -53,13 +54,27 @@ model GameActivity {
   user           User     @relation(fields: [userId], references: [id])
 }
 
-model Notifications {
-  id        Int      @id @default(autoincrement())
-  title     String
-  details   String
-  iconId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Notification {
+  id                Int                  @id @default(autoincrement())
+  title             String
+  details           String
+  iconId            Int?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  userNotifications UserToNotification[]
+}
+
+model UserToNotification {
+  userId         Int
+  notificationId Int
+  unread         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id])
+  notification   Notification @relation(fields: [notificationId], references: [id])
+
+  @@id([userId, notificationId])
+  @@index([userId, unread])
 }
 
 model Blogs {

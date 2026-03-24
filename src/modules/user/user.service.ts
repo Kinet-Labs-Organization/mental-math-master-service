@@ -7,7 +7,6 @@ import {
 } from "@nestjs/common";
 import { Prisma, User } from "@prisma/client";
 import { PrismaService } from "../../database/prisma/prisma.service";
-import { NOTIFICATIONS } from "@/src/utils/mock";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
@@ -469,12 +468,178 @@ export class UserService {
     };
   }
 
-  async notifications(recentMax: number) {
+  async notifications(email: string, recentMax: number) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const take = Number.isFinite(Number(recentMax)) && Number(recentMax) > 0
+      ? Number(recentMax)
+      : 20;
+
+    const [rows, total, unread] = await Promise.all([
+      this.prisma.userToNotification.findMany({
+        where: { userId: user.id },
+        orderBy: [{ notification: { createdAt: "desc" } }],
+        take,
+        select: {
+          unread: true,
+          notification: {
+            select: {
+              id: true,
+              title: true,
+              details: true,
+              iconId: true,
+              createdAt: true,
+            },
+          },
+        },
+      }),
+      this.prisma.userToNotification.count({
+        where: { userId: user.id },
+      }),
+      this.prisma.userToNotification.count({
+        where: { userId: user.id, unread: true },
+      }),
+    ]);
+
+    const notifications = rows.map((row) => ({
+      id: row.notification.id,
+      title: row.notification.title,
+      description: row.notification.details,
+      icon: row.notification.iconId ? String(row.notification.iconId) : "🔔",
+      read: !row.unread,
+      time: row.notification.createdAt.toISOString(),
+    }));
+
     return {
-      notifications: NOTIFICATIONS.notifications.slice(0, recentMax),
-      total: NOTIFICATIONS.total,
-      unread: NOTIFICATIONS.unread,
+      notifications,
+      total,
+      unread,
     };
+  }
+
+  async markNotificationRead(email: string, notificationId: number) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+    if (!notificationId || Number.isNaN(Number(notificationId))) {
+      throw new BadRequestException("notificationId is required");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const updated = await this.prisma.userToNotification.updateMany({
+      where: {
+        userId: user.id,
+        notificationId: Number(notificationId),
+      },
+      data: {
+        unread: false,
+      },
+    });
+
+    if (updated.count === 0) {
+      throw new NotFoundException("Notification not found for current user");
+    }
+
+    return {
+      message: "Notification marked as read",
+    };
+  }
+
+  async createNotificationAsAdmin(
+    email: string,
+    uid: string,
+    role: string | undefined,
+    payload: {
+      title: string;
+      details: string;
+      iconId?: number;
+      userIds?: number[];
+      broadcast?: boolean;
+    },
+  ) {
+    if (!email || !uid) {
+      throw new NotFoundException("Authenticated admin context not found");
+    }
+
+    const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = role === "ADMIN" || adminEmails.includes(email.toLowerCase());
+
+    if (!isAdmin) {
+      throw new ForbiddenException("Only admin can create notifications");
+    }
+
+    if (!payload?.title?.trim() || !payload?.details?.trim()) {
+      throw new BadRequestException("title and details are required");
+    }
+
+    const targetUserIds = payload.broadcast
+      ? undefined
+      : Array.isArray(payload.userIds)
+        ? payload.userIds.filter((id) => Number.isInteger(id) && id > 0)
+        : undefined;
+
+    return this.prisma.$transaction(async (tx) => {
+      const users = await tx.user.findMany({
+        where: targetUserIds?.length
+          ? { id: { in: targetUserIds } }
+          : undefined,
+        select: { id: true },
+      });
+
+      if (users.length === 0) {
+        throw new BadRequestException("No target users found");
+      }
+
+      const notification = await tx.notification.create({
+        data: {
+          title: payload.title.trim(),
+          details: payload.details.trim(),
+          iconId: payload.iconId ?? null,
+        },
+        select: {
+          id: true,
+          title: true,
+          details: true,
+          iconId: true,
+        },
+      });
+
+      await tx.userToNotification.createMany({
+        data: users.map((user) => ({
+          userId: user.id,
+          notificationId: notification.id,
+        })),
+        skipDuplicates: true,
+      });
+
+      return {
+        message: "Notification created successfully",
+        notification,
+        recipients: users.length,
+      };
+    });
   }
 
   async achievements(email: string) {
