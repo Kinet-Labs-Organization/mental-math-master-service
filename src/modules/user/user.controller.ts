@@ -77,7 +77,6 @@ export class UserController {
     return this.userService.updateSettings(email, payload);
   }
 
-  //
   @UseGuards(FirebaseAuthGuard)
   @Get("notifications")
   async notifications(
