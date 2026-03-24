@@ -86,10 +86,16 @@ export class UserService {
 
   async userSync(signupDto: any) {
     try {
+      const subscribedOn = new Date();
+      const subscriptionExpiration = new Date(subscribedOn);
+      subscriptionExpiration.setDate(subscriptionExpiration.getDate() + 7);
       const createUserInput: Prisma.UserCreateInput = {
         email: signupDto.email,
         name: signupDto.name || this.generateCreativeUsername(),
-        status: "UNSUBSCRIBED",
+        status: "TRIAL",
+        term: "d7",
+        subscribedOn,
+        subscriptionExpiration,
       };
       const user = await this.createUser(createUserInput);
       if (!user) {
@@ -97,9 +103,9 @@ export class UserService {
       }
       const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
       await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
-        status: (user.status as "PRO" | "TRIAL" | "UNSUBSCRIBED") ?? "UNSUBSCRIBED",
-        term: (user.term as "d7" | "d30" | "d365" | null) ?? null,
-        subscriptionExpiration: user.subscriptionExpiration ?? null,
+        status: "TRIAL",
+        term: "d7",
+        subscriptionExpiration,
       });
       return { message: "User synchronized successfully" };
     } catch (error) {
