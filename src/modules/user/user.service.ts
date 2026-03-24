@@ -823,6 +823,7 @@ export class UserService {
 
   private getGameMetaFromGameId(gameId: string) {
     const [gameType, gameLevel, gameNo] = gameId.split("_");
+    const fallbackName = gameType === "CUSTOM" ? "Custom Practice" : gameId;
     const gameConfigKey = `${gameType}_${gameLevel}` as keyof typeof games;
     const gameLevelList = games[gameConfigKey] as
       | Array<{ name: string; icon: string }>
@@ -831,8 +832,8 @@ export class UserService {
     const gameConfig = gameLevelList?.[gameIndex];
 
     return {
-      name: gameConfig?.name ?? gameId,
-      icon: Number(gameConfig?.icon ?? 0),
+      name: gameConfig?.name ?? fallbackName,
+      icon: Number(gameConfig?.icon ?? 1),
     };
   }
 }
