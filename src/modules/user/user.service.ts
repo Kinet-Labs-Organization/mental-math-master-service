@@ -110,26 +110,27 @@ export class UserService {
       return { message: "User synchronized successfully" };
     } catch (error) {
       if (error instanceof UnprocessableEntityException && error.message === 'Email already exists') {
-        try {
-          const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
-          const dbUser = await this.prisma.user.findUnique({
-            where: { email: signupDto.email },
-            select: {
-              status: true,
-              term: true,
-              subscriptionExpiration: true,
-            },
-          });
-          if (dbUser?.status) {
-            await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
-              status: dbUser.status as "PRO" | "TRIAL" | "UNSUBSCRIBED",
-              term: (dbUser.term as "d7" | "d30" | "d365" | null) ?? null,
-              subscriptionExpiration: dbUser.subscriptionExpiration ?? null,
-            });
-          }
-        } catch (claimSyncError) {
-          console.warn("Failed to sync Firebase custom claims during userSync:", claimSyncError);
-        }
+        // Add this code back when need to sync existing user's subscription status to Firebase claims during login/signup
+        // try {
+        //   const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
+        //   const dbUser = await this.prisma.user.findUnique({
+        //     where: { email: signupDto.email },
+        //     select: {
+        //       status: true,
+        //       term: true,
+        //       subscriptionExpiration: true,
+        //     },
+        //   });
+        //   if (dbUser?.status) {
+        //     await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
+        //       status: dbUser.status as "PRO" | "TRIAL" | "UNSUBSCRIBED",
+        //       term: (dbUser.term as "d7" | "d30" | "d365" | null) ?? null,
+        //       subscriptionExpiration: dbUser.subscriptionExpiration ?? null,
+        //     });
+        //   }
+        // } catch (claimSyncError) {
+        //   console.warn("Failed to sync Firebase custom claims during userSync:", claimSyncError);
+        // }
         return { message: "User synchronized successfully" };
       }
       if (error instanceof PrismaClientKnownRequestError) {
