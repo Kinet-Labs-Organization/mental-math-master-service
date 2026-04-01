@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { FAQ } from "@/src/utils/mock";
 import { PrismaClient } from "@prisma/client";
 
@@ -91,4 +91,9 @@ export class GenericService {
   async systemCall_userSyncFromSupabaseToLocalDB() {
   }
 
+  async onPurchase_rc_sandbox_webhook (payload: any) {
+    Logger.log('Received RevenueCat sandbox webhook payload:');
+    Logger.log(JSON.stringify(payload));
+    return null;
+  }
 }

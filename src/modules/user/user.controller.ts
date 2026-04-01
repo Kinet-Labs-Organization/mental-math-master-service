@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
+  HttpCode,
   Post,
   Put,
   Query,
@@ -129,12 +131,35 @@ export class UserController {
   }
 
   @UseGuards(FirebaseAuthGuard)
+  @Post("subscription/sync")
+  async syncSubscription(
+    @GetUser("email") email: string,
+    @GetUser("uid") uid: string,
+    @Body(ValidationPipe)
+    payload: {
+      status: "PRO" | "UNSUBSCRIBED";
+      subscriptionExpiration?: string | null;
+    },
+  ) {
+    return this.userService.syncSubscription(email, uid, payload);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
   @Post("unsubscribe")
   async unsubscribe(
     @GetUser("email") email: string,
     @GetUser("uid") uid: string,
   ) {
     return this.userService.unsubscribe(email, uid);
+  }
+
+  @HttpCode(200)
+  @Post("revenuecat/webhook")
+  async revenueCatWebhook(
+    @Headers("authorization") authorization: string | undefined,
+    @Body() payload: any,
+  ) {
+    return this.userService.handleRevenueCatWebhook(authorization, payload);
   }
 
   //

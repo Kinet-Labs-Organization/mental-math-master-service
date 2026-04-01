@@ -1,6 +1,8 @@
 import {
+  Body,
   Controller,
   Get,
+  Post,
   Query,
   UseGuards,
 } from "@nestjs/common";
@@ -28,6 +30,12 @@ export class GenericController {
   @Get("blogs")
   async blogs(@Query("recentMax") recentMax: number) {
     return this.genericService.blogs(recentMax);
+  }
+
+  // @UseGuards(FirebaseAuthGuard)
+  @Post("onPurchase_rc_sandbox_webhook")
+  async onPurchase_rc_sandbox_webhook(@Body() payload: any) {
+    return this.genericService.onPurchase_rc_sandbox_webhook(payload);
   }
 
 }

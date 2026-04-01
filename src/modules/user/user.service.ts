@@ -768,6 +768,48 @@ export class UserService {
     };
   }
 
+  async syncSubscription(
+    email: string,
+    uid: string,
+    payload: {
+      status: "PRO" | "UNSUBSCRIBED";
+      subscriptionExpiration?: string | null;
+    },
+  ) {
+    if (!email) {
+      throw new NotFoundException("Authenticated user email not found");
+    }
+    if (!uid) {
+      throw new NotFoundException("Authenticated user uid not found");
+    }
+
+    const nextStatus = payload?.status;
+    if (!["PRO", "UNSUBSCRIBED"].includes(nextStatus)) {
+      throw new BadRequestException("Invalid status. Allowed values: PRO, UNSUBSCRIBED");
+    }
+
+    const parsedExpiration =
+      payload?.subscriptionExpiration != null
+        ? new Date(payload.subscriptionExpiration)
+        : null;
+    const subscriptionExpiration =
+      parsedExpiration && !Number.isNaN(parsedExpiration.getTime())
+        ? parsedExpiration
+        : null;
+
+    const update = await this.updateSubscriptionStateByEmail(email, nextStatus, subscriptionExpiration);
+    await this.syncSubscriptionClaimsForFirebaseUser(uid, {
+      status: nextStatus,
+      term: update.term,
+      subscriptionExpiration: update.subscriptionExpiration,
+    });
+
+    return {
+      message: "Subscription synchronized successfully",
+      data: update,
+    };
+  }
+
   async unsubscribe(email: string, uid: string) {
     if (!email) {
       throw new NotFoundException("Authenticated user email not found");
@@ -816,10 +858,194 @@ export class UserService {
     };
   }
 
+  async handleRevenueCatWebhook(authorization: string | undefined, payload: any) {
+    const configuredSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
+    if (configuredSecret) {
+      const incomingToken = (authorization ?? "").replace(/^Bearer\s+/i, "").trim();
+      if (!incomingToken || incomingToken !== configuredSecret) {
+        throw new ForbiddenException("Invalid RevenueCat webhook authorization");
+      }
+    }
+
+    const event = payload?.event ?? payload;
+    const eventType = String(event?.type ?? "").toUpperCase();
+    if (!eventType) {
+      throw new BadRequestException("Invalid RevenueCat webhook payload: missing event type");
+    }
+
+    const appUserId = String(event?.app_user_id ?? "").trim();
+    const subscriberEmail =
+      event?.subscriber_attributes?.$email?.value ||
+      event?.subscriber_attributes?.email?.value ||
+      null;
+    const targetEmail = this.resolveRevenueCatTargetEmail(appUserId, subscriberEmail);
+    if (!targetEmail) {
+      return { message: "Webhook received but no target user email resolved", eventType };
+    }
+
+    const expiredEventTypes = new Set([
+      "EXPIRATION",
+      "SUBSCRIPTION_EXPIRED",
+      "SUBSCRIPTION_PAUSED",
+      "SUBSCRIPTION_REVOKED",
+    ]);
+    const activeEventTypes = new Set([
+      "INITIAL_PURCHASE",
+      "RENEWAL",
+      "NON_RENEWING_PURCHASE",
+      "PRODUCT_CHANGE",
+      "UNCANCELLATION",
+      "SUBSCRIPTION_EXTENDED",
+      "TRANSFER",
+    ]);
+
+    const expirationCandidate =
+      event?.expiration_at_ms ??
+      event?.expires_date_ms ??
+      event?.expiration_at ??
+      event?.expires_date ??
+      null;
+    const parsedExpiration = this.parseRevenueCatExpiration(expirationCandidate);
+
+    let nextStatus: "PRO" | "UNSUBSCRIBED" | null = null;
+    if (expiredEventTypes.has(eventType)) {
+      nextStatus = "UNSUBSCRIBED";
+    } else if (activeEventTypes.has(eventType)) {
+      nextStatus = "PRO";
+    }
+
+    if (!nextStatus) {
+      return {
+        message: "Webhook event ignored",
+        eventType,
+        targetEmail,
+      };
+    }
+
+    const update = await this.updateSubscriptionStateByEmail(
+      targetEmail,
+      nextStatus,
+      nextStatus === "PRO" ? parsedExpiration : null,
+    );
+
+    try {
+      const firebaseUser = await admin.auth().getUserByEmail(targetEmail);
+      await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
+        status: nextStatus,
+        term: update.term,
+        subscriptionExpiration: update.subscriptionExpiration,
+      });
+    } catch (error) {
+      console.warn("Failed to sync Firebase claims from RevenueCat webhook:", error);
+    }
+
+    return {
+      message: "Webhook processed successfully",
+      eventType,
+      targetEmail,
+      status: nextStatus,
+    };
+  }
+
   async clearData() {
     return {
       message: "User data cleared",
     };
+  }
+
+  private resolveRevenueCatTargetEmail(appUserId?: string | null, subscriberEmail?: string | null) {
+    const emailCandidate = (subscriberEmail ?? "").trim();
+    if (emailCandidate.includes("@")) {
+      return emailCandidate.toLowerCase();
+    }
+
+    const appUserIdCandidate = (appUserId ?? "").trim();
+    if (appUserIdCandidate.includes("@")) {
+      return appUserIdCandidate.toLowerCase();
+    }
+
+    return null;
+  }
+
+  private parseRevenueCatExpiration(value: unknown): Date | null {
+    if (value == null) {
+      return null;
+    }
+
+    if (typeof value === "number") {
+      const ms = value > 1_000_000_000_000 ? value : value * 1000;
+      const date = new Date(ms);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    if (typeof value === "string") {
+      const asNumber = Number(value);
+      if (!Number.isNaN(asNumber)) {
+        const ms = asNumber > 1_000_000_000_000 ? asNumber : asNumber * 1000;
+        const numericDate = new Date(ms);
+        if (!Number.isNaN(numericDate.getTime())) {
+          return numericDate;
+        }
+      }
+
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    return null;
+  }
+
+  private inferTermFromExpiration(subscriptionExpiration: Date | null): "d7" | "d30" | "d365" | null {
+    if (!subscriptionExpiration) {
+      return null;
+    }
+
+    const now = Date.now();
+    const diffDays = Math.ceil((subscriptionExpiration.getTime() - now) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 10) {
+      return "d7";
+    }
+    if (diffDays <= 60) {
+      return "d30";
+    }
+    return "d365";
+  }
+
+  private async updateSubscriptionStateByEmail(
+    email: string,
+    status: "PRO" | "UNSUBSCRIBED",
+    subscriptionExpiration: Date | null,
+  ) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+      select: { status: true },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const nextTerm = status === "PRO" ? this.inferTermFromExpiration(subscriptionExpiration) : null;
+    const subscribedOn = status === "PRO" ? new Date() : null;
+
+    return this.prisma.user.update({
+      where: { email },
+      data: {
+        lastSubscriptionStatus: existingUser.status ?? null,
+        status,
+        term: nextTerm,
+        subscribedOn,
+        subscriptionExpiration: status === "PRO" ? subscriptionExpiration : null,
+      },
+      select: {
+        email: true,
+        status: true,
+        lastSubscriptionStatus: true,
+        term: true,
+        subscribedOn: true,
+        subscriptionExpiration: true,
+      },
+    });
   }
 
   private getGameMetaFromGameId(gameId: string) {
