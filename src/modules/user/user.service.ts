@@ -90,27 +90,21 @@ export class UserService {
 
   async userSync(signupDto: any) {
     try {
-      const subscribedOn = new Date();
-      const subscriptionExpiration = new Date(subscribedOn);
-      subscriptionExpiration.setDate(subscriptionExpiration.getDate() + 7);
+      // const subscribedOn = new Date();
+      // const subscriptionExpiration = new Date(subscribedOn);
+      // subscriptionExpiration.setDate(subscriptionExpiration.getDate() + 7);
       const createUserInput: Prisma.UserCreateInput = {
         email: signupDto.email,
         name: signupDto.name || this.generateCreativeUsername(),
-        status: "TRIAL",
-        term: "d7",
-        subscribedOn,
-        subscriptionExpiration,
       };
       const user = await this.createUser(createUserInput);
       if (!user) {
         throw new ForbiddenException("User creation failed");
       }
-      const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
-      await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
-        status: "TRIAL",
-        term: "d7",
-        subscriptionExpiration,
-      });
+      // const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
+      // await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
+      //   status: "UNSUBSCRIBED",
+      // });
       return { message: "User synchronized successfully" };
     } catch (error) {
       if (error instanceof UnprocessableEntityException && error.message === 'Email already exists') {

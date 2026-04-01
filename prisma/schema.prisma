@@ -18,8 +18,8 @@ model User {
   name                   String?
   SignUpMethod           SignUpMethod        @default(GMAIL)
   country                String?
-  term                   Term?               @default(d7)
-  status                 SubscriptionStatus? @default(TRIAL)
+  term                   Term?               
+  status                 SubscriptionStatus? @default(UNSUBSCRIBED)
   lastSubscriptionStatus SubscriptionStatus?
   gameActivities         GameActivity[]
   userNotifications      UserToNotification[]
