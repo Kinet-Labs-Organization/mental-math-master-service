@@ -53,12 +53,6 @@ export class UserController {
   }
 
   @UseGuards(FirebaseAuthGuard)
-  @Get("leaderBoardData")
-  async leaderBoardData() {
-    return this.userService.leaderBoardData();
-  }
-
-  @UseGuards(FirebaseAuthGuard)
   @Get("profile")
   async profileData(@GetUser("email") email: string) {
     return this.userService.profileData(email);
@@ -97,6 +91,7 @@ export class UserController {
     return this.userService.markNotificationRead(email, payload.notificationId);
   }
 
+  // Used by Admin to create notification, should not be exposed to client
   @UseGuards(FirebaseAuthGuard)
   @Post("notifications/create")
   async createNotification(
@@ -130,6 +125,7 @@ export class UserController {
     return this.userService.upgrade(email, uid, payload);
   }
 
+  // To check
   @UseGuards(FirebaseAuthGuard)
   @Post("subscription/sync")
   async syncSubscription(
@@ -144,6 +140,8 @@ export class UserController {
     return this.userService.syncSubscription(email, uid, payload);
   }
 
+
+  // Used by Admin to manually unsubscribe a user, should not be exposed to client
   @UseGuards(FirebaseAuthGuard)
   @Post("unsubscribe")
   async unsubscribe(
@@ -153,16 +151,16 @@ export class UserController {
     return this.userService.unsubscribe(email, uid);
   }
 
-  @HttpCode(200)
-  @Post("revenuecat/webhook")
-  async revenueCatWebhook(
-    @Headers("authorization") authorization: string | undefined,
-    @Body() payload: any,
-  ) {
-    return this.userService.handleRevenueCatWebhook(authorization, payload);
-  }
+  // @HttpCode(200)
+  // @Post("revenuecat/webhook")
+  // async revenueCatWebhook(
+  //   @Headers("authorization") authorization: string | undefined,
+  //   @Body() payload: any,
+  // ) {
+  //   return this.userService.handleRevenueCatWebhook(authorization, payload);
+  // }
 
-  //
+  // To implement
   @UseGuards(FirebaseAuthGuard)
   @Put("clearData")
   async clearData() {

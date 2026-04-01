@@ -88,9 +88,6 @@ export class GenericService {
     });
   }
 
-  async systemCall_userSyncFromSupabaseToLocalDB() {
-  }
-
   async onPurchase_rc_sandbox_webhook (payload: any) {
     Logger.log('Received RevenueCat sandbox webhook payload:');
     Logger.log(JSON.stringify(payload));

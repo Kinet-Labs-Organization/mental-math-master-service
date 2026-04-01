@@ -32,7 +32,7 @@ export class GenericController {
     return this.genericService.blogs(recentMax);
   }
 
-  // @UseGuards(FirebaseAuthGuard)
+  // To implement
   @Post("onPurchase_rc_sandbox_webhook")
   async onPurchase_rc_sandbox_webhook(@Body() payload: any) {
     return this.genericService.onPurchase_rc_sandbox_webhook(payload);
