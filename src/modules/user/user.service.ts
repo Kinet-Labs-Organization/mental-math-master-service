@@ -349,6 +349,8 @@ export class UserService {
         planNameToShow = "Plan Expired";
       } else if (previousStatus === "TRIAL") {
         planNameToShow = "Trial Expired";
+      } else {
+        planNameToShow = "No Plan";
       }
     }
 
