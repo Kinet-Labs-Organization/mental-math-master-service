@@ -81,6 +81,7 @@ export class GameService {
           : [gameData.operations],
       gameType: gameData.gameType,
       numberOfQuestions: gameData.numberOfQuestions,
+      divisorDigits: gameData.divisorDigits || 0,
     };
     let gameDataResponse;
     if (gameData.gameType === "flash") {
