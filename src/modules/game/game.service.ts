@@ -92,17 +92,31 @@ export class GameService {
   }
 
   flashGame(game: any) {
-    const min = Math.pow(10, game.digitCount - 1);
-    const max = Math.pow(10, game.digitCount) - 1;
-    const newNumbers: any[] = [];
-    for (let i = 0; i < game.numberCount; i++) {
-      const value = Math.floor(Math.random() * (max - min + 1)) + min;
-      const operation =
-        game.operations[Math.floor(Math.random() * game.operations.length)];
-      newNumbers.push({ value, operation });
+    if (game.operations.length !== 0 && game.operations[0] === "divide") {
+      const minDividend = Math.pow(10, game.digitCount - 1);
+      const maxDividend = Math.pow(10, game.digitCount) - 1;
+      const minDivisor = Math.pow(10, game.divisorDigits - 1);
+      const maxDivisor = Math.pow(10, game.divisorDigits) - 1;
+      const newNumbers: any[] = [];
+      const valueDivident = Math.floor(Math.random() * (maxDividend - minDividend + 1)) + minDividend;
+      newNumbers.push({ value: valueDivident, operation: "" });
+      const valueDivisor = Math.floor(Math.random() * (maxDivisor - minDivisor + 1)) + minDivisor;
+      newNumbers.push({ value: valueDivisor, operation: "divide" });
+      return newNumbers;
     }
-    newNumbers[0].operation = "";
-    return newNumbers;
+    else {
+      const min = Math.pow(10, game.digitCount - 1);
+      const max = Math.pow(10, game.digitCount) - 1;
+      const newNumbers: any[] = [];
+      for (let i = 0; i < game.numberCount; i++) {
+        const value = Math.floor(Math.random() * (max - min + 1)) + min;
+        const operation =
+          game.operations[Math.floor(Math.random() * game.operations.length)];
+        newNumbers.push({ value, operation });
+      }
+      newNumbers[0].operation = "";
+      return newNumbers;
+    }
   }
 
   regularGame(game: any) {
