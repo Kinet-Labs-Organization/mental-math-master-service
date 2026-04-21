@@ -11,6 +11,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  dev-cache-mmm:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_dev_data:/data
+
   test-db-mmm:
     image: postgres:15
     restart: always
@@ -22,5 +30,26 @@ services:
       POSTGRES_DB: test_db_mmm
     # No volumes for test database - we want it to be ephemeral
 
+  test-cache-mmm:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - 6380:6379
+    # No volumes for test cache - we want it to be ephemeral
+
+  bullmq-dashboard-mmm:
+    image: venatum/bull-board:latest
+    restart: always
+    depends_on:
+      - dev-cache-mmm
+    environment:
+      REDIS_HOST: dev-cache-mmm
+      REDIS_PORT: 6379
+      BULL_VERSION: BULLMQ
+      BULL_PREFIX: bull
+    ports:
+      - 3002:3000
+
 volumes:
   postgres_data:
+  redis_dev_data:

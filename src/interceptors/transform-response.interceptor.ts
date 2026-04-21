@@ -22,12 +22,12 @@ export class TransformResponseInterceptor implements NestInterceptor {
     );
 
     // this.transformUpstream(context.switchToHttp().getRequest().url, data);
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        Logger.log("TransformResponseInterceptor: Simulated delay complete.");
-        resolve(1);
-      }, 500),
-    );
+    // await new Promise((resolve) =>
+    //   setTimeout(() => {
+    //     Logger.log("TransformResponseInterceptor: Simulated delay complete.");
+    //     resolve(1);
+    //   }, 500),
+    // );
 
     return next.handle().pipe(
       map((data) => ({

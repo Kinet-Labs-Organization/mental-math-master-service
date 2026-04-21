@@ -1,11 +1,23 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { FAQ } from "@/src/utils/mock";
-import { PrismaClient } from "@prisma/client";
+import { PrismaService } from "@/src/database/prisma/prisma.service";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
+import {
+  RC_WEBHOOK_QUEUE_COMMON,
+  RC_WEBHOOK_QUEUE_COMMON_JOB,
+} from "@/src/modules/queue-manager/constants/queue.constants";
 
 @Injectable()
 export class GenericService {
-  private readonly prisma = new PrismaClient();
   private readonly RANK_THRESHOLD = 10;
+  private readonly logger = new Logger(GenericService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue(RC_WEBHOOK_QUEUE_COMMON)
+    private readonly rcWebhookQueue: Queue,
+  ) {}
 
   async faqs() {
     return FAQ;
@@ -88,9 +100,21 @@ export class GenericService {
     });
   }
 
-  async onPurchase_rc_sandbox_webhook (payload: any) {
-    Logger.log('Received RevenueCat sandbox webhook payload:');
-    Logger.log(JSON.stringify(payload));
-    return null;
+  async onPurchase_rc_sandbox_webhook(payload: any) {
+    const message = JSON.stringify(payload ?? {});
+    this.logger.log(
+      message
+    );
+    const job = await this.rcWebhookQueue.add(RC_WEBHOOK_QUEUE_COMMON_JOB, {
+      message,
+    });
+    this.logger.log(
+      `Queued RevenueCat sandbox webhook payload in ${RC_WEBHOOK_QUEUE_COMMON} (jobId=${String(job.id)})`,
+    );
+    return {
+      queued: true,
+      queueName: RC_WEBHOOK_QUEUE_COMMON,
+      queueId: String(job.id),
+    };
   }
 }

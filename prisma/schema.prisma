@@ -100,6 +100,22 @@ model Settings {
   user          User     @relation(fields: [userId], references: [id])
 }
 
+model QueueManager {
+  id           Int                @id @default(autoincrement())
+  queueId      String             @unique
+  queueName    String
+  message      String
+  status       QueueManagerStatus @default(PENDING)
+  attemptsMade Int                @default(0)
+  processedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([queueName])
+  @@index([status])
+}
+
 enum SignUpMethod {
   EMAIL
   GOOGLE
@@ -145,4 +161,10 @@ enum Term {
   d7
   d30
   d365
+}
+
+enum QueueManagerStatus {
+  PENDING
+  PROCESSED
+  FAILED
 }
