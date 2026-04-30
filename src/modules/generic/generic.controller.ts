@@ -38,4 +38,10 @@ export class GenericController {
     return this.genericService.onPurchase_rc_sandbox_webhook(payload);
   }
 
+  // To implement
+  @Post("onExpire_rc_sandbox_webhook")
+  async onExpire_rc_sandbox_webhook(@Body() payload: any) {
+    return this.genericService.onExpire_rc_sandbox_webhook(payload);
+  }
+
 }
