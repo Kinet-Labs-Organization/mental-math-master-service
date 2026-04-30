@@ -16,8 +16,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    let status = 500;
-    let message = "Something went wrong. Try again later";
+    const status = 500;
+    const message = "Something went wrong. Try again later";
 
     if (exception instanceof HttpException) {
       HttpExceptionFilter.prototype.catch.call(this, exception, host);

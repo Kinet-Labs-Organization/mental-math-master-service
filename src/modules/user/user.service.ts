@@ -19,7 +19,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ruleEngineService: RuleEngineService,
-  ) { }
+  ) {}
 
   // Un-used because users are created by Firebase Authentication trigger and synced to local database in userSync method, but keep this for now for better separation of concerns and future use if needed
   async findUserByEmail(email: string): Promise<User> {
@@ -107,7 +107,10 @@ export class UserService {
       // });
       return { message: "User synchronized successfully" };
     } catch (error) {
-      if (error instanceof UnprocessableEntityException && error.message === 'Email already exists') {
+      if (
+        error instanceof UnprocessableEntityException &&
+        error.message === "Email already exists"
+      ) {
         // Add this code back when need to sync existing user's subscription status to Firebase claims during login/signup
         // try {
         //   const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
@@ -159,7 +162,7 @@ export class UserService {
       accuracyRate: user.report?.accuracy ?? 0,
       currentStreak: user.report?.streak ?? 0,
       score: user.report?.score ?? 0,
-      achievements: user.report?.achievements ?? []
+      achievements: user.report?.achievements ?? [],
     };
   }
 
@@ -267,7 +270,9 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    const pos = Number.isNaN(parseInt(position, 10)) ? 0 : parseInt(position, 10);
+    const pos = Number.isNaN(parseInt(position, 10))
+      ? 0
+      : parseInt(position, 10);
     const take = Number.isNaN(parseInt(length, 10)) ? 5 : parseInt(length, 10);
 
     const [activities, totalCount] = await Promise.all([
@@ -339,12 +344,13 @@ export class UserService {
     }
 
     let planNameToShow: string = "";
-    const previousStatus: string = user.lastSubscriptionStatus as string || "TRIAL";
-    if (user.status as string === "PRO") {
+    const previousStatus: string =
+      (user.lastSubscriptionStatus as string) || "TRIAL";
+    if ((user.status as string) === "PRO") {
       planNameToShow = "Pro Plan";
-    } else if (user.status as string === "TRIAL") {
+    } else if ((user.status as string) === "TRIAL") {
       planNameToShow = "Free Trial";
-    } else if (user.status as string === "UNSUBSCRIBED") {
+    } else if ((user.status as string) === "UNSUBSCRIBED") {
       if (previousStatus === "PRO") {
         planNameToShow = "Plan Expired";
       } else if (previousStatus === "TRIAL") {
@@ -361,7 +367,11 @@ export class UserService {
       plan: {
         planId: user.status,
         planNameToShow: planNameToShow,
-        planAction: (user.status as string === "UNSUBSCRIBED" || user.status as string === "TRIAL") ? "UPGRADE" : "",
+        planAction:
+          (user.status as string) === "UNSUBSCRIBED" ||
+          (user.status as string) === "TRIAL"
+            ? "UPGRADE"
+            : "",
       },
       createdAt: user.createdAt,
     };
@@ -471,9 +481,10 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    const take = Number.isFinite(Number(recentMax)) && Number(recentMax) > 0
-      ? Number(recentMax)
-      : 20;
+    const take =
+      Number.isFinite(Number(recentMax)) && Number(recentMax) > 0
+        ? Number(recentMax)
+        : 20;
 
     const [rows, total, unread] = await Promise.all([
       this.prisma.userToNotification.findMany({
@@ -573,7 +584,8 @@ export class UserService {
       .split(",")
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean);
-    const isAdmin = role === "ADMIN" || adminEmails.includes(email.toLowerCase());
+    const isAdmin =
+      role === "ADMIN" || adminEmails.includes(email.toLowerCase());
 
     if (!isAdmin) {
       throw new ForbiddenException("Only admin can create notifications");
@@ -657,12 +669,14 @@ export class UserService {
     }
 
     const achievementMetaMap = new Map(
-      (games.ACHIEVEMENTS_CRITERIA as Array<{
-        id: string;
-        name: string;
-        description: string;
-        icon: string;
-      }>).map((achievement) => [
+      (
+        games.ACHIEVEMENTS_CRITERIA as Array<{
+          id: string;
+          name: string;
+          description: string;
+          icon: string;
+        }>
+      ).map((achievement) => [
         achievement.id,
         {
           title: achievement.name,
@@ -703,13 +717,22 @@ export class UserService {
 
     const daysToAdd = validTerms[payload?.term];
     if (!daysToAdd) {
-      throw new BadRequestException("Invalid term. Allowed values: d7, d30, d365");
+      throw new BadRequestException(
+        "Invalid term. Allowed values: d7, d30, d365",
+      );
     }
 
     const subscribedOn = new Date();
     const subscriptionExpiration = new Date(subscribedOn);
-    subscriptionExpiration.setDate(subscriptionExpiration.getDate() + daysToAdd);
-    const subscriptionStatus = (daysToAdd === 7) ? "TRIAL" : (daysToAdd === 30 || daysToAdd === 365) ? "PRO" : "UNSUBSCRIBED";
+    subscriptionExpiration.setDate(
+      subscriptionExpiration.getDate() + daysToAdd,
+    );
+    const subscriptionStatus =
+      daysToAdd === 7
+        ? "TRIAL"
+        : daysToAdd === 30 || daysToAdd === 365
+          ? "PRO"
+          : "UNSUBSCRIBED";
 
     const updatedUser = await this.prisma.$transaction(async (tx) => {
       // Check existing user and get current subscription status from local database
@@ -804,7 +827,9 @@ export class UserService {
 
     const nextStatus = payload?.status;
     if (!["PRO", "UNSUBSCRIBED"].includes(nextStatus)) {
-      throw new BadRequestException("Invalid status. Allowed values: PRO, UNSUBSCRIBED");
+      throw new BadRequestException(
+        "Invalid status. Allowed values: PRO, UNSUBSCRIBED",
+      );
     }
 
     const parsedExpiration =
@@ -816,7 +841,11 @@ export class UserService {
         ? parsedExpiration
         : null;
 
-    const update = await this.updateSubscriptionStateByEmail(email, nextStatus, subscriptionExpiration);
+    const update = await this.updateSubscriptionStateByEmail(
+      email,
+      nextStatus,
+      subscriptionExpiration,
+    );
     await this.syncSubscriptionClaimsForFirebaseUser(uid, {
       status: nextStatus,
       term: update.term,
@@ -1014,13 +1043,17 @@ export class UserService {
   //   return null;
   // }
 
-  private inferTermFromExpiration(subscriptionExpiration: Date | null): "d7" | "d30" | "d365" | null {
+  private inferTermFromExpiration(
+    subscriptionExpiration: Date | null,
+  ): "d7" | "d30" | "d365" | null {
     if (!subscriptionExpiration) {
       return null;
     }
 
     const now = Date.now();
-    const diffDays = Math.ceil((subscriptionExpiration.getTime() - now) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (subscriptionExpiration.getTime() - now) / (1000 * 60 * 60 * 24),
+    );
     if (diffDays <= 10) {
       return "d7";
     }
@@ -1044,7 +1077,10 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    const nextTerm = status === "PRO" ? this.inferTermFromExpiration(subscriptionExpiration) : null;
+    const nextTerm =
+      status === "PRO"
+        ? this.inferTermFromExpiration(subscriptionExpiration)
+        : null;
     const subscribedOn = status === "PRO" ? new Date() : null;
 
     return this.prisma.user.update({
@@ -1054,7 +1090,8 @@ export class UserService {
         status,
         term: nextTerm,
         subscribedOn,
-        subscriptionExpiration: status === "PRO" ? subscriptionExpiration : null,
+        subscriptionExpiration:
+          status === "PRO" ? subscriptionExpiration : null,
       },
       select: {
         email: true,

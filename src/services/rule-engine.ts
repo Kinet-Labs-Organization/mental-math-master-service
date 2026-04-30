@@ -56,7 +56,9 @@ export class RuleEngineService {
     }
 
     const flashActivities = activities.filter((a) => a.gameType === "flash");
-    const regularActivities = activities.filter((a) => a.gameType === "regular");
+    const regularActivities = activities.filter(
+      (a) => a.gameType === "regular",
+    );
     const flashAccuracy = this.calculateAccuracy(flashActivities);
     const regularAccuracy = this.calculateAccuracy(regularActivities);
 
@@ -74,7 +76,9 @@ export class RuleEngineService {
 
     const weakestOperation = this.findWeakestOperation(activities);
     if (weakestOperation) {
-      suggestions.push(`Practice ${weakestOperation} more in your next session.`);
+      suggestions.push(
+        `Practice ${weakestOperation} more in your next session.`,
+      );
     }
 
     if (report.currentStreak <= 1 && report.totalSessions >= 10) {

@@ -27,5 +27,5 @@ export class AccessTokenDto {
   subscribedOn?: Date | null;
   subscriptionExpiration?: Date | null;
   term?: string | null;
-  status: 'TRIAL' | 'PRO' |'UNSUBSCRIBED' | null;
+  status: "TRIAL" | "PRO" | "UNSUBSCRIBED" | null;
 }

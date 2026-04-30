@@ -47,8 +47,8 @@ export class GameController {
         forbidNonWhitelisted: true,
         transform: true,
       }),
-  )
-  data: FlashGameReportPayloadDto,
+    )
+    data: FlashGameReportPayloadDto,
   ) {
     return this.gameService.saveGame(user, data);
   }

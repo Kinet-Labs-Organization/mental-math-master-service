@@ -12,12 +12,16 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { GetUser, Subscriptions } from "@/src/auth/decorator";
-import { FirebaseAuthGuard, JwtGuard, SubscriptionGuard } from "@/src/auth/guard";
+import {
+  FirebaseAuthGuard,
+  JwtGuard,
+  SubscriptionGuard,
+} from "@/src/auth/guard";
 import { AccessTokenDto } from "@/src/auth/dto";
 
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @UseGuards(FirebaseAuthGuard)
   @Get("me")
@@ -98,7 +102,8 @@ export class UserController {
     @GetUser("email") email: string,
     @GetUser("uid") uid: string,
     @GetUser("role") role: string,
-    @Body(ValidationPipe) payload: {
+    @Body(ValidationPipe)
+    payload: {
       title: string;
       details: string;
       iconId?: number;
@@ -106,7 +111,12 @@ export class UserController {
       broadcast?: boolean;
     },
   ) {
-    return this.userService.createNotificationAsAdmin(email, uid, role, payload);
+    return this.userService.createNotificationAsAdmin(
+      email,
+      uid,
+      role,
+      payload,
+    );
   }
 
   @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
@@ -139,7 +149,6 @@ export class UserController {
   ) {
     return this.userService.syncSubscription(email, uid, payload);
   }
-
 
   // Used by Admin to manually unsubscribe a user, should not be exposed to client
   @UseGuards(FirebaseAuthGuard)

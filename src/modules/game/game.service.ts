@@ -50,7 +50,7 @@ const SCORE_TOTAL_ACHIEVEMENT_MAP: Record<string, Achievement> = {
 
 @Injectable()
 export class GameService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async gameLevels(gameLevel: string) {
     const gameLevelData = games[gameLevel];
@@ -99,13 +99,15 @@ export class GameService {
       const minDivisor = Math.pow(10, game.divisorDigits - 1);
       const maxDivisor = Math.pow(10, game.divisorDigits) - 1;
       const newNumbers: any[] = [];
-      const valueDivident = Math.floor(Math.random() * (maxDividend - minDividend + 1)) + minDividend;
+      const valueDivident =
+        Math.floor(Math.random() * (maxDividend - minDividend + 1)) +
+        minDividend;
       newNumbers.push({ value: valueDivident, operation: "" });
-      const valueDivisor = Math.floor(Math.random() * (maxDivisor - minDivisor + 1)) + minDivisor;
+      const valueDivisor =
+        Math.floor(Math.random() * (maxDivisor - minDivisor + 1)) + minDivisor;
       newNumbers.push({ value: valueDivisor, operation: "divide" });
       return newNumbers;
-    }
-    else {
+    } else {
       const min = Math.pow(10, game.digitCount - 1);
       const max = Math.pow(10, game.digitCount) - 1;
       const newNumbers: any[] = [];
@@ -150,7 +152,12 @@ export class GameService {
           summary.score,
           activity.playedAt,
         );
-        const report = await this.updateUserReport(tx, appUser, summary, achievements);
+        const report = await this.updateUserReport(
+          tx,
+          appUser,
+          summary,
+          achievements,
+        );
 
         return {
           message: "Game saved successfully",
@@ -258,7 +265,8 @@ export class GameService {
       tx.report.findUnique({
         where: { userId: user.id },
         select: { streak: true },
-      })]);
+      }),
+    ]);
 
     const correctAnswers = aggregates._sum.correctAnswers ?? 0;
     const wrongAnswers = aggregates._sum.wrongAnswers ?? 0;
@@ -268,7 +276,7 @@ export class GameService {
     const accuracy =
       totalAttempts === 0
         ? 0
-        : Math.ceil(Number(((totalCorrectAnswers / totalAttempts) * 100)));
+        : Math.ceil(Number((totalCorrectAnswers / totalAttempts) * 100));
 
     let currentOnGoingStreak = report?.streak ?? 0;
     if (payload.gameMode === "flash") {
@@ -382,7 +390,9 @@ export class GameService {
           gamesPlayed >= achievement.target,
       )
       .map((achievement) => GAMES_PLAYED_ACHIEVEMENT_MAP[achievement.id])
-      .filter((achievement): achievement is Achievement => Boolean(achievement));
+      .filter((achievement): achievement is Achievement =>
+        Boolean(achievement),
+      );
   }
 
   private checkWinStreakAchievements(
@@ -392,18 +402,20 @@ export class GameService {
     const currentAchievementsSet = new Set(currentAchievements);
 
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
-      .filter(
-        (achievement) => {
-          return (
-            achievement.category === "win_streak" &&
-            !currentAchievementsSet.has(WIN_STREAK_ACHIEVEMENT_MAP[achievement.id]) &&
-            typeof achievement.target === "number" &&
-            currentStreak >= achievement.target
-          );
-        },
-      )
+      .filter((achievement) => {
+        return (
+          achievement.category === "win_streak" &&
+          !currentAchievementsSet.has(
+            WIN_STREAK_ACHIEVEMENT_MAP[achievement.id],
+          ) &&
+          typeof achievement.target === "number" &&
+          currentStreak >= achievement.target
+        );
+      })
       .map((achievement) => WIN_STREAK_ACHIEVEMENT_MAP[achievement.id])
-      .filter((achievement): achievement is Achievement => Boolean(achievement));
+      .filter((achievement): achievement is Achievement =>
+        Boolean(achievement),
+      );
   }
 
   private async checkPlayStreakAchievements(
@@ -414,7 +426,9 @@ export class GameService {
   ): Promise<Achievement[]> {
     const currentAchievementsSet = new Set(currentAchievements);
 
-    const pendingPlayStreakCriteria = (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
+    const pendingPlayStreakCriteria = (
+      games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[]
+    )
       .filter(
         (achievement) =>
           achievement.category === "play_streak" &&
@@ -425,9 +439,11 @@ export class GameService {
         mappedAchievement: PLAY_STREAK_ACHIEVEMENT_MAP[achievement.id],
       }))
       .filter(
-        (achievement): achievement is { target: number; mappedAchievement: Achievement } =>
+        (
+          achievement,
+        ): achievement is { target: number; mappedAchievement: Achievement } =>
           Boolean(achievement.mappedAchievement) &&
-          !currentAchievementsSet.has(achievement.mappedAchievement as Achievement),
+          !currentAchievementsSet.has(achievement.mappedAchievement),
       );
 
     if (pendingPlayStreakCriteria.length === 0) {
@@ -458,7 +474,9 @@ export class GameService {
     });
 
     const playedDates = new Set(
-      recentActivities.map((activity) => activity.playedAt.toISOString().slice(0, 10)),
+      recentActivities.map((activity) =>
+        activity.playedAt.toISOString().slice(0, 10),
+      ),
     );
 
     let continuousDays = 0;
@@ -475,7 +493,9 @@ export class GameService {
     return pendingPlayStreakCriteria
       .filter((achievement) => continuousDays >= achievement.target)
       .map((achievement) => achievement.mappedAchievement)
-      .filter((achievement): achievement is Achievement => Boolean(achievement));
+      .filter((achievement): achievement is Achievement =>
+        Boolean(achievement),
+      );
   }
 
   private checkTotalScoreAchievements(
@@ -485,25 +505,30 @@ export class GameService {
     const currentAchievementsSet = new Set(currentAchievements);
 
     return (games.ACHIEVEMENTS_CRITERIA as AchievementCriteriaItem[])
-      .filter(
-        (achievement) => {
-          return (
-            achievement.category === "score_total" &&
-            !currentAchievementsSet.has(SCORE_TOTAL_ACHIEVEMENT_MAP[achievement.id]) &&
-            typeof achievement.target === "number" &&
-            totalScore >= achievement.target
-          );
-        },
-      )
+      .filter((achievement) => {
+        return (
+          achievement.category === "score_total" &&
+          !currentAchievementsSet.has(
+            SCORE_TOTAL_ACHIEVEMENT_MAP[achievement.id],
+          ) &&
+          typeof achievement.target === "number" &&
+          totalScore >= achievement.target
+        );
+      })
       .map((achievement) => SCORE_TOTAL_ACHIEVEMENT_MAP[achievement.id])
-      .filter((achievement): achievement is Achievement => Boolean(achievement));
+      .filter((achievement): achievement is Achievement =>
+        Boolean(achievement),
+      );
   }
 
   private calculateGameScore(payload: FlashGameReportPayloadDto): number {
     const [gameType, gameLevel, gameNo] = payload.gameId.split("_");
-    const weightage = games.GAME_METAS.filter((meta) => meta.code === gameType)[0].weightage;
+    const weightage = games.GAME_METAS.filter(
+      (meta) => meta.code === gameType,
+    )[0].weightage;
     const levelMultiplier = parseInt(gameLevel.substring(1));
-    const currentGameScore = payload.correctAnswerGiven * weightage * levelMultiplier;
+    const currentGameScore =
+      payload.correctAnswerGiven * weightage * levelMultiplier;
     return currentGameScore;
   }
 }

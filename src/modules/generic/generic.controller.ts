@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { GetUser } from "@/src/auth/decorator";
 import { FirebaseAuthGuard } from "@/src/auth/guard";
 import { GenericService } from "./generic.service";
@@ -43,5 +36,4 @@ export class GenericController {
   async onExpire_rc_sandbox_webhook(@Body() payload: any) {
     return this.genericService.onExpire_rc_sandbox_webhook(payload);
   }
-
 }

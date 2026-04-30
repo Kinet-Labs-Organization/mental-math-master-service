@@ -6,7 +6,7 @@ import { Queue } from "bullmq";
 import {
   RC_WEBHOOK_QUEUE_COMMON,
   RC_WEBHOOK_QUEUE_COMMON_JOB,
-  RC_WEBHOOK_QUEUE_CATEGORY_2_JOB
+  RC_WEBHOOK_QUEUE_CATEGORY_2_JOB,
 } from "@/src/modules/queue-manager/constants/queue.constants";
 
 @Injectable()
@@ -83,9 +83,10 @@ export class GenericService {
   }
 
   async blogs(recentMax: number) {
-    const take = Number.isFinite(Number(recentMax)) && Number(recentMax) > 0
-      ? Number(recentMax)
-      : 100;
+    const take =
+      Number.isFinite(Number(recentMax)) && Number(recentMax) > 0
+        ? Number(recentMax)
+        : 100;
 
     return this.prisma.blogs.findMany({
       take,
@@ -103,9 +104,7 @@ export class GenericService {
 
   async onPurchase_rc_sandbox_webhook(payload: any) {
     const message = JSON.stringify(payload ?? {});
-    this.logger.log(
-      message
-    );
+    this.logger.log(message);
     const job = await this.rcWebhookQueue.add(RC_WEBHOOK_QUEUE_COMMON_JOB, {
       message,
     });
@@ -121,9 +120,7 @@ export class GenericService {
 
   async onExpire_rc_sandbox_webhook(payload: any) {
     const message = JSON.stringify(payload ?? {});
-    this.logger.log(
-      message
-    );
+    this.logger.log(message);
     const job = await this.rcWebhookQueue.add(RC_WEBHOOK_QUEUE_CATEGORY_2_JOB, {
       message,
     });

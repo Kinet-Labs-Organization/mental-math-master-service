@@ -30,7 +30,7 @@ export class SubscriptionGuard implements CanActivate {
     const claimStatus = user?.status as string | undefined;
     // const claimExpiry = user?.subscriptionExpiration as number | undefined;
 
-    let effectiveStatus = claimStatus ?? "UNSUBSCRIBED";
+    const effectiveStatus = claimStatus ?? "UNSUBSCRIBED";
     // This logic is bypassed because we are now relying on RevenueCat webhooks to keep user subscription status up to date in the database, and the subscription sync endpoint that can be called from the client to sync the latest subscription status from RevenueCat, instead of relying solely on token claims that may expire and cause bad user experience if not refreshed in time. However, keeping this logic here for now for better safety and fallback in case there are any issues with webhook or sync mechanism, but it can be removed in the future if we find it unnecessary.
     // if (
     //   (effectiveStatus === "PRO" || effectiveStatus === "TRIAL") &&
