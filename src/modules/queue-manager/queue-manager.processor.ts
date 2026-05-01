@@ -6,7 +6,6 @@ import {
   RC_WEBHOOK_QUEUE_COMMON,
   RcWebhookQueueJobData,
 } from "@/src/modules/queue-manager/constants/queue.constants";
-import { QueueManagerStatus } from "@prisma/client";
 
 @Injectable()
 @Processor(RC_WEBHOOK_QUEUE_COMMON)
@@ -17,7 +16,7 @@ export class QueueManagerProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<RcWebhookQueueJobData>): Promise<void> {
+  process(job: Job<RcWebhookQueueJobData>): Promise<void> {
     // await this.prisma.queueManager.upsert({
     //   where: { queueId: String(job.id) },
     //   create: {
@@ -41,15 +40,16 @@ export class QueueManagerProcessor extends WorkerHost {
     this.logger.log(
       `Processed queue message queueId=${String(job.id)} queueName=${job.queueName}`,
     );
+    return Promise.resolve();
   }
 
   @OnWorkerEvent("failed")
-  async onFailed(
+  onFailed(
     job: Job<RcWebhookQueueJobData> | undefined,
     error: Error,
   ): Promise<void> {
     if (!job) {
-      return;
+      return Promise.resolve();
     }
 
     // await this.prisma.queueManager.upsert({
@@ -73,5 +73,6 @@ export class QueueManagerProcessor extends WorkerHost {
       `Queue processing failed queueId=${String(job.id)} queueName=${job.queueName}`,
       error.stack,
     );
+    return Promise.resolve();
   }
 }

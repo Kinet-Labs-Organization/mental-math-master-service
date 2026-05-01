@@ -1,6 +1,7 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
+import { Server } from "http";
 import { AppModule } from "@/src/app.module";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
 import { DatabaseTestSetup } from "../helpers/database-test-setup";
@@ -13,9 +14,10 @@ import { AllExceptionsFilter } from "@/src/filters/unhandled-exception.filter";
 describe("AppController (e2e)", () => {
   let app: INestApplication;
   let prismaService: PrismaService;
+  let httpServer: Server;
 
   beforeAll(async () => {
-    const { module } = await DatabaseTestSetup.setupTestDatabase();
+    await DatabaseTestSetup.setupTestDatabase();
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
@@ -34,6 +36,7 @@ describe("AppController (e2e)", () => {
     app.useGlobalFilters(new HttpExceptionFilter(), new AllExceptionsFilter());
 
     await app.init();
+    httpServer = app.getHttpServer() as Server;
 
     // Get the PrismaService from the module
     prismaService = moduleRef.get<PrismaService>(PrismaService);
@@ -49,7 +52,7 @@ describe("AppController (e2e)", () => {
 
   describe("Health Check", () => {
     it("GET /health - should return health status", () => {
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get("/health")
         .expect(200)
         .expect((res) => {
@@ -74,7 +77,7 @@ describe("AppController (e2e)", () => {
 
     describe("Signup", () => {
       it("POST /auth/signup - should create a new vendor", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/signup")
           .send(testVendor)
           .expect(201)
@@ -86,7 +89,7 @@ describe("AppController (e2e)", () => {
       });
 
       it("POST /auth/signup - should reject duplicate email", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/signup")
           .send(testVendor)
           .expect((res) => {
@@ -98,7 +101,7 @@ describe("AppController (e2e)", () => {
 
     describe("Signin", () => {
       it("POST /auth/signin - should authenticate with valid credentials", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/signin")
           .send({
             email: testVendor.email,
@@ -114,7 +117,7 @@ describe("AppController (e2e)", () => {
       });
 
       it("POST /auth/signin - should reject invalid credentials", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/signin")
           .send({
             email: testVendor.email,
@@ -128,7 +131,7 @@ describe("AppController (e2e)", () => {
       });
 
       it("POST /auth/signin - should reject non-existent user", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/signin")
           .send({
             email: "nonexistent@example.com",
@@ -145,7 +148,7 @@ describe("AppController (e2e)", () => {
     // Basic test for Google authentication (mock)
     describe("Google Authentication", () => {
       it("POST /auth/google/signup - should handle Google signup", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/google/signup")
           .send({
             email: "google-test@example.com",
@@ -162,7 +165,7 @@ describe("AppController (e2e)", () => {
       });
 
       it("POST /auth/google/signin - should handle Google signin", () => {
-        return request(app.getHttpServer())
+        return request(httpServer)
           .post("/auth/google/signin")
           .send({
             email: "google-test@example.com",

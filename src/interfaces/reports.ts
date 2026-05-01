@@ -6,7 +6,7 @@ import {
   IsString,
 } from "class-validator";
 
-interface IProgressReport {
+export interface IProgressReport {
   totalSessions: number;
   accuracyRate: number;
   currentStreak: number;

@@ -20,7 +20,7 @@ export class GenericService {
     private readonly rcWebhookQueue: Queue,
   ) {}
 
-  async faqs() {
+  faqs() {
     return FAQ;
   }
 

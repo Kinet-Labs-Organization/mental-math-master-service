@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { ForbiddenException } from "@nestjs/common";
+import { ForbiddenException, Type } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { WINSTON_MODULE_NEST_PROVIDER } from "nest-winston";
@@ -31,7 +31,7 @@ describe("AuthService - Unit Tests", () => {
   let service: AuthService;
   let vendorService: jest.Mocked<VendorService>;
   let jwtService: jest.Mocked<JwtService>;
-  let configService: jest.Mocked<ConfigService>;
+  let jwtSignAsyncMock: jest.Mock;
 
   beforeEach(async () => {
     const mockVendorService = {
@@ -42,6 +42,7 @@ describe("AuthService - Unit Tests", () => {
     const mockJwtService = {
       signAsync: jest.fn(),
     };
+    jwtSignAsyncMock = mockJwtService.signAsync;
 
     const mockConfigService = {
       get: jest.fn().mockReturnValue("test-jwt-secret"),
@@ -65,9 +66,11 @@ describe("AuthService - Unit Tests", () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    vendorService = module.get(VendorService);
-    jwtService = module.get(JwtService);
-    configService = module.get(ConfigService);
+    const vendorServiceToken = VendorService as unknown as Type<VendorService>;
+    vendorService = module.get<VendorService>(
+      vendorServiceToken,
+    ) as jest.Mocked<VendorService>;
+    jwtService = module.get<JwtService>(JwtService) as jest.Mocked<JwtService>;
   });
 
   afterEach(() => {
@@ -124,7 +127,7 @@ describe("AuthService - Unit Tests", () => {
         role: Role.VENDOR,
       });
 
-      expect(jwtService.signAsync).toHaveBeenCalledWith(
+      expect(jwtSignAsyncMock).toHaveBeenCalledWith(
         {
           id: mockVendor.id,
           email: mockVendor.email,
@@ -466,7 +469,7 @@ describe("AuthService - Unit Tests", () => {
       const result = await service.signToken(payload);
 
       // Assert
-      expect(jwtService.signAsync).toHaveBeenCalledWith(payload, {
+      expect(jwtSignAsyncMock).toHaveBeenCalledWith(payload, {
         expiresIn: "59m",
         secret: "test-jwt-secret",
       });

@@ -7,8 +7,7 @@ import { VendorService } from "@/src/modules/vendor/vendor.service";
 import { PrismaModule } from "@/src/database/prisma/prisma.module";
 import { DatabaseTestSetup } from "../../helpers/database-test-setup";
 import { TestHelper } from "../../helpers/test-helper";
-import { PrismaService } from "@/src/database/prisma/prisma.service";
-import { ForbiddenException } from "@nestjs/common";
+import { ForbiddenException, Type } from "@nestjs/common";
 
 // Import enums we created for the unit tests
 enum SignUpMethod {
@@ -28,12 +27,10 @@ enum Role {
 describe("Auth Module - Integration Tests", () => {
   let authService: AuthService;
   let vendorService: VendorService;
-  let prismaService: PrismaService;
   let module: TestingModule;
 
   beforeAll(async () => {
-    const { prismaService: testPrismaService, module: testModule } =
-      await DatabaseTestSetup.setupTestDatabase();
+    await DatabaseTestSetup.setupTestDatabase();
 
     const moduleBuilder = Test.createTestingModule({
       imports: [
@@ -66,8 +63,8 @@ describe("Auth Module - Integration Tests", () => {
 
     module = await moduleBuilder.compile();
     authService = module.get<AuthService>(AuthService);
-    vendorService = module.get<VendorService>(VendorService);
-    prismaService = module.get<PrismaService>(PrismaService);
+    const vendorServiceToken = VendorService as unknown as Type<VendorService>;
+    vendorService = module.get<VendorService>(vendorServiceToken);
   });
 
   beforeEach(async () => {

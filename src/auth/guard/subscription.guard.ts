@@ -6,16 +6,12 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { SUBSCRIPTION_GUARD_KEY } from "../decorator/subscription-guard.decorator";
-import { UserService } from "@/src/modules/user/user.service";
 
 @Injectable()
 export class SubscriptionGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  canActivate(context: ExecutionContext): boolean {
     const requiredSubscription = this.reflector.getAllAndOverride<string[]>(
       SUBSCRIPTION_GUARD_KEY,
       [context.getHandler(), context.getClass()],

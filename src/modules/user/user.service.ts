@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -12,7 +11,6 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
 import * as admin from "firebase-admin";
-import axios from "axios";
 
 @Injectable()
 export class UserService {
@@ -906,7 +904,7 @@ export class UserService {
     };
   }
 
-  async clearData() {
+  clearData() {
     return {
       message: "User data cleared",
     };

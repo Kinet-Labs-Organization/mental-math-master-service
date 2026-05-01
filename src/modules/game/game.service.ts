@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Achievement, Prisma, PrismaClient, User } from "@prisma/client";
+import { Achievement, PrismaClient, User } from "@prisma/client";
 import * as games from "@/src/utils/gameConfig";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
 import { FlashGameReportPayloadDto } from "@/src/interfaces/reports";
@@ -16,6 +16,34 @@ interface AchievementCriteriaItem {
   id: string;
   category: string;
   target: number | string;
+}
+
+interface GameConfig {
+  digitCount: number;
+  numberCount: number;
+  operations: string[];
+  gameType?: string;
+  numberOfQuestions: number;
+  divisorDigits?: number;
+}
+
+interface FetchGameData {
+  id: string;
+  type: "flash" | "regular";
+}
+
+interface FetchCustomGameData {
+  digitCount: number;
+  numberCount: number;
+  operations: string;
+  gameType: "flash" | "regular";
+  numberOfQuestions: number;
+  divisorDigits?: number;
+}
+
+interface GeneratedGameNumber {
+  value: number;
+  operation: string;
 }
 
 const GAMES_PLAYED_ACHIEVEMENT_MAP: Record<string, Achievement> = {
@@ -48,20 +76,22 @@ const SCORE_TOTAL_ACHIEVEMENT_MAP: Record<string, Achievement> = {
   SCORE_TOTAL_10000: Achievement.SCORE_TOTAL_10000,
 };
 
+const GAME_CONFIGS = games as unknown as Record<string, GameConfig[]>;
+
 @Injectable()
 export class GameService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async gameLevels(gameLevel: string) {
-    const gameLevelData = games[gameLevel];
+  gameLevels(gameLevel: string) {
+    const gameLevelData = GAME_CONFIGS[gameLevel];
     return gameLevelData;
   }
 
-  async fetchGame(gameData: any) {
+  fetchGame(gameData: FetchGameData) {
     const { id, type } = gameData;
     const gameTypeLevel = id.substring(0, id.lastIndexOf("_"));
     const gameId = parseInt(id.substring(id.lastIndexOf("_") + 1));
-    const selctedGameConfig = games[gameTypeLevel][gameId - 1];
+    const selctedGameConfig = GAME_CONFIGS[gameTypeLevel][gameId - 1];
     let gameDataResponse;
     if (type === "flash") {
       gameDataResponse = this.flashGame(selctedGameConfig);
@@ -71,8 +101,8 @@ export class GameService {
     return gameDataResponse;
   }
 
-  async fetchCustomGame(gameData: any) {
-    const game = {
+  fetchCustomGame(gameData: FetchCustomGameData) {
+    const game: GameConfig = {
       digitCount: gameData.digitCount,
       numberCount: gameData.numberCount,
       operations:
@@ -92,13 +122,14 @@ export class GameService {
     return gameDataResponse;
   }
 
-  flashGame(game: any) {
+  flashGame(game: GameConfig): GeneratedGameNumber[] {
     if (game.operations.length !== 0 && game.operations[0] === "divide") {
+      const divisorDigits = game.divisorDigits ?? 1;
       const minDividend = Math.pow(10, game.digitCount - 1);
       const maxDividend = Math.pow(10, game.digitCount) - 1;
-      const minDivisor = Math.pow(10, game.divisorDigits - 1);
-      const maxDivisor = Math.pow(10, game.divisorDigits) - 1;
-      const newNumbers: any[] = [];
+      const minDivisor = Math.pow(10, divisorDigits - 1);
+      const maxDivisor = Math.pow(10, divisorDigits) - 1;
+      const newNumbers: GeneratedGameNumber[] = [];
       const valueDivident =
         Math.floor(Math.random() * (maxDividend - minDividend + 1)) +
         minDividend;
@@ -110,7 +141,7 @@ export class GameService {
     } else {
       const min = Math.pow(10, game.digitCount - 1);
       const max = Math.pow(10, game.digitCount) - 1;
-      const newNumbers: any[] = [];
+      const newNumbers: GeneratedGameNumber[] = [];
       for (let i = 0; i < game.numberCount; i++) {
         const value = Math.floor(Math.random() * (max - min + 1)) + min;
         const operation =
@@ -122,8 +153,8 @@ export class GameService {
     }
   }
 
-  regularGame(game: any) {
-    const gameData: any[] = [];
+  regularGame(game: GameConfig): GeneratedGameNumber[][] {
+    const gameData: GeneratedGameNumber[][] = [];
     for (let i = 0; i < game.numberOfQuestions; i++) {
       gameData.push(this.flashGame(game));
     }
@@ -138,7 +169,7 @@ export class GameService {
     return `${color} ${animal}`;
   }
 
-  async saveGame(user: any, payload: FlashGameReportPayloadDto) {
+  async saveGame(user: { email: string }, payload: FlashGameReportPayloadDto) {
     const result = await this.prisma.$transaction(
       async (tx) => {
         const appUser = await this.getOrCreateUser(tx, user.email);
@@ -522,7 +553,7 @@ export class GameService {
   }
 
   private calculateGameScore(payload: FlashGameReportPayloadDto): number {
-    const [gameType, gameLevel, gameNo] = payload.gameId.split("_");
+    const [gameType, gameLevel] = payload.gameId.split("_");
     const weightage = games.GAME_METAS.filter(
       (meta) => meta.code === gameType,
     )[0].weightage;

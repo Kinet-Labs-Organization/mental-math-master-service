@@ -1,8 +1,3 @@
-import { Achievement } from "@prisma/client";
-
-const millisecondsInADay = 24 * 60 * 60 * 1000;
-const today = Date.now();
-
 export const SETTINGS = {
   soundEffect: false,
   notification: true,

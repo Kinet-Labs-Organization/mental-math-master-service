@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Headers,
-  HttpCode,
   Post,
   Put,
   Query,
@@ -11,12 +10,8 @@ import {
   ValidationPipe,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { GetUser, Subscriptions } from "@/src/auth/decorator";
-import {
-  FirebaseAuthGuard,
-  JwtGuard,
-  SubscriptionGuard,
-} from "@/src/auth/guard";
+import { GetUser } from "@/src/auth/decorator";
+import { FirebaseAuthGuard, SubscriptionGuard } from "@/src/auth/guard";
 import { AccessTokenDto } from "@/src/auth/dto";
 
 @Controller("user")
@@ -25,7 +20,7 @@ export class UserController {
 
   @UseGuards(FirebaseAuthGuard)
   @Get("me")
-  async me(@GetUser() user: AccessTokenDto) {
+  me(@GetUser() user: AccessTokenDto) {
     return user;
   }
 
@@ -172,7 +167,7 @@ export class UserController {
   // To implement
   @UseGuards(FirebaseAuthGuard)
   @Put("clearData")
-  async clearData() {
+  clearData() {
     // Error: This endpoint is for testing purposes only and should not be used in production
     return this.userService.clearData();
   }

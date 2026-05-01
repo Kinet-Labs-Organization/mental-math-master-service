@@ -9,7 +9,7 @@ export class GenericController {
 
   @UseGuards(FirebaseAuthGuard)
   @Get("faqs")
-  async faqs() {
+  faqs() {
     return this.genericService.faqs();
   }
 

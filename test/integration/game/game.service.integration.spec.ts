@@ -75,7 +75,7 @@ describe("GameService - Integration Tests", () => {
       },
     });
 
-    const result = await gameService.saveFlashGameReport(email, payload);
+    await gameService.saveFlashGameReport(email, payload);
 
     // expect(result.message).toBe("Flash game report saved successfully");
     // expect(result.activityId).toEqual(expect.any(Number));
