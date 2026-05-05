@@ -1,68 +1,74 @@
-# Production-grade NestJS Dockerfile
-
+# =============================================
 # Stage 1: Build
-FROM node:18-alpine AS build
+# =============================================
+FROM node:20-alpine AS build
+
+# Prisma needs OpenSSL available in Alpine-based images.
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including dev dependencies for build)
+# Install ALL deps (dev included) needed to compile
 RUN npm ci
 
-# Copy source code
 COPY . .
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build the application
+# Compile NestJS
 RUN npm run build
 
-# Remove dev dependencies, keeping only production dependencies
-RUN npm prune --production
+# Prune to production deps only
+RUN npm prune --omit=dev
 
+# Keep the Prisma CLI available because the runtime command applies migrations.
+RUN npm install --omit=dev prisma@$(node -p "require('./node_modules/@prisma/client/package.json').version")
+
+
+# =============================================
 # Stage 2: Production
-FROM node:18-alpine AS production
+# =============================================
+FROM node:20-alpine AS production
 
-# Install dumb-init to properly handle signals
-RUN apk add --no-cache dumb-init
+# Install dumb-init for signal handling, curl for healthcheck, and OpenSSL for Prisma.
+RUN apk add --no-cache dumb-init curl openssl
 
-# Create app user
+# Set NODE_ENV early so all libs behave in production mode
+ENV NODE_ENV=production
+
+# Use ARG so PORT can be overridden at build time; ENV makes it available at runtime
+ARG PORT=8000
+ENV PORT=${PORT}
+
+# Non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json for metadata
-COPY package*.json ./
-
-# Copy production dependencies from dependencies stage
+# Copy artifacts from build stage
+COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
-
-# Copy built application from build stage
 COPY --from=build /app/dist ./dist
 
-# Copy Prisma schema and generated client
+# Only copy prisma folder if you run migrations at startup
+# Remove this line if you run migrations separately (recommended)
 COPY --from=build /app/prisma ./prisma
 
-# Create necessary directories and set permissions
+# Set permissions
 RUN mkdir -p /app/logs && \
     chown -R nestjs:nodejs /app
 
-# Switch to non-root user
 USER nestjs
 
-# Expose port
-EXPOSE 8000
+# Documents which port the app uses (actual binding is via -p at runtime)
+EXPOSE ${PORT}
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node --version || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]

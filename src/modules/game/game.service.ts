@@ -82,7 +82,7 @@ const GAME_CONFIGS = games as unknown as Record<string, GameConfig[]>;
 export class GameService {
   constructor(private readonly prisma: PrismaService) {}
 
-  gameLevels(gameLevel: string) {
+  gameLevels(gameLevel: string):any {
     const gameLevelData = GAME_CONFIGS[gameLevel];
     return gameLevelData;
   }

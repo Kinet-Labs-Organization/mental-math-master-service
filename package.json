@@ -8,15 +8,17 @@
   "scripts": {
     "prebuild": "rimraf dist",
 
-    "build": "prisma migrate deploy && nest build",
+    "build:dev": "prisma migrate deploy && nest build",
     "build:qa": "dotenv -e .env.qa -- prisma migrate deploy && nest build",
     "build:uat": "dotenv -e .env.uat -- prisma migrate deploy && nest build",
     "build:production": "dotenv -e .env.production -- prisma migrate deploy && nest build",
+    "build": "nest build",
     
-    "start": "nest start --watch",
+    "start:dev": "nest start --watch",
     "start:qa": "dotenv -e .env.qa node dist/main",
     "start:uat": "dotenv -e .env.uat node dist/main",
     "start:production": "dotenv -e .env.production node dist/main",
+    "start": "node dist/main",
     
     "test": "echo \"No tests specified\" && exit 0",
     "test:integration:game": "npm run start:db:test && jest --config test/jest-integration.json test/integration/game/game.service.integration.spec.ts --runInBand",
