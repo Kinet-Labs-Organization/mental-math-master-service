@@ -341,21 +341,49 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    let planNameToShow: string = "";
-    const previousStatus: string =
-      (user.lastSubscriptionStatus as string) || "TRIAL";
-    if ((user.status as string) === "PRO") {
-      planNameToShow = "Pro Plan";
-    } else if ((user.status as string) === "TRIAL") {
-      planNameToShow = "Free Trial";
-    } else if ((user.status as string) === "UNSUBSCRIBED") {
-      if (previousStatus === "PRO") {
-        planNameToShow = "Plan Expired";
-      } else if (previousStatus === "TRIAL") {
-        planNameToShow = "Trial Expired";
-      } else {
+    const status = (user.status as string | null);
+    const lastSubscriptionStatus = user.lastSubscriptionStatus as
+      | string
+      | null;
+    const planKey = `${status}:${lastSubscriptionStatus ?? "null"}`;
+    console.log("Determining plan to show with key:", planKey);
+
+    let planNameToShow = "No Plan";
+    let planAction = "Upgrade";
+
+    // Explicit status mapping as per product rules.
+    switch (planKey) {
+      case "UNSUBSCRIBED:null":
         planNameToShow = "No Plan";
-      }
+        planAction = "Start Free Trial";
+        break;
+      case "TRIAL:UNSUBSCRIBED":
+        planNameToShow = "Free Trial";
+        planAction = "Upgrade";
+        break;
+      case "PRO:TRIAL":
+      case "PRO:UNSUBSCRIBED":
+        planNameToShow = "Pro";
+        planAction = "";
+        break;
+      case "UNSUBSCRIBED:TRIAL":
+        planNameToShow = "Trial Expired";
+        planAction = "Upgrade";
+        break;
+      case "UNSUBSCRIBED:PRO":
+        planNameToShow = "Plan Expired";
+        planAction = "Upgrade";
+        break;
+      default:
+        // Fallback for impossible/legacy combinations.
+        if (status === "PRO") {
+          planNameToShow = "Pro";
+          planAction = "";
+        } else {
+          planNameToShow = "No Plan";
+          planAction = "Upgrade";
+        }
+        break;
     }
 
     return {
@@ -363,13 +391,9 @@ export class UserService {
       email: user.email,
       subscribedOn: user.subscribedOn ?? user.subscriptionExpiration ?? null,
       plan: {
-        planId: user.status,
-        planNameToShow: planNameToShow,
-        planAction:
-          (user.status as string) === "UNSUBSCRIBED" ||
-          (user.status as string) === "TRIAL"
-            ? "UPGRADE"
-            : "",
+        planId: status,
+        planNameToShow,
+        planAction,
       },
       createdAt: user.createdAt,
     };
