@@ -94,7 +94,6 @@ export class DatabaseTestSetup {
           ].join("\n"),
         );
       }
-      console.error("Error cleaning test database:", error);
       throw error;
     }
   }

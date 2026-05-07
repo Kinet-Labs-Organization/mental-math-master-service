@@ -99,37 +99,12 @@ export class UserService {
       if (!user) {
         throw new ForbiddenException("User creation failed");
       }
-      // const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
-      // await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
-      //   status: "UNSUBSCRIBED",
-      // });
       return { message: "User synchronized successfully" };
     } catch (error) {
       if (
         error instanceof UnprocessableEntityException &&
         error.message === "Email already exists"
       ) {
-        // Add this code back when need to sync existing user's subscription status to Firebase claims during login/signup
-        // try {
-        //   const firebaseUser = await admin.auth().getUserByEmail(signupDto.email);
-        //   const dbUser = await this.prisma.user.findUnique({
-        //     where: { email: signupDto.email },
-        //     select: {
-        //       status: true,
-        //       term: true,
-        //       subscriptionExpiration: true,
-        //     },
-        //   });
-        //   if (dbUser?.status) {
-        //     await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
-        //       status: dbUser.status as "PRO" | "TRIAL" | "UNSUBSCRIBED",
-        //       term: (dbUser.term as "d7" | "d30" | "d365" | null) ?? null,
-        //       subscriptionExpiration: dbUser.subscriptionExpiration ?? null,
-        //     });
-        //   }
-        // } catch (claimSyncError) {
-        //   console.warn("Failed to sync Firebase custom claims during userSync:", claimSyncError);
-        // }
         return { message: "User synchronized successfully" };
       }
       if (error instanceof PrismaClientKnownRequestError) {
@@ -344,7 +319,6 @@ export class UserService {
     const status = user.status as string | null;
     const lastSubscriptionStatus = user.lastSubscriptionStatus as string | null;
     const planKey = `${status}:${lastSubscriptionStatus ?? "null"}`;
-    console.log("Determining plan to show with key:", planKey);
 
     let planNameToShow = "No Plan";
     let planAction = "Upgrade";
@@ -942,137 +916,6 @@ export class UserService {
   clearData() {
     throw new Error("Data clearing is not allowed");
   }
-
-  // async handleRevenueCatWebhook(authorization: string | undefined, payload: any) {
-  //   const configuredSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
-  //   if (configuredSecret) {
-  //     const incomingToken = (authorization ?? "").replace(/^Bearer\s+/i, "").trim();
-  //     if (!incomingToken || incomingToken !== configuredSecret) {
-  //       throw new ForbiddenException("Invalid RevenueCat webhook authorization");
-  //     }
-  //   }
-
-  //   const event = payload?.event ?? payload;
-  //   const eventType = String(event?.type ?? "").toUpperCase();
-  //   if (!eventType) {
-  //     throw new BadRequestException("Invalid RevenueCat webhook payload: missing event type");
-  //   }
-
-  //   const appUserId = String(event?.app_user_id ?? "").trim();
-  //   const subscriberEmail =
-  //     event?.subscriber_attributes?.$email?.value ||
-  //     event?.subscriber_attributes?.email?.value ||
-  //     null;
-  //   const targetEmail = this.resolveRevenueCatTargetEmail(appUserId, subscriberEmail);
-  //   if (!targetEmail) {
-  //     return { message: "Webhook received but no target user email resolved", eventType };
-  //   }
-
-  //   const expiredEventTypes = new Set([
-  //     "EXPIRATION",
-  //     "SUBSCRIPTION_EXPIRED",
-  //     "SUBSCRIPTION_PAUSED",
-  //     "SUBSCRIPTION_REVOKED",
-  //   ]);
-  //   const activeEventTypes = new Set([
-  //     "INITIAL_PURCHASE",
-  //     "RENEWAL",
-  //     "NON_RENEWING_PURCHASE",
-  //     "PRODUCT_CHANGE",
-  //     "UNCANCELLATION",
-  //     "SUBSCRIPTION_EXTENDED",
-  //     "TRANSFER",
-  //   ]);
-
-  //   const expirationCandidate =
-  //     event?.expiration_at_ms ??
-  //     event?.expires_date_ms ??
-  //     event?.expiration_at ??
-  //     event?.expires_date ??
-  //     null;
-  //   const parsedExpiration = this.parseRevenueCatExpiration(expirationCandidate);
-
-  //   let nextStatus: "PRO" | "UNSUBSCRIBED" | null = null;
-  //   if (expiredEventTypes.has(eventType)) {
-  //     nextStatus = "UNSUBSCRIBED";
-  //   } else if (activeEventTypes.has(eventType)) {
-  //     nextStatus = "PRO";
-  //   }
-
-  //   if (!nextStatus) {
-  //     return {
-  //       message: "Webhook event ignored",
-  //       eventType,
-  //       targetEmail,
-  //     };
-  //   }
-
-  //   const update = await this.updateSubscriptionStateByEmail(
-  //     targetEmail,
-  //     nextStatus,
-  //     nextStatus === "PRO" ? parsedExpiration : null,
-  //   );
-
-  //   try {
-  //     const firebaseUser = await admin.auth().getUserByEmail(targetEmail);
-  //     await this.syncSubscriptionClaimsForFirebaseUser(firebaseUser.uid, {
-  //       status: nextStatus,
-  //       term: update.term,
-  //       subscriptionExpiration: update.subscriptionExpiration,
-  //     });
-  //   } catch (error) {
-  //     console.warn("Failed to sync Firebase claims from RevenueCat webhook:", error);
-  //   }
-
-  //   return {
-  //     message: "Webhook processed successfully",
-  //     eventType,
-  //     targetEmail,
-  //     status: nextStatus,
-  //   };
-  // }
-
-  // private resolveRevenueCatTargetEmail(appUserId?: string | null, subscriberEmail?: string | null) {
-  //   const emailCandidate = (subscriberEmail ?? "").trim();
-  //   if (emailCandidate.includes("@")) {
-  //     return emailCandidate.toLowerCase();
-  //   }
-
-  //   const appUserIdCandidate = (appUserId ?? "").trim();
-  //   if (appUserIdCandidate.includes("@")) {
-  //     return appUserIdCandidate.toLowerCase();
-  //   }
-
-  //   return null;
-  // }
-
-  // private parseRevenueCatExpiration(value: unknown): Date | null {
-  //   if (value == null) {
-  //     return null;
-  //   }
-
-  //   if (typeof value === "number") {
-  //     const ms = value > 1_000_000_000_000 ? value : value * 1000;
-  //     const date = new Date(ms);
-  //     return Number.isNaN(date.getTime()) ? null : date;
-  //   }
-
-  //   if (typeof value === "string") {
-  //     const asNumber = Number(value);
-  //     if (!Number.isNaN(asNumber)) {
-  //       const ms = asNumber > 1_000_000_000_000 ? asNumber : asNumber * 1000;
-  //       const numericDate = new Date(ms);
-  //       if (!Number.isNaN(numericDate.getTime())) {
-  //         return numericDate;
-  //       }
-  //     }
-
-  //     const date = new Date(value);
-  //     return Number.isNaN(date.getTime()) ? null : date;
-  //   }
-
-  //   return null;
-  // }
 
   private inferTermFromExpiration(
     subscriptionExpiration: Date | null,
