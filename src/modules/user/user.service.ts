@@ -17,7 +17,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ruleEngineService: RuleEngineService,
-  ) {}
+  ) { }
 
   // Un-used because users are created by Firebase Authentication trigger and synced to local database in userSync method, but keep this for now for better separation of concerns and future use if needed
   async findUserByEmail(email: string): Promise<User> {
@@ -508,9 +508,22 @@ export class UserService {
         ? Number(recentMax)
         : 20;
 
+    const userSettings = await this.prisma.settings.findUnique({
+      where: { userId: user.id },
+      select: {
+        notifications: true,
+      },
+    });
+    const notificationsEnabled = userSettings?.notifications ?? true;
+    const unreadWhereClause = notificationsEnabled ? undefined : false;
+    const notificationsWhereClause = {
+      userId: user.id,
+      unread: unreadWhereClause,
+    };
+
     const [rows, total, unread] = await Promise.all([
       this.prisma.userToNotification.findMany({
-        where: { userId: user.id },
+        where: notificationsWhereClause,
         orderBy: [{ notification: { createdAt: "desc" } }],
         take,
         select: {
@@ -527,7 +540,7 @@ export class UserService {
         },
       }),
       this.prisma.userToNotification.count({
-        where: { userId: user.id },
+        where: notificationsWhereClause,
       }),
       this.prisma.userToNotification.count({
         where: { userId: user.id, unread: true },
@@ -546,7 +559,7 @@ export class UserService {
     return {
       notifications,
       total,
-      unread,
+      unread: notificationsEnabled ? unread : 0,
     };
   }
 
