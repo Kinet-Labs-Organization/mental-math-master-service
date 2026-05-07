@@ -39,10 +39,6 @@ RUN apk add --no-cache dumb-init curl openssl
 # Set NODE_ENV early so all libs behave in production mode
 ENV NODE_ENV=production
 
-# Use ARG so PORT can be overridden at build time; ENV makes it available at runtime
-ARG PORT=8000
-ENV PORT=${PORT}
-
 # Non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
