@@ -9,6 +9,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "docker:build": "docker build -t mental-math-master-backend .",
+    "docker:compose:up": "docker compose -f docker-compose.yml up -d --build",
     
     "start:dev": "nest start --watch",
     "start": "node dist/main",
