@@ -73,15 +73,6 @@ export const BLOGS = [
   },
   {
     brief:
-      "Learn how mental math training improves concentration, logic, and quick calculation skills.",
-    icon: "⚙️",
-    image: "https://images.unsplash.com/photo-1526378722484-bd91ca387e72",
-    link: "https://www.successabacus.com/blog/mental-math-training-for-kids-how-abacus-improves-memory-in-children/",
-    read: "6 min",
-    title: "Mental Math Training for Kids",
-  },
-  {
-    brief:
       "Discover how abacus enhances cognitive skills like visualization, memory, and problem-solving.",
     icon: "🧠",
     image: "https://images.unsplash.com/photo-1532012197267-da84d127e765",
