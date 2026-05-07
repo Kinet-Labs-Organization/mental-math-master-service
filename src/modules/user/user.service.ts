@@ -940,9 +940,7 @@ export class UserService {
   }
 
   clearData() {
-    return {
-      message: "User data cleared",
-    };
+    throw new Error("Data clearing is not allowed");
   }
 
   // async handleRevenueCatWebhook(authorization: string | undefined, payload: any) {
