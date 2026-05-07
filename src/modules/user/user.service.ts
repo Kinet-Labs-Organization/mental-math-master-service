@@ -17,7 +17,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ruleEngineService: RuleEngineService,
-  ) { }
+  ) {}
 
   // Un-used because users are created by Firebase Authentication trigger and synced to local database in userSync method, but keep this for now for better separation of concerns and future use if needed
   async findUserByEmail(email: string): Promise<User> {
@@ -341,10 +341,8 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    const status = (user.status as string | null);
-    const lastSubscriptionStatus = user.lastSubscriptionStatus as
-      | string
-      | null;
+    const status = user.status as string | null;
+    const lastSubscriptionStatus = user.lastSubscriptionStatus as string | null;
     const planKey = `${status}:${lastSubscriptionStatus ?? "null"}`;
     console.log("Determining plan to show with key:", planKey);
 
