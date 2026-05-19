@@ -11,6 +11,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import * as games from "@/src/utils/gameConfig";
 import { RuleEngineService } from "@/src/services/rule-engine";
 import * as admin from "firebase-admin";
+import axios, { AxiosError } from "axios";
 
 @Injectable()
 export class UserService {
@@ -707,7 +708,7 @@ export class UserService {
   async upgrade(
     email: string,
     uid: string,
-    payload: { term: "d7" | "d30" | "d365" },
+    _payload: { term: "d7" | "d30" | "d365" },
   ) {
     if (!email) {
       throw new NotFoundException("Authenticated user email not found");
@@ -716,103 +717,40 @@ export class UserService {
       throw new NotFoundException("Authenticated user uid not found");
     }
 
-    const validTerms: Record<string, number> = {
-      d7: 7,
-      d30: 30,
-      d365: 365,
-    };
+    const revenueCatState = await this.fetchRevenueCatSubscriptionState(email);
 
-    const daysToAdd = validTerms[payload?.term];
-    if (!daysToAdd) {
-      throw new BadRequestException(
-        "Invalid term. Allowed values: d7, d30, d365",
+    if (revenueCatState.status !== "PRO") {
+      const update = await this.updateSubscriptionStateByEmail(
+        email,
+        "UNSUBSCRIBED",
+        null,
       );
+      await this.syncSubscriptionClaimsForFirebaseUser(uid, {
+        status: "UNSUBSCRIBED",
+        term: null,
+        subscriptionExpiration: null,
+      });
+
+      throw new ForbiddenException({
+        message: "No active RevenueCat entitlement found.",
+        data: update,
+      });
     }
 
-    const subscribedOn = new Date();
-    const subscriptionExpiration = new Date(subscribedOn);
-    subscriptionExpiration.setDate(
-      subscriptionExpiration.getDate() + daysToAdd,
+    const updatedUser = await this.updateSubscriptionStateByEmail(
+      email,
+      revenueCatState.status,
+      revenueCatState.subscriptionExpiration,
     );
-    const subscriptionStatus =
-      daysToAdd === 7
-        ? "TRIAL"
-        : daysToAdd === 30 || daysToAdd === 365
-          ? "PRO"
-          : "UNSUBSCRIBED";
 
-    const updatedUser = await this.prisma.$transaction(async (tx) => {
-      // Check existing user and get current subscription status from local database
-      const existingUser = await tx.user.findUnique({
-        where: { email },
-        select: { status: true },
-      });
-
-      if (!existingUser) {
-        throw new NotFoundException(`No user found for email: ${email}`);
-      }
-
-      // Check RevenueCat or other third-party subscription status here if needed and decide whether to allow upgrade or not based on current subscription status in local database and/or third-party source
-      // const rcBaseUrl = process.env.REVENUECAT_BASEURL_V2_RESTAPI;
-      // const rcProjectId = process.env.REVENUECAT_PROJECTID_RESTAPI;
-      // const rcApiKey = process.env.REVENUECAT_API_KEY;
-      // const expectedEntitlementId = process.env.REVENUECAT_ENTITLEMENT_ID;
-
-      // if (!rcBaseUrl || !rcProjectId || !rcApiKey || !expectedEntitlementId) {
-      //   throw new BadRequestException(
-      //     "RevenueCat configuration missing. Please set base URL, project ID, API key, and entitlement ID.",
-      //   );
-      // }
-
-      // const rcSubscriptionStatus = await axios.get(`${rcBaseUrl}/projects/${rcProjectId}/customers/${email}`, {
-      //   headers: {
-      //     'Authorization': `Bearer ${rcApiKey}`
-      //   }
-      // });
-
-      // const activeEntitlement = rcSubscriptionStatus?.data?.active_entitlements?.items?.[0];
-      // const activeEntitlementId =
-      //   activeEntitlement?.entitlement_id ??
-      //   null;
-
-      // if (!activeEntitlement || activeEntitlementId !== expectedEntitlementId) {
-      //   throw new ForbiddenException(
-      //     `No active entitlement found for ${expectedEntitlementId}.`,
-      //   );
-      // }
-
-      // Update user subscription status in local database
-      const user = await tx.user.update({
-        where: { email },
-        data: {
-          lastSubscriptionStatus: existingUser.status ?? null,
-          status: subscriptionStatus,
-          term: payload.term,
-          subscribedOn,
-          subscriptionExpiration,
-        },
-        select: {
-          email: true,
-          status: true,
-          lastSubscriptionStatus: true,
-          term: true,
-          subscribedOn: true,
-          subscriptionExpiration: true,
-        },
-      });
-
-      // Sync the new subscription status to Firebase custom claims
-      await this.syncSubscriptionClaimsForFirebaseUser(uid, {
-        status: subscriptionStatus,
-        term: payload.term,
-        subscriptionExpiration,
-      });
-
-      return user;
+    await this.syncSubscriptionClaimsForFirebaseUser(uid, {
+      status: revenueCatState.status,
+      term: updatedUser.term,
+      subscriptionExpiration: updatedUser.subscriptionExpiration,
     });
 
     return {
-      message: "User upgraded successfully",
+      message: "Subscription refreshed from RevenueCat successfully",
       data: updatedUser,
     };
   }
@@ -820,7 +758,7 @@ export class UserService {
   async syncSubscription(
     email: string,
     uid: string,
-    payload: {
+    _payload: {
       status: "PRO" | "UNSUBSCRIBED";
       subscriptionExpiration?: string | null;
     },
@@ -832,29 +770,15 @@ export class UserService {
       throw new NotFoundException("Authenticated user uid not found");
     }
 
-    const nextStatus = payload?.status;
-    if (!["PRO", "UNSUBSCRIBED"].includes(nextStatus)) {
-      throw new BadRequestException(
-        "Invalid status. Allowed values: PRO, UNSUBSCRIBED",
-      );
-    }
-
-    const parsedExpiration =
-      payload?.subscriptionExpiration != null
-        ? new Date(payload.subscriptionExpiration)
-        : null;
-    const subscriptionExpiration =
-      parsedExpiration && !Number.isNaN(parsedExpiration.getTime())
-        ? parsedExpiration
-        : null;
+    const revenueCatState = await this.fetchRevenueCatSubscriptionState(email);
 
     const update = await this.updateSubscriptionStateByEmail(
       email,
-      nextStatus,
-      subscriptionExpiration,
+      revenueCatState.status,
+      revenueCatState.subscriptionExpiration,
     );
     await this.syncSubscriptionClaimsForFirebaseUser(uid, {
-      status: nextStatus,
+      status: revenueCatState.status,
       term: update.term,
       subscriptionExpiration: update.subscriptionExpiration,
     });
@@ -880,6 +804,27 @@ export class UserService {
 
     if (!existingUser) {
       throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    const revenueCatState = await this.fetchRevenueCatSubscriptionState(email);
+
+    if (revenueCatState.status === "PRO") {
+      const update = await this.updateSubscriptionStateByEmail(
+        email,
+        revenueCatState.status,
+        revenueCatState.subscriptionExpiration,
+      );
+      await this.syncSubscriptionClaimsForFirebaseUser(uid, {
+        status: revenueCatState.status,
+        term: update.term,
+        subscriptionExpiration: update.subscriptionExpiration,
+      });
+
+      return {
+        message:
+          "RevenueCat has an active entitlement for this user; subscription kept as PRO.",
+        data: update,
+      };
     }
 
     const updatedUser = await this.prisma.user.update({
@@ -976,6 +921,70 @@ export class UserService {
         subscriptionExpiration: true,
       },
     });
+  }
+
+  private async fetchRevenueCatSubscriptionState(email: string): Promise<{
+    status: "PRO" | "UNSUBSCRIBED";
+    subscriptionExpiration: Date | null;
+  }> {
+    const rcBaseUrl = process.env.REVENUECAT_BASEURL_V2_RESTAPI;
+    const rcProjectId = process.env.REVENUECAT_PROJECTID_RESTAPI;
+    const rcApiKey = process.env.REVENUECAT_API_KEY;
+    const expectedEntitlementId = process.env.REVENUECAT_ENTITLEMENT_ID;
+
+    if (!rcBaseUrl || !rcProjectId || !rcApiKey || !expectedEntitlementId) {
+      throw new BadRequestException(
+        "RevenueCat configuration missing. Please set base URL, project ID, API key, and entitlement ID.",
+      );
+    }
+
+    const activeEntitlementsUrl = `${rcBaseUrl.replace(/\/$/, "")}/projects/${encodeURIComponent(rcProjectId)}/customers/${encodeURIComponent(email)}/active_entitlements`;
+
+    try {
+      const response = await axios.get<{
+        items?: Array<{
+          entitlement_id?: string;
+          expires_at?: number | null;
+        }>;
+      }>(activeEntitlementsUrl, {
+        headers: {
+          Authorization: `Bearer ${rcApiKey}`,
+        },
+      });
+
+      const activeEntitlement = response.data.items?.find(
+        (item) => item.entitlement_id === expectedEntitlementId,
+      );
+
+      if (!activeEntitlement) {
+        return {
+          status: "UNSUBSCRIBED",
+          subscriptionExpiration: null,
+        };
+      }
+
+      const expiresAt =
+        typeof activeEntitlement.expires_at === "number"
+          ? new Date(activeEntitlement.expires_at)
+          : null;
+
+      return {
+        status: "PRO",
+        subscriptionExpiration:
+          expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response?.status === 404) {
+        return {
+          status: "UNSUBSCRIBED",
+          subscriptionExpiration: null,
+        };
+      }
+      throw new BadRequestException(
+        "Unable to verify subscription status with RevenueCat.",
+      );
+    }
   }
 
   private getGameMetaFromGameId(gameId: string) {
