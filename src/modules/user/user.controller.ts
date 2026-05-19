@@ -122,12 +122,8 @@ export class UserController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post("upgrade")
-  async upgrade(
-    @GetUser("email") email: string,
-    @GetUser("uid") uid: string,
-    @Body(ValidationPipe) payload: { term: "d7" | "d30" | "d365" },
-  ) {
-    return this.userService.upgrade(email, uid, payload);
+  async upgrade(@GetUser("email") email: string, @GetUser("uid") uid: string) {
+    return this.userService.upgrade(email, uid);
   }
 
   // To check
@@ -136,13 +132,8 @@ export class UserController {
   async syncSubscription(
     @GetUser("email") email: string,
     @GetUser("uid") uid: string,
-    @Body(ValidationPipe)
-    payload: {
-      status: "PRO" | "UNSUBSCRIBED";
-      subscriptionExpiration?: string | null;
-    },
   ) {
-    return this.userService.syncSubscription(email, uid, payload);
+    return this.userService.syncSubscription(email, uid);
   }
 
   // Used by Admin to manually unsubscribe a user, should not be exposed to client

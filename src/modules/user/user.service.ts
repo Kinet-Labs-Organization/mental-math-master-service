@@ -705,11 +705,7 @@ export class UserService {
     });
   }
 
-  async upgrade(
-    email: string,
-    uid: string,
-    _payload: { term: "d7" | "d30" | "d365" },
-  ) {
+  async upgrade(email: string, uid: string) {
     if (!email) {
       throw new NotFoundException("Authenticated user email not found");
     }
@@ -755,14 +751,7 @@ export class UserService {
     };
   }
 
-  async syncSubscription(
-    email: string,
-    uid: string,
-    _payload: {
-      status: "PRO" | "UNSUBSCRIBED";
-      subscriptionExpiration?: string | null;
-    },
-  ) {
+  async syncSubscription(email: string, uid: string) {
     if (!email) {
       throw new NotFoundException("Authenticated user email not found");
     }
