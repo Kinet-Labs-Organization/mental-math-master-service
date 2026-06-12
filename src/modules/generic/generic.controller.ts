@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { GetUser } from "@/src/auth/decorator";
 import { FirebaseAuthGuard } from "@/src/auth/guard";
 import { GenericService } from "./generic.service";
@@ -25,14 +33,26 @@ export class GenericController {
     return this.genericService.blogs(recentMax);
   }
 
-  // To implement
+  @Post("onPurchase_rc_production_webhook")
+  @HttpCode(200)
+  async onPurchase_rc_production_webhook(@Body() payload: any) {
+    return this.genericService.onPurchase_rc_production_webhook(payload);
+  }
+
+  @Post("onExpire_rc_production_webhook")
+  @HttpCode(200)
+  async onExpire_rc_production_webhook(@Body() payload: any) {
+    return this.genericService.onExpire_rc_production_webhook(payload);
+  }
+
   @Post("onPurchase_rc_sandbox_webhook")
+  @HttpCode(200)
   async onPurchase_rc_sandbox_webhook(@Body() payload: any) {
     return this.genericService.onPurchase_rc_sandbox_webhook(payload);
   }
 
-  // To implement
   @Post("onExpire_rc_sandbox_webhook")
+  @HttpCode(200)
   async onExpire_rc_sandbox_webhook(@Body() payload: any) {
     return this.genericService.onExpire_rc_sandbox_webhook(payload);
   }

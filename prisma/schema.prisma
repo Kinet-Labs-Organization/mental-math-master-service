@@ -103,8 +103,9 @@ model Settings {
 model QueueManager {
   id           Int                @id @default(autoincrement())
   queueId      String             @unique
-  queueName    String
+  queueName    String?
   message      String
+  environment  Environment        @default(SANDBOX)
   status       QueueManagerStatus @default(PENDING)
   attemptsMade Int                @default(0)
   processedAt  DateTime?
@@ -112,8 +113,7 @@ model QueueManager {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  @@index([queueName])
-  @@index([status])
+  @@index([queueId])
 }
 
 enum SignUpMethod {
@@ -167,4 +167,9 @@ enum QueueManagerStatus {
   PENDING
   PROCESSED
   FAILED
+}
+
+enum Environment {
+  PRODUCTION
+  SANDBOX
 }

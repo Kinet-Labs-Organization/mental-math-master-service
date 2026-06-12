@@ -17,26 +17,6 @@ export class QueueManagerProcessor extends WorkerHost {
   }
 
   process(job: Job<RcWebhookQueueJobData>): Promise<void> {
-    // await this.prisma.queueManager.upsert({
-    //   where: { queueId: String(job.id) },
-    //   create: {
-    //     queueId: String(job.id),
-    //     queueName: job.queueName,
-    //     message: job.data.message,
-    //     status: QueueManagerStatus.PROCESSED,
-    //     attemptsMade: job.attemptsMade,
-    //     processedAt: new Date(),
-    //   },
-    //   update: {
-    //     queueName: job.queueName,
-    //     message: job.data.message,
-    //     status: QueueManagerStatus.PROCESSED,
-    //     attemptsMade: job.attemptsMade,
-    //     processedAt: new Date(),
-    //     errorMessage: null,
-    //   },
-    // });
-
     this.logger.log(
       `Processed queue message queueId=${String(job.id)} queueName=${job.queueName}`,
     );
@@ -51,24 +31,6 @@ export class QueueManagerProcessor extends WorkerHost {
     if (!job) {
       return Promise.resolve();
     }
-
-    // await this.prisma.queueManager.upsert({
-    //   where: { queueId: String(job.id) },
-    //   create: {
-    //     queueId: String(job.id),
-    //     queueName: job.queueName,
-    //     message: job.data?.message ?? "",
-    //     status: QueueManagerStatus.FAILED,
-    //     attemptsMade: job.attemptsMade,
-    //     errorMessage: error.message,
-    //   },
-    //   update: {
-    //     status: QueueManagerStatus.FAILED,
-    //     attemptsMade: job.attemptsMade,
-    //     errorMessage: error.message,
-    //   },
-    // });
-
     this.logger.error(
       `Queue processing failed queueId=${String(job.id)} queueName=${job.queueName}`,
       error.stack,

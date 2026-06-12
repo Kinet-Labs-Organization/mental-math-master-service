@@ -1,11 +1,9 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { FAQ } from "@/src/utils/mock";
 import { PrismaService } from "@/src/database/prisma/prisma.service";
-import { InjectQueue } from "@nestjs/bullmq";
-import { Queue } from "bullmq";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import {
-  RC_WEBHOOK_QUEUE_COMMON,
-  RC_WEBHOOK_QUEUE_COMMON_JOB,
+  RC_WEBHOOK_QUEUE_CATEGORY_1_JOB,
   RC_WEBHOOK_QUEUE_CATEGORY_2_JOB,
 } from "@/src/modules/queue-manager/constants/queue.constants";
 
@@ -14,11 +12,7 @@ export class GenericService {
   private readonly RANK_THRESHOLD = 10;
   private readonly logger = new Logger(GenericService.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-    @InjectQueue(RC_WEBHOOK_QUEUE_COMMON)
-    private readonly rcWebhookQueue: Queue,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   faqs() {
     return FAQ;
@@ -102,35 +96,80 @@ export class GenericService {
     });
   }
 
-  async onPurchase_rc_sandbox_webhook(payload: any) {
-    const message = JSON.stringify(payload ?? {});
-    this.logger.log(message);
-    const job = await this.rcWebhookQueue.add(RC_WEBHOOK_QUEUE_COMMON_JOB, {
-      message,
-    });
-    this.logger.log(
-      `Queued RevenueCat sandbox webhook payload in ${RC_WEBHOOK_QUEUE_COMMON} (jobId=${String(job.id)})`,
+  async onPurchase_rc_production_webhook(payload: any) {
+    return this.queueManagerEntries(payload, RC_WEBHOOK_QUEUE_CATEGORY_1_JOB);
+  }
+
+  async onExpire_rc_production_webhook(payload: any) {
+    return this.queueManagerEntries(
+      payload,
+      RC_WEBHOOK_QUEUE_CATEGORY_2_JOB,
+      "PRODUCTION",
     );
-    return {
-      queued: true,
-      queueName: RC_WEBHOOK_QUEUE_COMMON,
-      queueId: String(job.id),
-    };
+  }
+
+  async onPurchase_rc_sandbox_webhook(payload: any) {
+    return this.queueManagerEntries(payload, RC_WEBHOOK_QUEUE_CATEGORY_1_JOB);
   }
 
   async onExpire_rc_sandbox_webhook(payload: any) {
+    return this.queueManagerEntries(payload, RC_WEBHOOK_QUEUE_CATEGORY_2_JOB);
+  }
+
+  async queueManagerEntries(
+    payload: any,
+    queueName: string,
+    environment: "PRODUCTION" | "SANDBOX" = "SANDBOX",
+  ) {
     const message = JSON.stringify(payload ?? {});
     this.logger.log(message);
-    const job = await this.rcWebhookQueue.add(RC_WEBHOOK_QUEUE_CATEGORY_2_JOB, {
-      message,
-    });
+    const payloadId = payload?.id;
+
+    if (!payloadId) {
+      throw new BadRequestException("RevenueCat webhook payload id is missing");
+    }
+
+    let queueManagerEntry: {
+      id: number;
+      queueId: string;
+    };
+
+    try {
+      queueManagerEntry = await this.prisma.queueManager.create({
+        data: {
+          queueId: `${String(payloadId)}:${environment}`,
+          queueName,
+          message,
+          environment,
+        },
+        select: {
+          id: true,
+          queueId: true,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        this.logger.log(
+          `This RevenueCat [${environment}] webhook payload is already queued in QueueManager (queueId=${String(payloadId)})`,
+        );
+
+        return {
+          message: "Already payload queued",
+        };
+      }
+
+      throw error;
+    }
+
     this.logger.log(
-      `Queued RevenueCat sandbox webhook payload in ${RC_WEBHOOK_QUEUE_COMMON} (jobId=${String(job.id)})`,
+      `Saved RevenueCat [${environment}] webhook payload in QueueManager (id=${queueManagerEntry.id})`,
     );
+
     return {
-      queued: true,
-      queueName: RC_WEBHOOK_QUEUE_COMMON,
-      queueId: String(job.id),
+      message: "Payload queued",
     };
   }
 }

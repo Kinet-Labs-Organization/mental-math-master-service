@@ -11,7 +11,6 @@ import { AppController } from "./app.controller";
 import { GameModule } from "./modules/game/game.module";
 import { GenericModule } from "./modules/generic/generic.module";
 import { FirebaseAdminModule } from "./auth/firebase/firebase-admin.module";
-import { QueueManagerModule } from "./modules/queue-manager/queue-manager.module";
 
 @Module({
   controllers: [AppController],
@@ -23,7 +22,6 @@ import { QueueManagerModule } from "./modules/queue-manager/queue-manager.module
     GameModule,
     FirebaseAdminModule,
     AuthModule,
-    QueueManagerModule,
     GenericModule,
     WinstonModule.forRoot(WinstonOptions),
     ThrottlerModule.forRoot({

@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { GetUser } from "@/src/auth/decorator";
-import { FirebaseAuthGuard, SubscriptionGuard } from "@/src/auth/guard";
+import { FirebaseAuthGuard } from "@/src/auth/guard";
 import { AccessTokenDto } from "@/src/auth/dto";
 
 @Controller("user")
@@ -114,7 +114,7 @@ export class UserController {
     );
   }
 
-  @UseGuards(FirebaseAuthGuard, SubscriptionGuard)
+  @UseGuards(FirebaseAuthGuard)
   @Get("achievements")
   async achievements(@GetUser("email") email: string) {
     return this.userService.achievements(email);
@@ -122,11 +122,15 @@ export class UserController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post("upgrade")
-  async upgrade(@GetUser("email") email: string, @GetUser("uid") uid: string) {
-    return this.userService.upgrade(email, uid);
+  async upgrade(
+    @GetUser("email") email: string,
+    @GetUser("uid") uid: string,
+    @Body(ValidationPipe) term: "d365" | "d30" | "d7",
+  ) {
+    return this.userService.upgrade(email, uid, term);
   }
 
-  // To check
+  // (used in expired)
   @UseGuards(FirebaseAuthGuard)
   @Post("subscription/sync")
   async syncSubscription(
@@ -137,6 +141,8 @@ export class UserController {
   }
 
   // Used by Admin to manually unsubscribe a user, should not be exposed to client
+  // Currently no subscription or un-subscription flows from this backend, all handled through RevenueCat
+  // Hence we can not even manually override the subscription status
   @UseGuards(FirebaseAuthGuard)
   @Post("unsubscribe")
   async unsubscribe(
@@ -145,15 +151,6 @@ export class UserController {
   ) {
     return this.userService.unsubscribe(email, uid);
   }
-
-  // @HttpCode(200)
-  // @Post("revenuecat/webhook")
-  // async revenueCatWebhook(
-  //   @Headers("authorization") authorization: string | undefined,
-  //   @Body() payload: any,
-  // ) {
-  //   return this.userService.handleRevenueCatWebhook(authorization, payload);
-  // }
 
   // To implement
   @UseGuards(FirebaseAuthGuard)

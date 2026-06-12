@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -15,6 +16,7 @@ import axios, { AxiosError } from "axios";
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly ruleEngineService: RuleEngineService,
@@ -705,7 +707,7 @@ export class UserService {
     });
   }
 
-  async upgrade(email: string, uid: string) {
+  async upgrade(email: string, uid: string, term: "d365" | "d30" | "d7") {
     if (!email) {
       throw new NotFoundException("Authenticated user email not found");
     }
@@ -713,42 +715,55 @@ export class UserService {
       throw new NotFoundException("Authenticated user uid not found");
     }
 
-    const revenueCatState = await this.fetchRevenueCatSubscriptionState(email);
-
-    if (revenueCatState.status !== "PRO") {
-      const update = await this.updateSubscriptionStateByEmail(
-        email,
-        "UNSUBSCRIBED",
-        null,
-      );
-      await this.syncSubscriptionClaimsForFirebaseUser(uid, {
-        status: "UNSUBSCRIBED",
-        term: null,
-        subscriptionExpiration: null,
-      });
-
-      throw new ForbiddenException({
-        message: "No active RevenueCat entitlement found.",
-        data: update,
-      });
-    }
-
+    const status = term === "d7" ? "TRIAL" : "PRO";
+    const subscriptionExpiration = new Date(
+      new Date().getTime() +
+        3600000 * 24 * (term === "d7" ? 7 : term === "d30" ? 30 : 365),
+    );
     const updatedUser = await this.updateSubscriptionStateByEmail(
       email,
-      revenueCatState.status,
-      revenueCatState.subscriptionExpiration,
+      status,
+      subscriptionExpiration,
+      term,
     );
 
     await this.syncSubscriptionClaimsForFirebaseUser(uid, {
-      status: revenueCatState.status,
-      term: updatedUser.term,
-      subscriptionExpiration: updatedUser.subscriptionExpiration,
+      status: status,
+      term: term,
+      subscriptionExpiration: subscriptionExpiration,
     });
 
     return {
       message: "Subscription refreshed from RevenueCat successfully",
       data: updatedUser,
     };
+  }
+
+  private mapRevenueCatProductIdToTerm(
+    productIdentifier?: string | null,
+  ): "d30" | "d365" | null {
+    switch (productIdentifier) {
+      case "mental_math_master_monthly_pid":
+        return "d30";
+      case "mental_math_master_yearly_pid":
+        return "d365";
+      default:
+        return null;
+    }
+  }
+
+  private inferTermFromExpiration(
+    subscriptionExpiration: Date | null,
+  ): "d30" | "d365" | null {
+    if (!subscriptionExpiration) {
+      return null;
+    }
+
+    const diffDays = Math.ceil(
+      (subscriptionExpiration.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    );
+
+    return diffDays <= 60 ? "d30" : "d365";
   }
 
   async syncSubscription(email: string, uid: string) {
@@ -765,6 +780,7 @@ export class UserService {
       email,
       revenueCatState.status,
       revenueCatState.subscriptionExpiration,
+      revenueCatState.term,
     );
     await this.syncSubscriptionClaimsForFirebaseUser(uid, {
       status: revenueCatState.status,
@@ -796,54 +812,10 @@ export class UserService {
     }
 
     const revenueCatState = await this.fetchRevenueCatSubscriptionState(email);
-
-    if (revenueCatState.status === "PRO") {
-      const update = await this.updateSubscriptionStateByEmail(
-        email,
-        revenueCatState.status,
-        revenueCatState.subscriptionExpiration,
-      );
-      await this.syncSubscriptionClaimsForFirebaseUser(uid, {
-        status: revenueCatState.status,
-        term: update.term,
-        subscriptionExpiration: update.subscriptionExpiration,
-      });
-
-      return {
-        message:
-          "RevenueCat has an active entitlement for this user; subscription kept as PRO.",
-        data: update,
-      };
-    }
-
-    const updatedUser = await this.prisma.user.update({
-      where: { email },
-      data: {
-        lastSubscriptionStatus: existingUser.status ?? null,
-        status: "UNSUBSCRIBED",
-        term: null,
-        subscribedOn: null,
-        subscriptionExpiration: null,
-      },
-      select: {
-        email: true,
-        status: true,
-        lastSubscriptionStatus: true,
-        term: true,
-        subscribedOn: true,
-        subscriptionExpiration: true,
-      },
-    });
-
-    await this.syncSubscriptionClaimsForFirebaseUser(uid, {
-      status: "UNSUBSCRIBED",
-      term: null,
-      subscriptionExpiration: null,
-    });
-
+    this.logger.log(JSON.stringify(revenueCatState));
     return {
-      message: "User unsubscribed successfully",
-      data: updatedUser,
+      message:
+        "Currently no subscription or un-subscription flows from this backend, all handled through RevenueCat. Hence we can not even manually override the subscription status",
     };
   }
 
@@ -851,30 +823,11 @@ export class UserService {
     throw new Error("Data clearing is not allowed");
   }
 
-  private inferTermFromExpiration(
-    subscriptionExpiration: Date | null,
-  ): "d7" | "d30" | "d365" | null {
-    if (!subscriptionExpiration) {
-      return null;
-    }
-
-    const now = Date.now();
-    const diffDays = Math.ceil(
-      (subscriptionExpiration.getTime() - now) / (1000 * 60 * 60 * 24),
-    );
-    if (diffDays <= 10) {
-      return "d7";
-    }
-    if (diffDays <= 60) {
-      return "d30";
-    }
-    return "d365";
-  }
-
   private async updateSubscriptionStateByEmail(
     email: string,
-    status: "PRO" | "UNSUBSCRIBED",
+    status: "TRIAL" | "PRO" | "UNSUBSCRIBED",
     subscriptionExpiration: Date | null,
+    term?: "d7" | "d30" | "d365" | null,
   ) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -885,10 +838,10 @@ export class UserService {
       throw new NotFoundException(`No user found for email: ${email}`);
     }
 
-    const nextTerm =
-      status === "PRO"
-        ? this.inferTermFromExpiration(subscriptionExpiration)
-        : null;
+    // const nextTerm =
+    //   status === "PRO"
+    //     ? this.inferTermFromExpiration(subscriptionExpiration)
+    //     : null;
     const subscribedOn = status === "PRO" ? new Date() : null;
 
     return this.prisma.user.update({
@@ -896,7 +849,7 @@ export class UserService {
       data: {
         lastSubscriptionStatus: existingUser.status ?? null,
         status,
-        term: nextTerm,
+        term: term,
         subscribedOn,
         subscriptionExpiration:
           status === "PRO" ? subscriptionExpiration : null,
@@ -913,8 +866,9 @@ export class UserService {
   }
 
   private async fetchRevenueCatSubscriptionState(email: string): Promise<{
-    status: "PRO" | "UNSUBSCRIBED";
+    status: "TRIAL" | "PRO" | "UNSUBSCRIBED";
     subscriptionExpiration: Date | null;
+    term: "d30" | "d365" | null;
   }> {
     const rcBaseUrl = process.env.REVENUECAT_BASEURL_V2_RESTAPI;
     const rcProjectId = process.env.REVENUECAT_PROJECTID_RESTAPI;
@@ -934,6 +888,9 @@ export class UserService {
         items?: Array<{
           entitlement_id?: string;
           expires_at?: number | null;
+          product_id?: string | null;
+          product_identifier?: string | null;
+          store_product_identifier?: string | null;
         }>;
       }>(activeEntitlementsUrl, {
         headers: {
@@ -949,6 +906,7 @@ export class UserService {
         return {
           status: "UNSUBSCRIBED",
           subscriptionExpiration: null,
+          term: null,
         };
       }
 
@@ -956,11 +914,21 @@ export class UserService {
         typeof activeEntitlement.expires_at === "number"
           ? new Date(activeEntitlement.expires_at)
           : null;
+      const subscriptionExpiration =
+        expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null;
+      const productIdentifier =
+        activeEntitlement.product_id ??
+        activeEntitlement.product_identifier ??
+        activeEntitlement.store_product_identifier ??
+        null;
+      const term =
+        this.mapRevenueCatProductIdToTerm(productIdentifier) ??
+        this.inferTermFromExpiration(subscriptionExpiration);
 
       return {
         status: "PRO",
-        subscriptionExpiration:
-          expiresAt && !Number.isNaN(expiresAt.getTime()) ? expiresAt : null,
+        subscriptionExpiration,
+        term,
       };
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -968,6 +936,7 @@ export class UserService {
         return {
           status: "UNSUBSCRIBED",
           subscriptionExpiration: null,
+          term: null,
         };
       }
       throw new BadRequestException(
